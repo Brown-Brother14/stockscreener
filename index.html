@@ -253,10 +253,61 @@ async function finnhubFetch(endpoint, params={}) {
 async function fmpFetch(endpoint, params={}) {
   try {
     const qs = new URLSearchParams({...params, apikey: FMP_KEY}).toString();
+    // Try new stable API first, fall back to v3
     const res = await fetch(`${PROXY}/fmp/${endpoint}?${qs}`);
     if (!res.ok) return null;
-    return await res.json();
+    const data = await res.json();
+    // FMP returns {"message":"..."} when endpoint is restricted
+    if (data?.message || data?.error) return null;
+    return data;
   } catch(e) { return null; }
+}
+
+// FMP: company profile
+async function fetchProfile(ticker) {
+  // Try stable endpoint first
+  let d = await fmpFetch(`stable/profile`, {symbol: ticker});
+  if (!d || !d[0]) {
+    d = await fmpFetch(`profile/${ticker}`);
+  }
+  if (!d || !d[0]) return null;
+  const p = d[0];
+  return {
+    name: p.companyName || p.name || ticker,
+    industry: p.industry || '',
+    sector: p.sector || '',
+    marketCap: p.mktCap ? p.mktCap / 1e9 : null,
+    beta: p.beta || null,
+    avgVolume: p.volAvg || p.avgVolume || null,
+  };
+}
+
+// FMP: quote data (PE, EPS, volume, 52w hi/lo)
+async function fetchFinancials(ticker) {
+  let qData = await fmpFetch(`stable/quote`, {symbol: ticker});
+  if (!qData || !qData[0]) {
+    qData = await fmpFetch(`quote/${ticker}`);
+  }
+  const q = qData?.[0] || null;
+
+  let mData = await fmpFetch(`stable/key-metrics-ttm`, {symbol: ticker});
+  if (!mData || !mData[0]) {
+    mData = await fmpFetch(`key-metrics-ttm/${ticker}`);
+  }
+  const m = mData?.[0] || null;
+
+  return {
+    pe: q?.pe || null,
+    eps: q?.eps || null,
+    high52w: q?.yearHigh || null,
+    low52w: q?.yearLow || null,
+    avgVolume: q?.avgVolume || null,
+    volume: q?.volume || null,
+    epsGrowth: m?.netIncomePerShareGrowth || null,
+    divYield: m?.dividendYieldTTM ? m.dividendYieldTTM * 100 : (q?.earningsAnnouncement ? null : null),
+    revenueGrowth: m?.revenueGrowth || null,
+    roe: m?.roeTTM || null,
+  };
 }
 
 // Finnhub: real-time quote
