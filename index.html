@@ -166,7 +166,7 @@
           <th onclick="sortBy('price')">Price ↕</th>
           <th onclick="sortBy('change')">Change % ↕</th>
           <th onclick="sortBy('volume')" class="hide-mobile">Volume ↕</th>
-          <th onclick="sortBy('relVol')" class="hide-mobile">Rel Vol ↕</th>
+          <th onclick="sortBy('avgVolume')" class="hide-mobile">Avg Volume ↕</th>
           <th onclick="sortBy('marketCap')" class="hide-mobile">Mkt Cap ↕</th>
           <th onclick="sortBy('pe')" class="hide-mobile">P/E ↕</th>
           <th onclick="sortBy('eps')" class="hide-mobile">EPS dil TTM ↕</th>
@@ -471,16 +471,10 @@ function renderTable() {
   document.getElementById('tableBody').innerHTML=data.map((d,i)=>{
     const sc=getScoreClass(d.score), cc=d.change>=0?'up':'down';
 
-    // Volume — from last candle (today's volume)
-    const vol = d.volume ? (d.volume >= 1e6 ? (d.volume/1e6).toFixed(2)+'M' : (d.volume/1e3).toFixed(0)+'K') : '--';
-
-    // Relative volume — today vs 10-day average (avgVolume in shares from Finnhub)
-    const relVol = (d.volume && d.avgVolume && d.avgVolume > 0)
-      ? (d.volume / d.avgVolume).toFixed(2)
-      : (d.volume ? '1.00' : null);  // default to 1x if no avg
-    d.relVol = relVol ? parseFloat(relVol) : null;
-    const relVolLabel = relVol ? relVol+'x' : '--';
-    const relVolColor = parseFloat(relVol) > 1.5 ? 'var(--accent2)' : parseFloat(relVol) < 0.5 ? 'var(--accent3)' : 'var(--text)';
+    // Today's Volume — from last candle
+    const fmtVol = v => !v ? '--' : v >= 1e9 ? (v/1e9).toFixed(2)+'B' : v >= 1e6 ? (v/1e6).toFixed(2)+'M' : (v/1e3).toFixed(0)+'K';
+    const vol = fmtVol(d.volume);
+    const avgVol = fmtVol(d.avgVolume);
 
     // Market cap (in billions from FMP)
     const mc = d.marketCap;
@@ -509,7 +503,7 @@ function renderTable() {
       <td><div class="price">$${d.price.toFixed(2)}</div></td>
       <td><span class="change ${cc}">${d.change>=0?'+':''}${d.change.toFixed(2)}%</span></td>
       <td class="hide-mobile" style="${mono};color:var(--text)">${vol}</td>
-      <td class="hide-mobile" style="${mono};color:${relVolColor}">${relVolLabel}</td>
+      <td class="hide-mobile" style="${mono};color:var(--muted)">${avgVol}</td>
       <td class="hide-mobile" style="${mono};color:var(--muted)">${mcLabel}</td>
       <td class="hide-mobile" style="${mono};color:var(--muted)">${peLabel}</td>
       <td class="hide-mobile" style="${mono};color:${epsColor}">${epsLabel}</td>
