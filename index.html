@@ -233,11 +233,13 @@
 
 <script>
 const FINNHUB_KEY = 'd6m8fvhr01qi0ajlajn0d6m8fvhr01qi0ajlajng';
+const FMP_KEY = 'dEIJdi7mxSprUhIPm5yeakN26WXQa1J5';
 const BASE = '/.netlify/functions/proxy';
 let allResults=[], currentFilter='all', sortField='score', sortDir=-1;
 let currentTicker='', currentInterval='W';
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
+// ── FINNHUB (real-time price + candles) ──
 async function finnhubFetch(endpoint, params={}) {
   try {
     const qs = new URLSearchParams({...params, token: FINNHUB_KEY}).toString();
@@ -247,48 +249,72 @@ async function finnhubFetch(endpoint, params={}) {
   } catch(e) { return null; }
 }
 
+// ── FMP (fundamentals) ──
+async function fmpFetch(endpoint, params={}) {
+  try {
+    const qs = new URLSearchParams({...params, apikey: FMP_KEY}).toString();
+    const res = await fetch(`${BASE}/fmp/${endpoint}?${qs}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch(e) { return null; }
+}
+
+// Finnhub: real-time quote
 async function fetchQuote(ticker) {
   const d = await finnhubFetch('quote', {symbol: ticker});
   if (!d || !d.c) return null;
   return {price: d.c, change: d.dp, high: d.h, low: d.l, prevClose: d.pc};
 }
 
-async function fetchProfile(ticker) {
-  const d = await finnhubFetch('stock/profile2', {symbol: ticker});
-  if (!d || !d.name) return null;
-  return {name: d.name, industry: d.finnhubIndustry||''};
-}
-
-async function fetchFinancials(ticker) {
-  const d = await finnhubFetch('stock/metric', {symbol: ticker, metric: 'all'});
-  if (!d || !d.metric) return null;
-  const m = d.metric;
-  return {
-    pe: m.peBasicExclExtraTTM || m.peTTM || null,
-    high52w: m['52WeekHigh'] || null,
-    low52w: m['52WeekLow'] || null,
-    revenueGrowth: m.revenueGrowthTTMYoy || null,
-    eps: m.epsBasicExclExtraItemsTTM || m.epsTTM || null,
-    epsGrowth: m.epsGrowthTTMYoy || null,
-    divYield: m.dividendYieldIndicatedAnnual || null,
-    marketCap: m.marketCapitalization || null,  // in millions
-    avgVol10: m['10DayAverageTradingVolume'] || null,
-  };
-}
-
-async function fetchQuoteExtra(ticker) {
-  // gets current volume from quote
-  const d = await finnhubFetch('quote', {symbol: ticker});
-  if (!d) return null;
-  return d;
-}
-
+// Finnhub: candles for RSI/MACD calculation
 async function fetchCandles(ticker) {
   const to = Math.floor(Date.now()/1000);
   const from = to - (90*24*60*60);
   const d = await finnhubFetch('stock/candle', {symbol: ticker, resolution: 'D', from, to});
   if (!d || d.s !== 'ok' || !d.c) return null;
   return {closes: d.c, opens: d.o, highs: d.h, lows: d.l, volumes: d.v, timestamps: d.t};
+}
+
+// FMP: company profile — name, sector, industry, market cap, price, beta
+async function fetchProfile(ticker) {
+  const d = await fmpFetch(`profile/${ticker}`);
+  if (!d || !d[0]) return null;
+  const p = d[0];
+  return {
+    name: p.companyName || ticker,
+    industry: p.industry || '',
+    sector: p.sector || '',
+    marketCap: p.mktCap ? p.mktCap / 1e9 : null,  // convert to billions
+    beta: p.beta || null,
+    avgVolume: p.volAvg || null,
+    description: p.description || ''
+  };
+}
+
+// FMP: key metrics — PE, EPS, dividend yield, revenue growth, 52w high/low
+async function fetchFinancials(ticker) {
+  // Fetch quote data from FMP (has volume, avg vol, 52w hi/lo, PE, EPS)
+  const [quoteData, metricsData] = await Promise.all([
+    fmpFetch(`quote/${ticker}`),
+    fmpFetch(`key-metrics-ttm/${ticker}`)
+  ]);
+
+  const q = quoteData?.[0] || null;
+  const m = metricsData?.[0] || null;
+
+  return {
+    pe: q?.pe || null,
+    eps: q?.eps || null,
+    high52w: q?.yearHigh || null,
+    low52w: q?.yearLow || null,
+    avgVolume: q?.avgVolume || null,
+    volume: q?.volume || null,
+    epsGrowth: m?.netIncomePerShareGrowth || null,
+    divYield: m?.dividendYieldTTM ? m.dividendYieldTTM * 100 : null,
+    revenueGrowth: m?.revenueGrowth || null,
+    roe: m?.roeTTM || null,
+    debtToEquity: m?.debtToEquityTTM || null,
+  };
 }
 
 function ema(prices, period) {
@@ -393,12 +419,15 @@ async function runScan() {
 
       const rsi = calcRSI(candles?.closes);
       const macd = calcMACD(candles?.closes);
-      const pe = financials?.pe||null;
-      const high52w = financials?.high52w||null;
-      const low52w = financials?.low52w||null;
+      const pe = financials?.pe || null;
+      const high52w = financials?.high52w || null;
+      const low52w = financials?.low52w || null;
       const pos52w = (high52w&&low52w) ? ((quote.price-low52w)/(high52w-low52w))*100 : null;
-      const revenueGrowth = financials?.revenueGrowth||null;
-      const name = profile?.name||ticker;
+      const revenueGrowth = financials?.revenueGrowth || null;
+      const name = profile?.name || ticker;
+      const marketCap = profile?.marketCap || null; // billions from FMP profile
+      const volume = financials?.volume || candles?.volumes?.[candles.volumes.length-1] || null;
+      const avgVolume = financials?.avgVolume || profile?.avgVolume || null;
 
       const score = calculateScore({rsi, macd, change:quote.change, pe, pos52w, revenueGrowth});
       const signal = getSignal(score, macd);
@@ -408,18 +437,20 @@ async function runScan() {
       totalScore+=score;
 
       allResults.push({
-        ticker, name, industry: profile?.industry||'',
+        ticker, name,
+        industry: profile?.industry || '',
+        sector: profile?.sector || '',
         price: quote.price, change: quote.change,
-        volume: candles?.volumes?.[candles.volumes.length-1] || null,
-        avgVol: financials?.avgVol10 || null,
-        marketCap: financials?.marketCap || null,
+        volume, avgVolume, marketCap,
         score, signal, rsi, macd,
-        pe: financials?.pe || null,
-        eps: financials?.eps || null,
+        pe, eps: financials?.eps || null,
         epsGrowth: financials?.epsGrowth || null,
         divYield: financials?.divYield || null,
-        pos52w,
-        revenueGrowth: financials?.revenueGrowth || null
+        pos52w, high52w, low52w,
+        revenueGrowth,
+        roe: financials?.roe || null,
+        debtToEquity: financials?.debtToEquity || null,
+        candles
       });
 
       document.getElementById('totalScanned').textContent=allResults.length;
@@ -465,17 +496,17 @@ function renderTable() {
     // Volume
     const vol = d.volume ? (d.volume >= 1e6 ? (d.volume/1e6).toFixed(2)+'M' : (d.volume/1e3).toFixed(0)+'K') : '--';
 
-    // Relative volume (today vs 10-day avg)
-    const relVol = (d.volume && d.avgVol && d.avgVol > 0)
-      ? (d.volume / (d.avgVol * 1e6)).toFixed(2)
+    // Relative volume (today vs avg volume from FMP)
+    const relVol = (d.volume && d.avgVolume && d.avgVolume > 0)
+      ? (d.volume / d.avgVolume).toFixed(2)
       : null;
     d.relVol = relVol ? parseFloat(relVol) : null;
     const relVolLabel = relVol ? relVol+'x' : '--';
     const relVolColor = relVol > 1.5 ? 'var(--accent2)' : relVol < 0.5 ? 'var(--accent3)' : 'var(--text)';
 
-    // Market cap
+    // Market cap (in billions from FMP)
     const mc = d.marketCap;
-    const mcLabel = !mc ? '--' : mc >= 1000 ? (mc/1000).toFixed(2)+'T' : mc >= 1 ? mc.toFixed(2)+'B' : (mc*1000).toFixed(0)+'M';
+    const mcLabel = !mc ? '--' : mc >= 1000 ? (mc/1000).toFixed(1)+'T' : mc >= 1 ? mc.toFixed(1)+'B' : (mc*1000).toFixed(0)+'M';
 
     // P/E
     const peLabel = d.pe && d.pe > 0 && d.pe < 999 ? d.pe.toFixed(1) : '--';
@@ -492,8 +523,8 @@ function renderTable() {
     // Div Yield
     const divLabel = d.divYield && d.divYield > 0 ? d.divYield.toFixed(2)+'%' : '--';
 
-    // Sector (shortened)
-    const sector = d.industry ? d.industry.replace('Technology','Tech').replace('Communication','Comm').replace('Consumer','Cons').replace('Services','Svcs') : '--';
+    // Sector from FMP (more accurate than Finnhub industry)
+    const sector = (d.sector || d.industry || '--').replace('Technology','Tech').replace('Communication','Comm').replace('Consumer','Cons').replace('Services','Svcs');
 
     return `<tr style="animation-delay:${i*0.03}s" onclick="openChart('${d.ticker}')">
       <td><div class="ticker">${d.ticker}</div><div class="company-name">${d.name!==d.ticker?d.name:''}</div></td>
