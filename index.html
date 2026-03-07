@@ -403,7 +403,9 @@ async function runScan() {
       const revenueGrowth = financials?.revenueGrowth || null;
       const name = profile?.name || ticker;
       const marketCap = profile?.marketCap ? profile.marketCap / 1000 : null; // Finnhub gives millions, convert to billions
-      const volume = candles?.volumes?.[candles.volumes.length-1] || null;
+      // Get last available volume (works when market is closed too)
+      const lastVol = candles?.volumes ? [...candles.volumes].reverse().find(v => v > 0) : null;
+      const volume = lastVol || null;
       const avgVolume = financials?.avgVolume || null;
       // Rel vol = today's volume vs 10-day average
 
