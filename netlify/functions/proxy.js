@@ -5,13 +5,20 @@ exports.handler = async function(event) {
   const params = event.queryStringParameters || {};
   let fullUrl = '';
 
-  if (path.includes('finnhub')) {
+  if (path.includes('/finnhub/')) {
     const endpoint = path.replace(/.*\/finnhub\//, '');
-    const qs = Object.keys(params).length ? '?' + new URLSearchParams(params).toString() : '';
-    fullUrl = `https://finnhub.io/api/v1/${endpoint}${qs}`;
-  } else if (path.includes('alpha')) {
-    const qs = Object.keys(params).length ? '?' + new URLSearchParams(params).toString() : '';
-    fullUrl = `https://www.alphavantage.co/query${qs}`;
+    const qs = new URLSearchParams(params).toString();
+    fullUrl = `https://finnhub.io/api/v1/${endpoint}${qs ? '?' + qs : ''}`;
+
+  } else if (path.includes('/fmp/')) {
+    const endpoint = path.replace(/.*\/fmp\//, '');
+    const qs = new URLSearchParams(params).toString();
+    fullUrl = `https://financialmodelingprep.com/api/v3/${endpoint}${qs ? '?' + qs : ''}`;
+
+  } else if (path.includes('/alpha/')) {
+    const qs = new URLSearchParams(params).toString();
+    fullUrl = `https://www.alphavantage.co/query${qs ? '?' + qs : ''}`;
+
   } else {
     return {
       statusCode: 400,
@@ -26,7 +33,10 @@ exports.handler = async function(event) {
       res.on('data', chunk => data += chunk);
       res.on('end', () => resolve({
         statusCode: 200,
-        headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        },
         body: data
       }));
     }).on('error', (e) => resolve({
