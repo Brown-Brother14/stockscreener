@@ -5,11 +5,19 @@ exports.handler = async function(event) {
   const params = event.queryStringParameters || {};
   let fullUrl = '';
 
-  if (path.includes('alpha')) {
+  if (path.includes('finnhub')) {
+    const endpoint = path.replace(/.*\/finnhub\//, '');
+    const qs = Object.keys(params).length ? '?' + new URLSearchParams(params).toString() : '';
+    fullUrl = `https://finnhub.io/api/v1/${endpoint}${qs}`;
+  } else if (path.includes('alpha')) {
     const qs = Object.keys(params).length ? '?' + new URLSearchParams(params).toString() : '';
     fullUrl = `https://www.alphavantage.co/query${qs}`;
   } else {
-    return { statusCode: 400, headers: {'Access-Control-Allow-Origin':'*'}, body: JSON.stringify({ error: 'Invalid route', path }) };
+    return {
+      statusCode: 400,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ error: 'Invalid route', path })
+    };
   }
 
   return new Promise((resolve) => {
