@@ -3,11 +3,7 @@
   functions = "netlify/functions"
 
 [[redirects]]
-  from = "/api/polygon/*"
-  to = "/.netlify/functions/proxy"
+  from = "/api/*"
+  to = "/.netlify/functions/proxy/:splat"
   status = 200
-
-[[redirects]]
-  from = "/api/alpha/*"
-  to = "/.netlify/functions/proxy"
-  status = 200
+  force = true
