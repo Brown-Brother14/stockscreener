@@ -233,13 +233,12 @@
 
 <script>
 const FINNHUB_KEY = 'd6m8fvhr01qi0ajlajn0d6m8fvhr01qi0ajlajng';
-const FMP_KEY = 'dEIJdi7mxSprUhIPm5yeakN26WXQa1J5';
 const PROXY = 'https://broken-butterfly-8148.jai-mistry14.workers.dev';
 let allResults=[], currentFilter='all', sortField='score', sortDir=-1;
 let currentTicker='', currentInterval='W';
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
-// ── FINNHUB via Cloudflare Worker ──
+// ── All data via Finnhub through Cloudflare Worker ──
 async function finnhubFetch(endpoint, params={}) {
   try {
     const qs = new URLSearchParams({...params, token: FINNHUB_KEY}).toString();
@@ -249,108 +248,50 @@ async function finnhubFetch(endpoint, params={}) {
   } catch(e) { return null; }
 }
 
-// ── FMP via Cloudflare Worker ──
-async function fmpFetch(endpoint, params={}) {
-  try {
-    const qs = new URLSearchParams({...params, apikey: FMP_KEY}).toString();
-    const res = await fetch(`${PROXY}/fmp/${endpoint}?${qs}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (data?.['Error Message'] || data?.message) return null;
-    return data;
-  } catch(e) { return null; }
-}
-
-// FMP: single quote call — has price, PE, EPS, volume, 52w hi/lo, market cap, avg volume
-async function fetchProfile(ticker) {
-  const d = await fmpFetch(`profile/${ticker}`);
-  if (!d || !d[0]) return null;
-  const p = d[0];
-  return {
-    name: p.companyName || ticker,
-    industry: p.industry || '',
-    sector: p.sector || '',
-    marketCap: p.mktCap ? p.mktCap / 1e9 : null,
-    avgVolume: p.volAvg || null,
-    beta: p.beta || null,
-  };
-}
-
-// FMP: quote — confirmed free tier endpoint
-async function fetchFinancials(ticker) {
-  const d = await fmpFetch(`quote/${ticker}`);
-  if (!d || !d[0]) return null;
-  const q = d[0];
-  return {
-    pe: q.pe || null,
-    eps: q.eps || null,
-    high52w: q.yearHigh || null,
-    low52w: q.yearLow || null,
-    volume: q.volume || null,
-    avgVolume: q.avgVolume || null,
-    marketCap: q.marketCap ? q.marketCap / 1e9 : null,
-    epsGrowth: null,   // needs premium endpoint
-    divYield: null,    // needs premium endpoint
-    revenueGrowth: null,
-  };
-}
-
-// Finnhub: real-time quote
+// Real-time quote: price, change, high, low
 async function fetchQuote(ticker) {
   const d = await finnhubFetch('quote', {symbol: ticker});
   if (!d || !d.c) return null;
   return {price: d.c, change: d.dp, high: d.h, low: d.l, prevClose: d.pc};
 }
 
-// Finnhub: candles for RSI/MACD calculation
+// Company name + industry
+async function fetchProfile(ticker) {
+  const d = await finnhubFetch('stock/profile2', {symbol: ticker});
+  if (!d || !d.name) return null;
+  return {
+    name: d.name,
+    sector: d.finnhubIndustry || '',
+    industry: d.finnhubIndustry || '',
+    marketCap: d.marketCapitalization || null,  // millions
+    avgVolume: null,
+  };
+}
+
+// Key metrics: PE, EPS, 52w hi/lo, div yield, revenue growth
+async function fetchFinancials(ticker) {
+  const d = await finnhubFetch('stock/metric', {symbol: ticker, metric: 'all'});
+  if (!d || !d.metric) return null;
+  const m = d.metric;
+  return {
+    pe: m.peBasicExclExtraTTM || m.peTTM || null,
+    eps: m.epsBasicExclExtraItemsTTM || null,
+    high52w: m['52WeekHigh'] || null,
+    low52w: m['52WeekLow'] || null,
+    avgVolume: m['10DayAverageTradingVolume'] ? m['10DayAverageTradingVolume'] * 1e6 : null,
+    epsGrowth: m.epsGrowthTTMYoy || null,
+    divYield: m.dividendYieldIndicatedAnnual || null,
+    revenueGrowth: m.revenueGrowthTTMYoy || null,
+  };
+}
+
+// 90 days of candles for RSI + MACD
 async function fetchCandles(ticker) {
   const to = Math.floor(Date.now()/1000);
   const from = to - (90*24*60*60);
   const d = await finnhubFetch('stock/candle', {symbol: ticker, resolution: 'D', from, to});
   if (!d || d.s !== 'ok' || !d.c) return null;
   return {closes: d.c, opens: d.o, highs: d.h, lows: d.l, volumes: d.v, timestamps: d.t};
-}
-
-// FMP: company profile — name, sector, industry, market cap, price, beta
-async function fetchProfile(ticker) {
-  const d = await fmpFetch(`profile/${ticker}`);
-  if (!d || !d[0]) return null;
-  const p = d[0];
-  return {
-    name: p.companyName || ticker,
-    industry: p.industry || '',
-    sector: p.sector || '',
-    marketCap: p.mktCap ? p.mktCap / 1e9 : null,  // convert to billions
-    beta: p.beta || null,
-    avgVolume: p.volAvg || null,
-    description: p.description || ''
-  };
-}
-
-// FMP: key metrics — PE, EPS, dividend yield, revenue growth, 52w high/low
-async function fetchFinancials(ticker) {
-  // Fetch quote data from FMP (has volume, avg vol, 52w hi/lo, PE, EPS)
-  const [quoteData, metricsData] = await Promise.all([
-    fmpFetch(`quote/${ticker}`),
-    fmpFetch(`key-metrics-ttm/${ticker}`)
-  ]);
-
-  const q = quoteData?.[0] || null;
-  const m = metricsData?.[0] || null;
-
-  return {
-    pe: q?.pe || null,
-    eps: q?.eps || null,
-    high52w: q?.yearHigh || null,
-    low52w: q?.yearLow || null,
-    avgVolume: q?.avgVolume || null,
-    volume: q?.volume || null,
-    epsGrowth: m?.netIncomePerShareGrowth || null,
-    divYield: m?.dividendYieldTTM ? m.dividendYieldTTM * 100 : null,
-    revenueGrowth: m?.revenueGrowth || null,
-    roe: m?.roeTTM || null,
-    debtToEquity: m?.debtToEquityTTM || null,
-  };
 }
 
 function ema(prices, period) {
@@ -461,9 +402,9 @@ async function runScan() {
       const pos52w = (high52w&&low52w) ? ((quote.price-low52w)/(high52w-low52w))*100 : null;
       const revenueGrowth = financials?.revenueGrowth || null;
       const name = profile?.name || ticker;
-      const marketCap = financials?.marketCap || profile?.marketCap || null;
-      const volume = financials?.volume || candles?.volumes?.[candles.volumes.length-1] || null;
-      const avgVolume = financials?.avgVolume || profile?.avgVolume || null;
+      const marketCap = profile?.marketCap ? profile.marketCap / 1000 : null; // Finnhub gives millions, convert to billions
+      const volume = candles?.volumes?.[candles.volumes.length-1] || null;
+      const avgVolume = financials?.avgVolume || null;
 
       const score = calculateScore({rsi, macd, change:quote.change, pe, pos52w, revenueGrowth});
       const signal = getSignal(score, macd);
