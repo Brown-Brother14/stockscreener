@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AlgoScreen Pro — Swing Trader Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-chart-financial/0.1.1/chartjs-chart-financial.min.js"></script>
 <style>
   :root { --bg:#080c10;--surface:#0d1117;--border:#1e2a35;--accent:#00e5ff;--accent2:#00ff88;--accent3:#ff4d6d;--accent4:#ffd60a;--text:#e8f0f7;--muted:#5a7a8a;--card:#0f1923; }
   *{margin:0;padding:0;box-sizing:border-box}
@@ -48,9 +50,9 @@
   table{width:100%;border-collapse:collapse}
   thead th{padding:12px 16px;text-align:left;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);background:var(--surface);cursor:pointer;user-select:none;white-space:nowrap}
   thead th:hover{color:var(--accent)}
-  tbody tr{border-bottom:1px solid rgba(30,42,53,0.5);transition:background 0.15s;animation:fadeIn 0.3s ease forwards;opacity:0}
+  tbody tr{border-bottom:1px solid rgba(30,42,53,0.5);transition:background 0.15s;animation:fadeIn 0.3s ease forwards;opacity:0;cursor:pointer}
   @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-  tbody tr:hover{background:rgba(0,229,255,0.03)}
+  tbody tr:hover{background:rgba(0,229,255,0.06)}
   tbody tr:last-child{border-bottom:none}
   td{padding:13px 16px;font-size:13px;vertical-align:middle}
   .ticker{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:var(--accent)}
@@ -76,13 +78,39 @@
   .macd-badge.bull{color:var(--accent2)}.macd-badge.bear{color:var(--accent3)}.macd-badge.none{color:var(--muted)}
   .trend-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px}
   .trend-badge.up{color:var(--accent2);background:rgba(0,255,136,0.1)}.trend-badge.down{color:var(--accent3);background:rgba(255,77,109,0.1)}.trend-badge.side{color:var(--muted);background:rgba(90,122,138,0.1)}
+  .click-hint{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:10px;border-top:1px solid var(--border)}
   .loading-row td{text-align:center;padding:60px}
   .loader{display:inline-block;width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
   .loading-text{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin-top:12px}
   .footer-info{display:flex;align-items:center;justify-content:space-between;padding:16px 0;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);border-top:1px solid var(--border);margin-top:24px}
+
+  /* CHART MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:900px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 60px rgba(0,229,255,0.1)}
+  .modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-ticker{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--accent)}
+  .modal-name{font-size:13px;color:var(--muted);margin-top:2px}
+  .modal-close{background:transparent;border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+  .modal-close:hover{border-color:var(--accent3);color:var(--accent3)}
+  .modal-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+  .modal-stat{background:var(--surface);padding:12px 16px}
+  .modal-stat-label{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .modal-stat-value{font-size:16px;font-weight:800;margin-top:2px}
+  .modal-body{padding:24px;overflow-y:auto;flex:1}
+  .chart-container{position:relative;height:340px;margin-bottom:16px}
+  .vol-container{position:relative;height:100px}
+  .chart-legend{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+  .legend-item{display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)}
+  .legend-dot{width:10px;height:3px;border-radius:2px}
+  .modal-signals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+  .modal-signal-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px}
+  .modal-signal-label{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+  .modal-signal-value{font-size:15px;font-weight:700}
+
   @media(max-width:1000px){.stats-bar{grid-template-columns:repeat(3,1fr)}.hide-mobile{display:none}.watchlist-input{width:100%}}
-  @media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr)}.modal-stats{grid-template-columns:repeat(3,1fr)}.modal-signals{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -145,7 +173,7 @@
           <th>Signal</th>
           <th onclick="sortBy('rsi')" class="hide-mobile">RSI ↕</th>
           <th class="hide-mobile">MACD</th>
-          <th onclick="sortBy('pos52w')" class="hide-mobile">52W Position ↕</th>
+          <th onclick="sortBy('pos52w')" class="hide-mobile">52W ↕</th>
           <th onclick="sortBy('pe')" class="hide-mobile">P/E ↕</th>
         </tr>
       </thead>
@@ -159,11 +187,59 @@
         </tr>
       </tbody>
     </table>
+    <div class="click-hint" id="clickHint" style="display:none">🕯️ Click any row to open the chart</div>
   </div>
 
   <div class="footer-info">
     <div>⚠ Scores are algorithmic estimates only — not financial advice. Always do your own research.</div>
-    <div>Powered by Finnhub.io · 60 calls/min free tier</div>
+    <div>Powered by Finnhub.io</div>
+  </div>
+</div>
+
+<!-- CHART MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-ticker" id="modalTicker">--</div>
+        <div class="modal-name" id="modalName">--</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-stats">
+      <div class="modal-stat"><div class="modal-stat-label">Price</div><div class="modal-stat-value" id="mPrice">--</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">Change</div><div class="modal-stat-value" id="mChange">--</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">Score</div><div class="modal-stat-value" id="mScore">--</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">RSI</div><div class="modal-stat-value" id="mRSI">--</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">Signal</div><div class="modal-stat-value" id="mSignal">--</div></div>
+    </div>
+    <div class="modal-body">
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#00e5ff"></div>Price</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ffd60a"></div>20-Day MA</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ff4d6d"></div>50-Day MA</div>
+      </div>
+      <div class="chart-container">
+        <canvas id="priceChart"></canvas>
+      </div>
+      <div class="vol-container">
+        <canvas id="volChart"></canvas>
+      </div>
+      <div class="modal-signals">
+        <div class="modal-signal-card">
+          <div class="modal-signal-label">MACD</div>
+          <div class="modal-signal-value" id="mMACD">--</div>
+        </div>
+        <div class="modal-signal-card">
+          <div class="modal-signal-label">52W Position</div>
+          <div class="modal-signal-value" id="m52w">--</div>
+        </div>
+        <div class="modal-signal-card">
+          <div class="modal-signal-label">P/E Ratio</div>
+          <div class="modal-signal-value" id="mPE">--</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -171,6 +247,7 @@
 const FINNHUB_KEY = 'd6m8fvhr01qi0ajlajn0d6m8fvhr01qi0ajlajng';
 const BASE = '/.netlify/functions/proxy';
 let allResults=[], currentFilter='all', sortField='score', sortDir=-1;
+let priceChartInst=null, volChartInst=null;
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
 async function finnhubFetch(endpoint, params={}) {
@@ -206,12 +283,12 @@ async function fetchFinancials(ticker) {
   };
 }
 
-async function fetchCandles(ticker) {
+async function fetchCandles(ticker, days=90) {
   const to = Math.floor(Date.now()/1000);
-  const from = to - (90*24*60*60);
+  const from = to - (days*24*60*60);
   const d = await finnhubFetch('stock/candle', {symbol: ticker, resolution: 'D', from, to});
   if (!d || d.s !== 'ok' || !d.c) return null;
-  return d.c;
+  return {closes: d.c, opens: d.o, highs: d.h, lows: d.l, volumes: d.v, timestamps: d.t};
 }
 
 function ema(prices, period) {
@@ -219,6 +296,10 @@ function ema(prices, period) {
   let val = prices.slice(0,period).reduce((a,b)=>a+b,0)/period;
   for (let i=period; i<prices.length; i++) val = prices[i]*k + val*(1-k);
   return val;
+}
+
+function calcMA(prices, period) {
+  return prices.map((_,i) => i < period-1 ? null : prices.slice(i-period+1, i+1).reduce((a,b)=>a+b,0)/period);
 }
 
 function calcMACD(closes) {
@@ -297,7 +378,8 @@ async function runScan() {
   btn.disabled=true; btn.textContent='⏳ Scanning...';
   document.getElementById('errorBox').style.display='none';
   document.getElementById('progressBar').style.display='block';
-  showLoading(`Scanning ${tickers.length} stocks with Finnhub...`);
+  document.getElementById('clickHint').style.display='none';
+  showLoading(`Scanning ${tickers.length} stocks...`);
   allResults=[];
   let breakouts=0, bullishMACD=0, totalScore=0;
 
@@ -313,8 +395,8 @@ async function runScan() {
       await delay(150);
       if (!quote) continue;
 
-      const rsi = calcRSI(candles);
-      const macd = calcMACD(candles);
+      const rsi = calcRSI(candles?.closes);
+      const macd = calcMACD(candles?.closes);
       const pe = financials?.pe||null;
       const high52w = financials?.high52w||null;
       const low52w = financials?.low52w||null;
@@ -329,7 +411,7 @@ async function runScan() {
       if (macd?.bullish) bullishMACD++;
       totalScore+=score;
 
-      allResults.push({ticker, name, price:quote.price, change:quote.change, score, signal, rsi, macd, pe, pos52w});
+      allResults.push({ticker, name, price:quote.price, change:quote.change, score, signal, rsi, macd, pe, pos52w, candles});
 
       document.getElementById('totalScanned').textContent=allResults.length;
       document.getElementById('breakoutCount').textContent=breakouts;
@@ -347,7 +429,7 @@ async function runScan() {
   document.getElementById('lastUpdated').textContent=`Updated ${new Date().toLocaleTimeString()} · Finnhub`;
   document.getElementById('marketStatus').textContent='DATA LOADED';
   if (!allResults.length) showError('No data returned. Check your tickers and try again.');
-  else renderTable();
+  else { renderTable(); document.getElementById('clickHint').style.display='block'; }
 }
 
 function showLoading(msg) {
@@ -371,7 +453,7 @@ function renderTable() {
     const macdCls=d.macd?(d.macd.bullish?'bull':'bear'):'none';
     const pos52=get52wClass(d.pos52w);
     const peLabel=d.pe&&d.pe>0&&d.pe<500?d.pe.toFixed(1):'--';
-    return `<tr style="animation-delay:${i*0.03}s">
+    return `<tr style="animation-delay:${i*0.03}s" onclick="openChart('${d.ticker}')">
       <td><div class="ticker">${d.ticker}</div><div class="company-name">${d.name!==d.ticker?d.name:''}</div></td>
       <td><div class="price">$${d.price.toFixed(2)}</div></td>
       <td><span class="change ${cc}">${d.change>=0?'+':''}${d.change.toFixed(2)}%</span></td>
@@ -384,6 +466,161 @@ function renderTable() {
     </tr>`;
   }).join('');
 }
+
+// ── CHART MODAL ──
+function openChart(ticker) {
+  const stock = allResults.find(s=>s.ticker===ticker);
+  if (!stock) return;
+
+  document.getElementById('modalTicker').textContent=stock.ticker;
+  document.getElementById('modalName').textContent=stock.name;
+  document.getElementById('mPrice').textContent=`$${stock.price.toFixed(2)}`;
+
+  const chg = stock.change>=0?'+':'';
+  const mChange = document.getElementById('mChange');
+  mChange.textContent=`${chg}${stock.change.toFixed(2)}%`;
+  mChange.style.color=stock.change>=0?'var(--accent2)':'var(--accent3)';
+
+  const sc=getScoreClass(stock.score);
+  const mScore=document.getElementById('mScore');
+  mScore.textContent=stock.score+'/100';
+  mScore.style.color=sc==='high'?'var(--accent2)':sc==='mid'?'var(--accent4)':'var(--accent3)';
+
+  const ri=getRSIClass(stock.rsi);
+  const mRSI=document.getElementById('mRSI');
+  mRSI.textContent=ri.label;
+
+  document.getElementById('mSignal').textContent=stock.signal.label;
+  document.getElementById('mMACD').textContent=stock.macd?(stock.macd.bullish?'▲ Bullish':'▼ Bearish'):'--';
+  document.getElementById('mMACD').style.color=stock.macd?(stock.macd.bullish?'var(--accent2)':'var(--accent3)'):'var(--muted)';
+
+  const pos52=get52wClass(stock.pos52w);
+  document.getElementById('m52w').textContent=pos52.label;
+  document.getElementById('mPE').textContent=stock.pe&&stock.pe>0&&stock.pe<500?stock.pe.toFixed(1):'--';
+
+  // Draw charts
+  if (stock.candles) drawCharts(stock);
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function drawCharts(stock) {
+  const {closes, opens, highs, lows, volumes, timestamps} = stock.candles;
+  const labels = timestamps.map(t=>new Date(t*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+
+  const ma20 = calcMA(closes, 20);
+  const ma50 = calcMA(closes, 50);
+
+  // Destroy old charts
+  if (priceChartInst) { priceChartInst.destroy(); priceChartInst=null; }
+  if (volChartInst) { volChartInst.destroy(); volChartInst=null; }
+
+  const gridColor='rgba(30,42,53,0.8)';
+  const textColor='#5a7a8a';
+
+  // Price line chart
+  priceChartInst = new Chart(document.getElementById('priceChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Price',
+          data: closes,
+          borderColor: '#00e5ff',
+          backgroundColor: 'rgba(0,229,255,0.05)',
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: true,
+          tension: 0.3
+        },
+        {
+          label: '20 MA',
+          data: ma20,
+          borderColor: '#ffd60a',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: false,
+          tension: 0.3,
+          borderDash: [4,4]
+        },
+        {
+          label: '50 MA',
+          data: ma50,
+          borderColor: '#ff4d6d',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: false,
+          tension: 0.3,
+          borderDash: [4,4]
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0d1117',
+          borderColor: '#1e2a35',
+          borderWidth: 1,
+          titleColor: '#5a7a8a',
+          bodyColor: '#e8f0f7',
+          callbacks: {
+            label: ctx => ctx.dataset.label + ': $' + (ctx.parsed.y||0).toFixed(2)
+          }
+        }
+      },
+      scales: {
+        x: { grid:{color:gridColor}, ticks:{color:textColor,maxTicksLimit:8,font:{family:'Space Mono',size:10}} },
+        y: { grid:{color:gridColor}, ticks:{color:textColor,font:{family:'Space Mono',size:10},callback:v=>'$'+v.toFixed(0)}, position:'right' }
+      }
+    }
+  });
+
+  // Volume bar chart
+  const volColors = closes.map((c,i)=>i===0?'rgba(0,229,255,0.5)':c>=closes[i-1]?'rgba(0,255,136,0.5)':'rgba(255,77,109,0.5)');
+
+  volChartInst = new Chart(document.getElementById('volChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Volume',
+        data: volumes,
+        backgroundColor: volColors,
+        borderRadius: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend:{display:false}, tooltip:{
+        backgroundColor:'#0d1117',borderColor:'#1e2a35',borderWidth:1,
+        titleColor:'#5a7a8a',bodyColor:'#e8f0f7',
+        callbacks:{ label: ctx=>'Vol: '+(ctx.parsed.y/1000000).toFixed(1)+'M' }
+      }},
+      scales: {
+        x: { grid:{display:false}, ticks:{color:textColor,maxTicksLimit:8,font:{family:'Space Mono',size:10}} },
+        y: { grid:{color:gridColor}, ticks:{color:textColor,font:{family:'Space Mono',size:10},callback:v=>(v/1000000).toFixed(0)+'M'}, position:'right' }
+      }
+    }
+  });
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function closeModalOutside(e) {
+  if (e.target===document.getElementById('modalOverlay')) closeModal();
+}
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 
 function checkMarketStatus() {
   const et=new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
