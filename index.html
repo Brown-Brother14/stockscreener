@@ -164,18 +164,22 @@
         <tr>
           <th onclick="sortBy('ticker')">Ticker ↕</th>
           <th onclick="sortBy('price')">Price ↕</th>
-          <th onclick="sortBy('change')">Change ↕</th>
+          <th onclick="sortBy('change')">Change % ↕</th>
+          <th onclick="sortBy('volume')" class="hide-mobile">Volume ↕</th>
+          <th onclick="sortBy('relVol')" class="hide-mobile">Rel Vol ↕</th>
+          <th onclick="sortBy('marketCap')" class="hide-mobile">Mkt Cap ↕</th>
+          <th onclick="sortBy('pe')" class="hide-mobile">P/E ↕</th>
+          <th onclick="sortBy('eps')" class="hide-mobile">EPS TTM ↕</th>
+          <th onclick="sortBy('epsGrowth')" class="hide-mobile">EPS Growth ↕</th>
+          <th onclick="sortBy('divYield')" class="hide-mobile">Div Yield ↕</th>
+          <th class="hide-mobile">Sector</th>
           <th onclick="sortBy('score')">Score ↕</th>
           <th>Signal</th>
-          <th onclick="sortBy('rsi')" class="hide-mobile">RSI ↕</th>
-          <th class="hide-mobile">MACD</th>
-          <th onclick="sortBy('pos52w')" class="hide-mobile">52W ↕</th>
-          <th onclick="sortBy('pe')" class="hide-mobile">P/E ↕</th>
         </tr>
       </thead>
       <tbody id="tableBody">
         <tr class="loading-row">
-          <td colspan="9">
+          <td colspan="13">
             <div style="text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:13px">
               Enter tickers above and click ⚡ Run Scan to begin
             </div>
@@ -263,8 +267,20 @@ async function fetchFinancials(ticker) {
     pe: m.peBasicExclExtraTTM || m.peTTM || null,
     high52w: m['52WeekHigh'] || null,
     low52w: m['52WeekLow'] || null,
-    revenueGrowth: m.revenueGrowthTTMYoy || null
+    revenueGrowth: m.revenueGrowthTTMYoy || null,
+    eps: m.epsBasicExclExtraItemsTTM || m.epsTTM || null,
+    epsGrowth: m.epsGrowthTTMYoy || null,
+    divYield: m.dividendYieldIndicatedAnnual || null,
+    marketCap: m.marketCapitalization || null,  // in millions
+    avgVol10: m['10DayAverageTradingVolume'] || null,
   };
+}
+
+async function fetchQuoteExtra(ticker) {
+  // gets current volume from quote
+  const d = await finnhubFetch('quote', {symbol: ticker});
+  if (!d) return null;
+  return d;
 }
 
 async function fetchCandles(ticker) {
@@ -391,7 +407,20 @@ async function runScan() {
       if (macd?.bullish) bullishMACD++;
       totalScore+=score;
 
-      allResults.push({ticker, name, price:quote.price, change:quote.change, score, signal, rsi, macd, pe, pos52w});
+      allResults.push({
+        ticker, name, industry: profile?.industry||'',
+        price: quote.price, change: quote.change,
+        volume: candles?.volumes?.[candles.volumes.length-1] || null,
+        avgVol: financials?.avgVol10 || null,
+        marketCap: financials?.marketCap || null,
+        score, signal, rsi, macd,
+        pe: financials?.pe || null,
+        eps: financials?.eps || null,
+        epsGrowth: financials?.epsGrowth || null,
+        divYield: financials?.divYield || null,
+        pos52w,
+        revenueGrowth: financials?.revenueGrowth || null
+      });
 
       document.getElementById('totalScanned').textContent=allResults.length;
       document.getElementById('breakoutCount').textContent=breakouts;
@@ -413,7 +442,7 @@ async function runScan() {
 }
 
 function showLoading(msg) {
-  document.getElementById('tableBody').innerHTML=`<tr class="loading-row"><td colspan="9"><div style="text-align:center"><div class="loader"></div><div class="loading-text" id="loadingMsg">${msg}</div></div></td></tr>`;
+  document.getElementById('tableBody').innerHTML=`<tr class="loading-row"><td colspan="13"><div style="text-align:center"><div class="loader"></div><div class="loading-text" id="loadingMsg">${msg}</div></div></td></tr>`;
 }
 function updateLoadingText(msg) { const el=document.getElementById('loadingMsg'); if(el) el.textContent=msg; }
 function filterBy(type, btn) { currentFilter=type; document.querySelectorAll('.filter-group .btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderTable(); }
@@ -426,23 +455,60 @@ function renderTable() {
   else if (currentFilter==='top') data=data.sort((a,b)=>b.score-a.score).slice(0,5);
   else if (currentFilter==='weak') data=data.filter(d=>d.signal.cls==='weak');
   data.sort((a,b)=>{ let av=a[sortField],bv=b[sortField]; if(sortField==='ticker') return sortDir*av.localeCompare(bv); return sortDir*((av??-999)-(bv??-999)); });
-  if (!data.length&&allResults.length>0) { document.getElementById('tableBody').innerHTML=`<tr class="loading-row"><td colspan="9"><div style="color:var(--muted);font-family:'Space Mono',monospace;font-size:13px">No stocks match this filter</div></td></tr>`; return; }
+  if (!data.length&&allResults.length>0) { document.getElementById('tableBody').innerHTML=`<tr class="loading-row"><td colspan="13"><div style="color:var(--muted);font-family:'Space Mono',monospace;font-size:13px">No stocks match this filter</div></td></tr>`; return; }
+
+  const mono = "font-family:'Space Mono',monospace;font-size:12px";
+
   document.getElementById('tableBody').innerHTML=data.map((d,i)=>{
-    const sc=getScoreClass(d.score),ri=getRSIClass(d.rsi),cc=d.change>=0?'up':'down';
-    const macdLabel=d.macd?(d.macd.bullish?'▲ Bullish':'▼ Bearish'):'--';
-    const macdCls=d.macd?(d.macd.bullish?'bull':'bear'):'none';
-    const pos52=get52wClass(d.pos52w);
-    const peLabel=d.pe&&d.pe>0&&d.pe<500?d.pe.toFixed(1):'--';
+    const sc=getScoreClass(d.score), cc=d.change>=0?'up':'down';
+
+    // Volume
+    const vol = d.volume ? (d.volume >= 1e6 ? (d.volume/1e6).toFixed(2)+'M' : (d.volume/1e3).toFixed(0)+'K') : '--';
+
+    // Relative volume (today vs 10-day avg)
+    const relVol = (d.volume && d.avgVol && d.avgVol > 0)
+      ? (d.volume / (d.avgVol * 1e6)).toFixed(2)
+      : null;
+    d.relVol = relVol ? parseFloat(relVol) : null;
+    const relVolLabel = relVol ? relVol+'x' : '--';
+    const relVolColor = relVol > 1.5 ? 'var(--accent2)' : relVol < 0.5 ? 'var(--accent3)' : 'var(--text)';
+
+    // Market cap
+    const mc = d.marketCap;
+    const mcLabel = !mc ? '--' : mc >= 1000 ? (mc/1000).toFixed(2)+'T' : mc >= 1 ? mc.toFixed(2)+'B' : (mc*1000).toFixed(0)+'M';
+
+    // P/E
+    const peLabel = d.pe && d.pe > 0 && d.pe < 999 ? d.pe.toFixed(1) : '--';
+
+    // EPS
+    const epsLabel = d.eps != null ? (d.eps >= 0 ? '+' : '') + d.eps.toFixed(2) : '--';
+    const epsColor = d.eps > 0 ? 'var(--accent2)' : d.eps < 0 ? 'var(--accent3)' : 'var(--muted)';
+
+    // EPS Growth
+    const eg = d.epsGrowth;
+    const egLabel = eg != null ? (eg >= 0 ? '+' : '') + (eg*100).toFixed(1)+'%' : '--';
+    const egColor = eg > 0 ? 'var(--accent2)' : eg < 0 ? 'var(--accent3)' : 'var(--muted)';
+
+    // Div Yield
+    const divLabel = d.divYield && d.divYield > 0 ? d.divYield.toFixed(2)+'%' : '--';
+
+    // Sector (shortened)
+    const sector = d.industry ? d.industry.replace('Technology','Tech').replace('Communication','Comm').replace('Consumer','Cons').replace('Services','Svcs') : '--';
+
     return `<tr style="animation-delay:${i*0.03}s" onclick="openChart('${d.ticker}')">
       <td><div class="ticker">${d.ticker}</div><div class="company-name">${d.name!==d.ticker?d.name:''}</div></td>
       <td><div class="price">$${d.price.toFixed(2)}</div></td>
       <td><span class="change ${cc}">${d.change>=0?'+':''}${d.change.toFixed(2)}%</span></td>
+      <td class="hide-mobile" style="${mono};color:var(--text)">${vol}</td>
+      <td class="hide-mobile" style="${mono};color:${relVolColor}">${relVolLabel}</td>
+      <td class="hide-mobile" style="${mono};color:var(--muted)">${mcLabel}</td>
+      <td class="hide-mobile" style="${mono};color:var(--muted)">${peLabel}</td>
+      <td class="hide-mobile" style="${mono};color:${epsColor}">${epsLabel}</td>
+      <td class="hide-mobile" style="${mono};color:${egColor}">${egLabel}</td>
+      <td class="hide-mobile" style="${mono};color:var(--muted)">${divLabel}</td>
+      <td class="hide-mobile" style="font-size:11px;color:var(--muted);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sector}</td>
       <td class="score-cell"><div class="score-bar-wrap"><span class="score-num ${sc}">${d.score}</span><div class="score-bar"><div class="score-fill ${sc}" style="width:${d.score}%"></div></div></div></td>
       <td><span class="signal ${d.signal.cls}">${d.signal.label}</span></td>
-      <td class="hide-mobile"><span class="rsi-badge ${ri.cls}">${ri.label}</span></td>
-      <td class="hide-mobile"><span class="macd-badge ${macdCls}">${macdLabel}</span></td>
-      <td class="hide-mobile"><span class="trend-badge ${pos52.cls}">${pos52.label}</span></td>
-      <td class="hide-mobile" style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted)">${peLabel}</td>
     </tr>`;
   }).join('');
 }
