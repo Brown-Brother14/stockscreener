@@ -648,7 +648,7 @@ Respond in this exact format:
 ANALYSIS: [2 sentences max about the technicals and fundamentals]
 VERDICT: [BUY or HOLD or AVOID]`;
 
-    const res = await fetch(`${PROXY}/claude/messages`, {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
