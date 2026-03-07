@@ -288,7 +288,7 @@ async function fetchFinancials(ticker) {
 // 90 days of candles for RSI + MACD
 async function fetchCandles(ticker) {
   const to = Math.floor(Date.now()/1000);
-  const from = to - (90*24*60*60);
+  const from = to - (120*24*60*60);
   const d = await finnhubFetch('stock/candle', {symbol: ticker, resolution: 'D', from, to});
   if (!d || d.s !== 'ok' || !d.c) return null;
   return {closes: d.c, opens: d.o, highs: d.h, lows: d.l, volumes: d.v, timestamps: d.t};
@@ -403,9 +403,9 @@ async function runScan() {
       const revenueGrowth = financials?.revenueGrowth || null;
       const name = profile?.name || ticker;
       const marketCap = profile?.marketCap ? profile.marketCap / 1000 : null; // Finnhub gives millions, convert to billions
-      // Get last available volume (works when market is closed too)
+      // Get last available volume (works when market is closed)
       const lastVol = candles?.volumes ? [...candles.volumes].reverse().find(v => v > 0) : null;
-      const volume = lastVol || null;
+      const volume = lastVol || financials?.avgVolume || null;
       const avgVolume = financials?.avgVolume || null;
       // Rel vol = today's volume vs 10-day average
 
