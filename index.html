@@ -108,6 +108,20 @@
   .interval-btns{display:flex;gap:6px}
   .interval-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.15s}
   .interval-btn:hover,.interval-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,0.05)}
+  .ai-panel{flex-shrink:0;border-top:1px solid var(--border);padding:16px 24px;background:var(--surface);display:flex;align-items:flex-start;gap:16px}
+  .ai-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#a855f7);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 0 16px rgba(168,85,247,0.3)}
+  .ai-content{flex:1;min-width:0}
+  .ai-label{font-family:'Space Mono',monospace;font-size:10px;color:#a855f7;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+  .ai-text{font-size:13px;color:var(--text);line-height:1.6}
+  .ai-verdict{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-top:8px}
+  .ai-verdict.buy{background:rgba(0,255,136,0.1);color:var(--accent2);border:1px solid rgba(0,255,136,0.2)}
+  .ai-verdict.hold{background:rgba(255,214,10,0.1);color:var(--accent4);border:1px solid rgba(255,214,10,0.2)}
+  .ai-verdict.avoid{background:rgba(255,77,109,0.1);color:var(--accent3);border:1px solid rgba(255,77,109,0.2)}
+  .ai-loading{display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)}
+  .ai-dot{width:6px;height:6px;border-radius:50%;background:#a855f7;animation:aiPulse 1s infinite}
+  .ai-dot:nth-child(2){animation-delay:0.2s}
+  .ai-dot:nth-child(3){animation-delay:0.4s}
+  @keyframes aiPulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1)}}
 
   @media(max-width:1000px){.stats-bar{grid-template-columns:repeat(3,1fr)}.hide-mobile{display:none}.watchlist-input{width:100%}}
   @media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr)}.modal-stats{grid-template-columns:repeat(3,1fr)}}
@@ -232,6 +246,15 @@
       <div class="tv-loading" id="tvLoading">
         <div class="loader"></div>
         <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted)">Loading TradingView chart...</div>
+      </div>
+    </div>
+    <div class="ai-panel">
+      <div class="ai-icon">🤖</div>
+      <div class="ai-content">
+        <div class="ai-label">⚡ Claude AI Analysis</div>
+        <div class="ai-text" id="aiText">
+          <div class="ai-loading"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span style="margin-left:4px">Analysing...</span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -594,9 +617,65 @@ function openChart(ticker) {
   document.getElementById('mRSI').textContent=ri.label;
   document.getElementById('mSignal').textContent=stock.signal.label;
 
+  // Reset AI panel and fetch analysis
+  document.getElementById('aiText').innerHTML=`<div class="ai-loading"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span style="margin-left:4px">Analysing ${ticker}...</span></div>`;
+  getAIAnalysis(stock);
+
   loadTVChart(ticker, currentInterval);
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow='hidden';
+}
+
+async function getAIAnalysis(stock) {
+  try {
+    const prompt = `You are a swing trader analyst. Analyse this stock data and give a concise 2-sentence verdict, then a recommendation.
+
+Stock: ${stock.ticker} (${stock.name})
+Sector: ${stock.sector || 'Unknown'}
+Price: $${stock.price?.toFixed(2)}
+Change today: ${stock.change?.toFixed(2)}%
+Score: ${stock.score}/100
+Signal: ${stock.signal?.label}
+RSI: ${stock.rsi?.toFixed(1) ?? 'N/A'}
+MACD: ${stock.macd?.bullish ? 'Bullish' : 'Bearish'} (hist: ${stock.macd?.hist?.toFixed(3) ?? 'N/A'})
+P/E: ${stock.pe?.toFixed(1) ?? 'N/A'}
+EPS TTM: ${stock.eps?.toFixed(2) ?? 'N/A'}
+EPS Growth YoY: ${stock.epsGrowth != null ? (stock.epsGrowth*100).toFixed(1)+'%' : 'N/A'}
+Market Cap: ${stock.marketCap ? stock.marketCap.toFixed(1)+'B' : 'N/A'}
+52W Position: ${stock.pos52w?.toFixed(0) ?? 'N/A'}%
+
+Respond in this exact format:
+ANALYSIS: [2 sentences max about the technicals and fundamentals]
+VERDICT: [BUY or HOLD or AVOID]`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{role: 'user', content: prompt}]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+
+    const analysisMatch = text.match(/ANALYSIS:\s*(.+?)(?=VERDICT:|$)/s);
+    const verdictMatch = text.match(/VERDICT:\s*(BUY|HOLD|AVOID)/i);
+
+    const analysis = analysisMatch?.[1]?.trim() || text;
+    const verdict = verdictMatch?.[1]?.toUpperCase() || 'HOLD';
+    const verdictClass = verdict === 'BUY' ? 'buy' : verdict === 'AVOID' ? 'avoid' : 'hold';
+    const verdictEmoji = verdict === 'BUY' ? '🟢' : verdict === 'AVOID' ? '🔴' : '🟡';
+
+    document.getElementById('aiText').innerHTML = `
+      <div style="color:var(--text);font-size:13px;line-height:1.7;margin-bottom:10px">${analysis}</div>
+      <span class="ai-verdict ${verdictClass}">${verdictEmoji} ${verdict}</span>
+    `;
+  } catch(e) {
+    document.getElementById('aiText').innerHTML = `<span style="color:var(--muted);font-size:12px">AI analysis unavailable</span>`;
+  }
 }
 
 function closeModal() {
