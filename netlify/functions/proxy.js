@@ -1,22 +1,29 @@
 const https = require('https');
 
 exports.handler = async function(event) {
-  const path = event.path;
+  const path = event.path || '';
+  const params = event.queryStringParameters || {};
+
   let fullUrl = '';
 
-  if (path.includes('/api/polygon/')) {
-    const polygonPath = path.replace('/api/polygon/', '');
-    const query = event.queryStringParameters
-      ? '?' + new URLSearchParams(event.queryStringParameters).toString()
+  if (path.includes('polygon')) {
+    const polygonPath = path.replace(/.*\/api\/polygon\//, '').replace(/.*proxy\/polygon\//, '');
+    const query = Object.keys(params).length
+      ? '?' + new URLSearchParams(params).toString()
       : '';
     fullUrl = `https://api.polygon.io/${polygonPath}${query}`;
-  } else if (path.includes('/api/alpha/')) {
-    const params = event.queryStringParameters
-      ? '?' + new URLSearchParams(event.queryStringParameters).toString()
+  } else if (path.includes('alpha')) {
+    const query = Object.keys(params).length
+      ? '?' + new URLSearchParams(params).toString()
       : '';
-    fullUrl = `https://www.alphavantage.co/query${params}`;
+    fullUrl = `https://www.alphavantage.co/query${query}`;
   } else {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid route' }) };
+    // Log what we received to help debug
+    return {
+      statusCode: 400,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ error: 'Invalid route', path: path, params: params })
+    };
   }
 
   return new Promise((resolve) => {
@@ -36,7 +43,8 @@ exports.handler = async function(event) {
     }).on('error', (e) => {
       resolve({
         statusCode: 500,
-        body: JSON.stringify({ error: e.message })
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: e.message, url: fullUrl })
       });
     });
   });
