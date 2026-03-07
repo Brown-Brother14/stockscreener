@@ -42,6 +42,10 @@
   .progress-bar-inner{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.3s ease;box-shadow:0 0 8px var(--accent)}
   .error-box{background:rgba(255,77,109,0.05);border:1px solid rgba(255,77,109,0.2);border-radius:8px;padding:16px 20px;margin:16px 0;font-size:13px;color:var(--accent3);font-family:'Space Mono',monospace;display:none}
   .table-wrapper{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .table-scroll{overflow-x:auto;width:100%}
+  .table-scroll::-webkit-scrollbar{height:4px}
+  .table-scroll::-webkit-scrollbar-track{background:var(--border)}
+  .table-scroll::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
   .table-header-bar{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
   .table-title{font-size:14px;font-weight:700}
   .last-updated{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)}
@@ -159,20 +163,21 @@
       <div class="table-title">📊 Screener Results</div>
       <div class="last-updated" id="lastUpdated">Not yet scanned</div>
     </div>
+    <div class="table-scroll">
     <table>
       <thead>
         <tr>
           <th onclick="sortBy('ticker')">Ticker ↕</th>
           <th onclick="sortBy('price')">Price ↕</th>
           <th onclick="sortBy('change')">Change % ↕</th>
-          <th onclick="sortBy('volume')" class="hide-mobile">Volume ↕</th>
-          <th onclick="sortBy('avgVolume')" class="hide-mobile">Avg Volume ↕</th>
-          <th onclick="sortBy('marketCap')" class="hide-mobile">Mkt Cap ↕</th>
-          <th onclick="sortBy('pe')" class="hide-mobile">P/E ↕</th>
-          <th onclick="sortBy('eps')" class="hide-mobile">EPS dil TTM ↕</th>
-          <th onclick="sortBy('epsGrowth')" class="hide-mobile">EPS dil growth TTM YoY ↕</th>
-          <th onclick="sortBy('divYield')" class="hide-mobile">Div Yield ↕</th>
-          <th class="hide-mobile">Sector</th>
+          <th onclick="sortBy('volume')">Volume ↕</th>
+          <th onclick="sortBy('avgVolume')">Avg Volume ↕</th>
+          <th onclick="sortBy('marketCap')">Mkt Cap ↕</th>
+          <th onclick="sortBy('pe')">P/E ↕</th>
+          <th onclick="sortBy('eps')">EPS dil TTM ↕</th>
+          <th onclick="sortBy('epsGrowth')">EPS dil growth TTM YoY ↕</th>
+          <th onclick="sortBy('divYield')">Div Yield ↕</th>
+          <th>Sector</th>
           <th onclick="sortBy('score')">Score ↕</th>
           <th>Signal</th>
         </tr>
@@ -187,6 +192,7 @@
         </tr>
       </tbody>
     </table>
+    </div>
     <div class="click-hint" id="clickHint" style="display:none">📈 Click any row to open TradingView chart</div>
   </div>
 
@@ -504,14 +510,14 @@ function renderTable() {
       <td><div class="ticker">${d.ticker}</div><div class="company-name">${d.name!==d.ticker?d.name:''}</div></td>
       <td><div class="price">$${d.price.toFixed(2)}</div></td>
       <td><span class="change ${cc}">${d.change>=0?'+':''}${d.change.toFixed(2)}%</span></td>
-      <td class="hide-mobile" style="${mono};color:var(--text)">${vol}</td>
-      <td class="hide-mobile" style="${mono};color:var(--muted)">${avgVol}</td>
-      <td class="hide-mobile" style="${mono};color:var(--muted)">${mcLabel}</td>
-      <td class="hide-mobile" style="${mono};color:var(--muted)">${peLabel}</td>
-      <td class="hide-mobile" style="${mono};color:${epsColor}">${epsLabel}</td>
-      <td class="hide-mobile" style="${mono};color:${egColor}">${egLabel}</td>
-      <td class="hide-mobile" style="${mono};color:var(--muted)">${divLabel}</td>
-      <td class="hide-mobile" style="font-size:11px;color:var(--muted);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sector}</td>
+      <td style="${mono};color:var(--text)">${vol}</td>
+      <td style="${mono};color:var(--muted)">${avgVol}</td>
+      <td style="${mono};color:var(--muted)">${mcLabel}</td>
+      <td style="${mono};color:var(--muted)">${peLabel}</td>
+      <td style="${mono};color:${epsColor}">${epsLabel}</td>
+      <td style="${mono};color:${egColor}">${egLabel}</td>
+      <td style="${mono};color:var(--muted)">${divLabel}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sector}</td>
       <td class="score-cell"><div class="score-bar-wrap"><span class="score-num ${sc}">${d.score}</span><div class="score-bar"><div class="score-fill ${sc}" style="width:${d.score}%"></div></div></div></td>
       <td><span class="signal ${d.signal.cls}">${d.signal.label}</span></td>
     </tr>`;
