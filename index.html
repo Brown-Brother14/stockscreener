@@ -169,8 +169,8 @@
           <th onclick="sortBy('relVol')" class="hide-mobile">Rel Vol ↕</th>
           <th onclick="sortBy('marketCap')" class="hide-mobile">Mkt Cap ↕</th>
           <th onclick="sortBy('pe')" class="hide-mobile">P/E ↕</th>
-          <th onclick="sortBy('eps')" class="hide-mobile">EPS TTM ↕</th>
-          <th onclick="sortBy('epsGrowth')" class="hide-mobile">EPS Growth ↕</th>
+          <th onclick="sortBy('eps')" class="hide-mobile">EPS dil TTM ↕</th>
+          <th onclick="sortBy('epsGrowth')" class="hide-mobile">EPS dil growth TTM YoY ↕</th>
           <th onclick="sortBy('divYield')" class="hide-mobile">Div Yield ↕</th>
           <th class="hide-mobile">Sector</th>
           <th onclick="sortBy('score')">Score ↕</th>
@@ -264,7 +264,7 @@ async function fetchProfile(ticker) {
     sector: d.finnhubIndustry || '',
     industry: d.finnhubIndustry || '',
     marketCap: d.marketCapitalization || null,  // millions
-    avgVolume: null,
+    avgVolume: null,  // comes from metrics
   };
 }
 
@@ -405,6 +405,7 @@ async function runScan() {
       const marketCap = profile?.marketCap ? profile.marketCap / 1000 : null; // Finnhub gives millions, convert to billions
       const volume = candles?.volumes?.[candles.volumes.length-1] || null;
       const avgVolume = financials?.avgVolume || null;
+      // Rel vol = today's volume vs 10-day average
 
       const score = calculateScore({rsi, macd, change:quote.change, pe, pos52w, revenueGrowth});
       const signal = getSignal(score, macd);
@@ -470,16 +471,16 @@ function renderTable() {
   document.getElementById('tableBody').innerHTML=data.map((d,i)=>{
     const sc=getScoreClass(d.score), cc=d.change>=0?'up':'down';
 
-    // Volume
+    // Volume — from last candle (today's volume)
     const vol = d.volume ? (d.volume >= 1e6 ? (d.volume/1e6).toFixed(2)+'M' : (d.volume/1e3).toFixed(0)+'K') : '--';
 
-    // Relative volume (today vs avg volume from FMP)
+    // Relative volume — today vs 10-day average (avgVolume in shares from Finnhub)
     const relVol = (d.volume && d.avgVolume && d.avgVolume > 0)
       ? (d.volume / d.avgVolume).toFixed(2)
-      : null;
+      : (d.volume ? '1.00' : null);  // default to 1x if no avg
     d.relVol = relVol ? parseFloat(relVol) : null;
     const relVolLabel = relVol ? relVol+'x' : '--';
-    const relVolColor = relVol > 1.5 ? 'var(--accent2)' : relVol < 0.5 ? 'var(--accent3)' : 'var(--text)';
+    const relVolColor = parseFloat(relVol) > 1.5 ? 'var(--accent2)' : parseFloat(relVol) < 0.5 ? 'var(--accent3)' : 'var(--text)';
 
     // Market cap (in billions from FMP)
     const mc = d.marketCap;
