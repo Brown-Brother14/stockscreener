@@ -234,27 +234,26 @@
 <script>
 const FINNHUB_KEY = 'd6m8fvhr01qi0ajlajn0d6m8fvhr01qi0ajlajng';
 const FMP_KEY = 'dEIJdi7mxSprUhIPm5yeakN26WXQa1J5';
-const FINNHUB_BASE = 'https://finnhub.io/api/v1';
-const FMP_BASE = 'https://financialmodelingprep.com/api/v3';
+const PROXY = 'https://broken-butterfly-8148.jai-mistry14.workers.dev';
 let allResults=[], currentFilter='all', sortField='score', sortDir=-1;
 let currentTicker='', currentInterval='W';
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
-// ── FINNHUB — direct API call ──
+// ── FINNHUB via Cloudflare Worker ──
 async function finnhubFetch(endpoint, params={}) {
   try {
     const qs = new URLSearchParams({...params, token: FINNHUB_KEY}).toString();
-    const res = await fetch(`${FINNHUB_BASE}/${endpoint}?${qs}`);
+    const res = await fetch(`${PROXY}/finnhub/${endpoint}?${qs}`);
     if (!res.ok) return null;
     return await res.json();
   } catch(e) { return null; }
 }
 
-// ── FMP — direct API call ──
+// ── FMP via Cloudflare Worker ──
 async function fmpFetch(endpoint, params={}) {
   try {
     const qs = new URLSearchParams({...params, apikey: FMP_KEY}).toString();
-    const res = await fetch(`${FMP_BASE}/${endpoint}?${qs}`);
+    const res = await fetch(`${PROXY}/fmp/${endpoint}?${qs}`);
     if (!res.ok) return null;
     return await res.json();
   } catch(e) { return null; }
