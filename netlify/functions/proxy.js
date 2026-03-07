@@ -1,24 +1,22 @@
-javascript
 const https = require('https');
 
 exports.handler = async function(event) {
-  const target = event.path.replace('/.netlify/functions/proxy/', '');
-  const query = event.queryStringParameters 
-    ? '?' + new URLSearchParams(event.queryStringParameters).toString() 
-    : '';
-  
-  const urlMap = {
-    'polygon': `https://api.polygon.io`,
-    'alpha': `https://www.alphavantage.co`
-  };
-
+  const path = event.path;
   let fullUrl = '';
-  if (target.startsWith('polygon/')) {
-    fullUrl = `https://api.polygon.io/${target.replace('polygon/', '')}${query}`;
-  } else if (target.startsWith('alpha/')) {
-    fullUrl = `https://www.alphavantage.co/${target.replace('alpha/', '')}${query}`;
+
+  if (path.includes('/api/polygon/')) {
+    const polygonPath = path.replace('/api/polygon/', '');
+    const query = event.queryStringParameters
+      ? '?' + new URLSearchParams(event.queryStringParameters).toString()
+      : '';
+    fullUrl = `https://api.polygon.io/${polygonPath}${query}`;
+  } else if (path.includes('/api/alpha/')) {
+    const params = event.queryStringParameters
+      ? '?' + new URLSearchParams(event.queryStringParameters).toString()
+      : '';
+    fullUrl = `https://www.alphavantage.co/query${params}`;
   } else {
-    return { statusCode: 400, body: 'Invalid target' };
+    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid route' }) };
   }
 
   return new Promise((resolve) => {
@@ -36,8 +34,10 @@ exports.handler = async function(event) {
         });
       });
     }).on('error', (e) => {
-      resolve({ statusCode: 500, body: JSON.stringify({ error: e.message }) });
+      resolve({
+        statusCode: 500,
+        body: JSON.stringify({ error: e.message })
+      });
     });
   });
 };
-```
