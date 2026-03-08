@@ -451,6 +451,14 @@
       </div>
     </div>
 
+    <!-- Analyst Targets -->
+    <div class="detail-section-header">🎯 Analyst Price Targets</div>
+    <div id="analystSection">
+      <div style="padding:20px;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;display:flex;align-items:center;gap:8px">
+        <div class="loader" style="width:14px;height:14px;border-width:2px"></div> Loading analyst data...
+      </div>
+    </div>
+
     <!-- News -->
     <div class="detail-section-header">📰 Latest News</div>
     <div id="newsContainer">
@@ -592,6 +600,27 @@ async function fetchFinancials(ticker) {
     epsGrowth: m.epsGrowthTTMYoy || null,
     divYield: m.dividendYieldIndicatedAnnual || null,
     revenueGrowth: m.revenueGrowthTTMYoy || null,
+  };
+}
+
+// Analyst price targets + buy/sell/hold consensus
+async function fetchAnalystTargets(ticker) {
+  const [pt, rec] = await Promise.all([
+    finnhubFetch('stock/price-target', {symbol: ticker}),
+    finnhubFetch('stock/recommendation', {symbol: ticker}),
+  ]);
+  const latest = Array.isArray(rec) && rec.length ? rec[0] : null;
+  return {
+    targetHigh:   pt?.targetHigh   || null,
+    targetLow:    pt?.targetLow    || null,
+    targetMean:   pt?.targetMean   || null,
+    targetMedian: pt?.targetMedian || null,
+    analystCount: pt?.lastUpdated  || null,
+    strongBuy:  latest?.strongBuy  || 0,
+    buy:        latest?.buy        || 0,
+    hold:       latest?.hold       || 0,
+    sell:       latest?.sell       || 0,
+    strongSell: latest?.strongSell || 0,
   };
 }
 
@@ -1105,7 +1134,9 @@ function openChart(ticker) {
 
   // News
   document.getElementById('newsContainer').innerHTML = '<div class="news-loading"><div class="loader" style="width:20px;height:20px;border-width:2px"></div><div style="margin-top:8px">Loading news...</div></div>';
+  document.getElementById('analystSection').innerHTML = '<div style="padding:20px;color:var(--muted);font-family:\'Space Mono\',monospace;font-size:11px;display:flex;align-items:center;gap:8px"><div class="loader" style="width:14px;height:14px;border-width:2px"></div> Loading analyst data...</div>';
   fetchNews(s.ticker);
+  fetchAndRenderAnalyst(s.ticker, s.price);
 
   loadTVChart(ticker, currentInterval);
   document.getElementById('modalOverlay').classList.add('open');
@@ -1132,6 +1163,85 @@ async function fetchEarningsDate(ticker) {
   } catch(e) {
     document.getElementById('earnDate').textContent='--';
     document.getElementById('earnCountdown').textContent='';
+  }
+}
+
+async function fetchAndRenderAnalyst(ticker, currentPrice) {
+  try {
+    const a = await fetchAnalystTargets(ticker);
+    const el = document.getElementById('analystSection');
+    if (!a || !a.targetMean) {
+      el.innerHTML = '<div style="padding:16px 20px;color:var(--muted);font-family:\'Space Mono\',monospace;font-size:11px">No analyst coverage data available</div>';
+      return;
+    }
+
+    const mean   = a.targetMean;
+    const high   = a.targetHigh;
+    const low    = a.targetLow;
+    const median = a.targetMedian;
+    const upside = currentPrice ? (((mean - currentPrice) / currentPrice) * 100) : null;
+    const upsideColor = upside >= 0 ? 'var(--accent2)' : 'var(--accent3)';
+
+    // Consensus bar
+    const total = a.strongBuy + a.buy + a.hold + a.sell + a.strongSell;
+    const pct = v => total ? Math.round((v/total)*100) : 0;
+    const sbPct = pct(a.strongBuy), bPct = pct(a.buy), hPct = pct(a.hold), sPct = pct(a.sell), ssPct = pct(a.strongSell);
+
+    // Price range bar — where current price sits between low and high target
+    const rangePos = (high > low && currentPrice) ? Math.min(100, Math.max(0, ((currentPrice - low) / (high - low)) * 100)) : null;
+
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)">
+
+        <!-- Left: price targets -->
+        <div style="padding:20px;background:var(--card)">
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Consensus Price Target</div>
+          <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:6px">
+            <div style="font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:var(--text)">$${mean.toFixed(2)}</div>
+            ${upside!=null ? `<div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:${upsideColor}">${upside>=0?'+':''}${upside.toFixed(1)}% upside</div>` : ''}
+          </div>
+          ${median ? `<div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:16px">Median: $${median.toFixed(2)}</div>` : ''}
+
+          <!-- Range bar -->
+          ${rangePos!=null ? `
+          <div style="margin-top:8px">
+            <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px">
+              <span>Low $${low.toFixed(2)}</span><span>High $${high.toFixed(2)}</span>
+            </div>
+            <div style="position:relative;height:6px;background:rgba(255,255,255,0.06);border-radius:3px">
+              <div style="position:absolute;left:0;top:0;height:100%;width:${rangePos}%;background:linear-gradient(90deg,var(--accent3),var(--accent4),var(--accent2));border-radius:3px"></div>
+              <div style="position:absolute;top:-4px;left:calc(${rangePos}% - 6px);width:14px;height:14px;background:white;border-radius:50%;border:2px solid var(--bg);box-shadow:0 0 6px rgba(255,255,255,0.4)"></div>
+            </div>
+            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:10px;text-align:center">▲ Current price $${currentPrice.toFixed(2)}</div>
+          </div>` : ''}
+        </div>
+
+        <!-- Right: buy/sell/hold consensus -->
+        <div style="padding:20px;background:var(--card)">
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Analyst Consensus ${total ? '('+total+' analysts)' : ''}</div>
+          ${total ? `
+          <div style="display:flex;flex-direction:column;gap:8px">
+            ${[
+              {label:'Strong Buy', val:a.strongBuy, pct:sbPct,  color:'#00ff88'},
+              {label:'Buy',        val:a.buy,        pct:bPct,   color:'#00e5ff'},
+              {label:'Hold',       val:a.hold,       pct:hPct,   color:'#ffd60a'},
+              {label:'Sell',       val:a.sell,       pct:sPct,   color:'#ff6b6b'},
+              {label:'Strong Sell',val:a.strongSell, pct:ssPct,  color:'#ff4d6d'},
+            ].map(r=>`
+              <div style="display:grid;grid-template-columns:90px 1fr 30px;align-items:center;gap:8px">
+                <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">${r.label}</div>
+                <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
+                  <div style="height:100%;width:${r.pct}%;background:${r.color};border-radius:3px;transition:width 0.6s ease"></div>
+                </div>
+                <div style="font-family:'Space Mono',monospace;font-size:10px;color:${r.color};text-align:right">${r.val}</div>
+              </div>
+            `).join('')}
+          </div>` : '<div style="color:var(--muted);font-family:\'Space Mono\',monospace;font-size:11px">No consensus data</div>'}
+        </div>
+      </div>
+    `;
+  } catch(e) {
+    document.getElementById('analystSection').innerHTML = '<div style="padding:16px 20px;color:var(--muted);font-family:\'Space Mono\',monospace;font-size:11px">Analyst data unavailable</div>';
   }
 }
 
