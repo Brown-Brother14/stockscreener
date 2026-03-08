@@ -164,6 +164,9 @@
   .news-meta{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);display:flex;gap:10px}
   .news-src{color:var(--accent)}
   .news-loading{padding:24px;text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)}
+  .ext-price{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;margin-top:3px;display:inline-block}
+  .ext-price.pre{color:#a78bfa;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2)}
+  .ext-price.after{color:#fb923c;background:rgba(251,146,60,0.1);border:1px solid rgba(251,146,60,0.2)}
   .ema-badges{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px}
   .ema-dot{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
   .ema-dot.above{color:var(--accent2);background:rgba(0,255,136,0.1)}
@@ -289,7 +292,7 @@
 
     <!-- Stats strip -->
     <div class="modal-stats-strip">
-      <div class="modal-stat"><div class="modal-stat-label">Price</div><div class="modal-stat-value" id="mPrice">--</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">Price</div><div class="modal-stat-value" id="mPrice">--</div><div id="mExtPrice" style="font-size:10px;margin-top:2px"></div></div>
       <div class="modal-stat"><div class="modal-stat-label">Change</div><div class="modal-stat-value" id="mChange">--</div></div>
       <div class="modal-stat"><div class="modal-stat-label">Market Cap</div><div class="modal-stat-value" id="mMktCap">--</div></div>
       <div class="modal-stat"><div class="modal-stat-label">Volume</div><div class="modal-stat-value" id="mVolume">--</div></div>
@@ -497,6 +500,31 @@ async function fetchQuote(ticker) {
   return {price: d.c, change: d.dp, high: d.h, low: d.l, prevClose: d.pc};
 }
 
+// Pre/after market price from Twelve Data
+async function fetchExtendedHours(ticker) {
+  try {
+    // Get last 2 1-min bars in pre/post market session
+    const now = new Date();
+    const etNow = new Date(now.toLocaleString('en-US', {timeZone:'America/New_York'}));
+    const hour = etNow.getHours() + etNow.getMinutes()/60;
+    const isWeekday = etNow.getDay()>=1 && etNow.getDay()<=5;
+    if (!isWeekday) return null;
+
+    const isPreMarket  = hour >= 4 && hour < 9.5;
+    const isAfterHours = hour >= 16 && hour < 20;
+    if (!isPreMarket && !isAfterHours) return null;
+
+    const d = await twelveFetch('time_series', {symbol: ticker, interval: '1min', outputsize: 1});
+    if (!d?.values?.[0]) return null;
+    const latest = d.values[0];
+    return {
+      extPrice: parseFloat(latest.close),
+      extTime: latest.datetime,
+      session: isPreMarket ? 'pre' : 'after',
+    };
+  } catch(e) { return null; }
+}
+
 // Company name + industry
 async function fetchProfile(ticker) {
   const d = await finnhubFetch('stock/profile2', {symbol: ticker});
@@ -672,6 +700,7 @@ async function runScan() {
       ]);
       await delay(200);
       const tech = await fetchTechnicals(ticker).catch(()=>({}));
+      const ext = await fetchExtendedHours(ticker).catch(()=>null);
       console.log(`${ticker} — RSI:${rsi?.toFixed(1)} MACD:${macd?.bullish} EMA20:${tech?.ema20?.toFixed(2)}`);
 
       const pe = financials?.pe || null;
@@ -721,6 +750,7 @@ async function runScan() {
         bbUpper: tech?.bbUpper||null, bbMiddle: tech?.bbMiddle||null, bbLower: tech?.bbLower||null, bbPos,
         adx: tech?.adx||null,
         stochK: tech?.stochK||null, stochD: tech?.stochD||null,
+        extPrice: ext?.extPrice||null, extSession: ext?.session||null, extTime: ext?.extTime||null,
       });
 
       document.getElementById('totalScanned').textContent=allResults.length;
@@ -780,9 +810,13 @@ function renderTable() {
     const adxClass = d.adx>=25?'adx-strong':d.adx>=20?'adx-mid':'adx-weak';
     const adxDesc = d.adx>=25?' S':d.adx>=20?' M':d.adx!=null?' W':'';
 
+    // Extended hours
+    const extChange = d.extPrice ? (((d.extPrice - d.price) / d.price) * 100) : null;
+    const extLabel = d.extPrice ? `${d.extSession==='pre'?'PRE':'AFTER'} $${d.extPrice.toFixed(2)} (${extChange>=0?'+':''}${extChange.toFixed(2)}%)` : null;
+
     return `<tr style="animation-delay:${i*0.03}s" onclick="openChart('${d.ticker}')">
       <td><div class="ticker">${d.ticker}</div><div class="company-name">${d.name!==d.ticker?d.name:''}</div></td>
-      <td><div class="price">$${d.price.toFixed(2)}</div></td>
+      <td><div class="price">$${d.price.toFixed(2)}</div>${extLabel?`<div class="ext-price ${d.extSession}">${extLabel}</div>`:''}</td>
       <td><span class="change ${cc}">${d.change>=0?'+':''}${d.change.toFixed(2)}%</span></td>
       <td><span style="${mono};color:${rsiColor};font-weight:700">${d.rsi!=null?d.rsi.toFixed(1):'--'}</span></td>
       <td><div class="ema-badges">${emaBadges||'<span style="color:var(--muted);font-size:10px">--</span>'}</div></td>
@@ -867,6 +901,11 @@ function openChart(ticker) {
   // Stats strip
   const fmtV = v => !v?'--':v>=1e12?(v/1e12).toFixed(2)+'T':v>=1e9?(v/1e9).toFixed(2)+'B':v>=1e6?(v/1e6).toFixed(2)+'M':(v/1e3).toFixed(0)+'K';
   document.getElementById('mPrice').textContent = `$${s.price.toFixed(2)}`;
+  const extEl = document.getElementById('mExtPrice');
+  if (s.extPrice) {
+    const extChg = ((s.extPrice - s.price) / s.price) * 100;
+    extEl.innerHTML = `<span class="ext-price ${s.extSession}">${s.extSession==='pre'?'PRE-MARKET':'AFTER-HOURS'} $${s.extPrice.toFixed(2)} ${extChg>=0?'+':''}${extChg.toFixed(2)}%</span>`;
+  } else { extEl.innerHTML = ''; }
   const mch = document.getElementById('mChange');
   mch.textContent = `${s.change>=0?'+':''}${s.change.toFixed(2)}%`;
   mch.style.color = s.change>=0?'var(--accent2)':'var(--accent3)';
@@ -1105,11 +1144,22 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 function checkMarketStatus() {
   const et=new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
   const t=et.getHours()+et.getMinutes()/60;
-  const open=et.getDay()>=1&&et.getDay()<=5&&t>=9.5&&t<16;
-  document.getElementById('marketStatus').textContent=open?'MARKET OPEN':'MARKET CLOSED';
+  const wd=et.getDay();
   const dot=document.querySelector('.status-dot');
-  dot.style.background=open?'var(--accent2)':'var(--accent3)';
-  dot.style.boxShadow=open?'0 0 8px var(--accent2)':'0 0 8px var(--accent3)';
+  const statusEl=document.getElementById('marketStatus');
+  if (wd>=1&&wd<=5&&t>=9.5&&t<16) {
+    statusEl.textContent='MARKET OPEN';
+    dot.style.background='var(--accent2)'; dot.style.boxShadow='0 0 8px var(--accent2)';
+  } else if (wd>=1&&wd<=5&&t>=4&&t<9.5) {
+    statusEl.textContent='PRE-MARKET';
+    dot.style.background='#a78bfa'; dot.style.boxShadow='0 0 8px #a78bfa';
+  } else if (wd>=1&&wd<=5&&t>=16&&t<20) {
+    statusEl.textContent='AFTER-HOURS';
+    dot.style.background='#fb923c'; dot.style.boxShadow='0 0 8px #fb923c';
+  } else {
+    statusEl.textContent='MARKET CLOSED';
+    dot.style.background='var(--accent3)'; dot.style.boxShadow='0 0 8px var(--accent3)';
+  }
 }
 checkMarketStatus();
 </script>
