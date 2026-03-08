@@ -279,9 +279,9 @@
       </div>
       <div class="modal-header-right">
         <div class="interval-btns">
-          <button class="interval-btn" onclick="setInterval('1D')">1D</button>
-          <button class="interval-btn active" onclick="setInterval('W')">1W</button>
-          <button class="interval-btn" onclick="setInterval('M')">1M</button>
+          <button class="interval-btn" onclick="setChartInterval('1D')">1D</button>
+          <button class="interval-btn active" onclick="setChartInterval('W')">1W</button>
+          <button class="interval-btn" onclick="setChartInterval('M')">1M</button>
         </div>
         <button class="modal-close" onclick="closeModal()">✕</button>
       </div>
@@ -843,7 +843,7 @@ function loadTVChart(ticker, interval) {
   container.appendChild(iframe);
 }
 
-function setInterval(interval) {
+function setChartInterval(interval) {
   currentInterval = interval;
   document.querySelectorAll('.interval-btn').forEach(b=>b.classList.remove('active'));
   event.target.classList.add('active');
