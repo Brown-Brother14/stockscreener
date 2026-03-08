@@ -1191,41 +1191,51 @@ function impactColor(name, impact) {
   const n = (name||'').toLowerCase();
   if (HIGH_IMPACT.some(k=>n.includes(k))) return 'var(--accent3)';
   const imp = (impact||'').toString().toLowerCase();
-  if (imp==='high'||imp==='3'||imp==='critical') return 'var(--accent3)';
+  if (imp==='high'||imp==='3') return 'var(--accent3)';
   if (imp==='medium'||imp==='2'||imp==='moderate') return 'var(--accent4)';
   return 'var(--border)';
 }
 
+async function fetchFFWeek(file) {
+  const res = await fetch(`${WORKER}/forexfactory/${file}`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
+}
+
 async function loadEconCalendar() {
-  // Fetch 3 months of data once and cache — using Twelve Data (free tier)
-  const from = fmtDate(new Date(Date.now() - 7*24*60*60*1000));
-  const to   = fmtDate(new Date(Date.now() + 90*24*60*60*1000));
   try {
-    const d = await twelveFetch('economic_calendar', {start_date: from, end_date: to, country: 'US'});
-    console.log('Econ calendar raw response:', JSON.stringify(d).slice(0,500));
-    const raw = d?.result || d?.data || d?.events || [];
+    // Fetch this week + next week from Forex Factory
+    const [thisWeek, nextWeek] = await Promise.all([
+      fetchFFWeek('ff_calendar_thisweek.json'),
+      fetchFFWeek('ff_calendar_nextweek.json'),
+    ]);
+    const raw = [...thisWeek, ...nextWeek];
+    console.log('FF calendar raw:', JSON.stringify(raw).slice(0,300));
+
     econEvents = raw
-      .filter(e => (e.event||e.name||'').trim())
+      .filter(e => (e.title||e.name||e.event||'').trim())
+      .filter(e => (e.country||'').toUpperCase() === 'USD' || (e.currency||'').toUpperCase() === 'USD')
       .map(e => ({
-        event:    e.event || e.name || '',
-        time:     e.date || e.time || '',
-        date:     (e.date||e.time||'').slice(0,10),
-        country:  e.country || 'US',
-        impact:   e.importance || e.impact || '',
-        actual:   e.actual ?? null,
-        estimate: e.forecast ?? e.estimate ?? null,
-        prev:     e.previous ?? e.prev ?? null,
+        event:    e.title || e.name || e.event || '',
+        date:     (e.date||'').slice(0,10),
+        time:     e.date || '',
+        timeStr:  e.time || '',
+        impact:   e.impact || e.importance || '',
+        actual:   e.actual || null,
+        estimate: e.forecast || e.estimate || null,
+        prev:     e.previous || e.prev || null,
       }))
-      .sort((a,b) => new Date(a.time||a.date) - new Date(b.time||b.date));
+      .sort((a,b) => new Date(a.date) - new Date(b.date));
 
     if (!econEvents.length) {
-      document.getElementById('econCalendar').innerHTML = `<div style="padding:24px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;text-align:center">No events returned from API</div>`;
+      document.getElementById('econCalendar').innerHTML = `<div style="padding:24px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;text-align:center">No events returned — check console</div>`;
       return;
     }
     renderWeek();
   } catch(e) {
     console.error('Econ calendar error:', e);
-    document.getElementById('econCalendar').innerHTML = `<div style="padding:20px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px">Failed to load calendar. Check your connection.</div>`;
+    document.getElementById('econCalendar').innerHTML = `<div style="padding:20px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px">Failed to load calendar.</div>`;
   }
 }
 
@@ -1285,7 +1295,7 @@ function renderWeek() {
           const actualColor = (actual && est)
             ? (parseFloat(actual) >= parseFloat(est) ? 'var(--accent2)' : 'var(--accent3)')
             : 'var(--text)';
-          const time = e.time ? new Date(e.time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:'America/New_York'}) : '';
+          const time = e.timeStr || (e.time ? new Date(e.time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:'America/New_York'}) : '');
 
           return `<div style="display:grid;grid-template-columns:60px 12px 1fr 90px 90px 90px;align-items:center;padding:10px 20px;border-bottom:1px solid rgba(30,42,53,0.4);transition:background 0.15s;${isHigh&&!isPast?'background:rgba(255,77,109,0.03)':''}" onmouseover="this.style.background='rgba(0,229,255,0.04)'" onmouseout="this.style.background='${isHigh&&!isPast?'rgba(255,77,109,0.03)':''}'">
             <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">${time}</div>
