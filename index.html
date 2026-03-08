@@ -465,29 +465,27 @@ async function fetchMACD(ticker) {
   return {macd: parseFloat(v.macd), signal: parseFloat(v.macd_signal), hist: parseFloat(v.macd_hist), bullish: parseFloat(v.macd) > parseFloat(v.macd_signal)};
 }
 
-// Fetch EMA 20, 50, 200 + Bollinger Bands + ADX + Stochastic + real volume in one batch call
+// Fetch EMA 20, 50, 200 + Bollinger Bands + ADX + Stochastic + real volume sequentially
 async function fetchTechnicals(ticker) {
   try {
-    const [ema20d, ema50d, ema200d, bbands, adx, stoch, timeseries] = await Promise.all([
-      twelveFetch('ema', {symbol:ticker, interval:'1day', time_period:20, outputsize:1}),
-      twelveFetch('ema', {symbol:ticker, interval:'1day', time_period:50, outputsize:1}),
-      twelveFetch('ema', {symbol:ticker, interval:'1day', time_period:200, outputsize:1}),
-      twelveFetch('bbands', {symbol:ticker, interval:'1day', outputsize:1}),
-      twelveFetch('adx', {symbol:ticker, interval:'1day', time_period:14, outputsize:1}),
-      twelveFetch('stoch', {symbol:ticker, interval:'1day', outputsize:1}),
-      twelveFetch('time_series', {symbol:ticker, interval:'1day', outputsize:2}),
-    ]);
+    const ema20d   = await twelveFetch('ema',         {symbol:ticker, interval:'1day', time_period:20,  outputsize:1});
+    const ema50d   = await twelveFetch('ema',         {symbol:ticker, interval:'1day', time_period:50,  outputsize:1});
+    const ema200d  = await twelveFetch('ema',         {symbol:ticker, interval:'1day', time_period:200, outputsize:1});
+    const bbands   = await twelveFetch('bbands',      {symbol:ticker, interval:'1day', outputsize:1});
+    const adx      = await twelveFetch('adx',         {symbol:ticker, interval:'1day', time_period:14,  outputsize:1});
+    const stoch    = await twelveFetch('stoch',       {symbol:ticker, interval:'1day', outputsize:1});
+    const ts       = await twelveFetch('time_series', {symbol:ticker, interval:'1day', outputsize:2});
     return {
-      ema20: ema20d?.values?.[0]?.ema ? parseFloat(ema20d.values[0].ema) : null,
-      ema50: ema50d?.values?.[0]?.ema ? parseFloat(ema50d.values[0].ema) : null,
-      ema200: ema200d?.values?.[0]?.ema ? parseFloat(ema200d.values[0].ema) : null,
-      bbUpper: bbands?.values?.[0]?.upper_band ? parseFloat(bbands.values[0].upper_band) : null,
-      bbMiddle: bbands?.values?.[0]?.middle_band ? parseFloat(bbands.values[0].middle_band) : null,
-      bbLower: bbands?.values?.[0]?.lower_band ? parseFloat(bbands.values[0].lower_band) : null,
-      adx: adx?.values?.[0]?.adx ? parseFloat(adx.values[0].adx) : null,
-      stochK: stoch?.values?.[0]?.slow_k ? parseFloat(stoch.values[0].slow_k) : null,
-      stochD: stoch?.values?.[0]?.slow_d ? parseFloat(stoch.values[0].slow_d) : null,
-      volume: timeseries?.values?.[0]?.volume ? parseFloat(timeseries.values[0].volume) : null,
+      ema20:    ema20d?.values?.[0]?.ema        ? parseFloat(ema20d.values[0].ema)              : null,
+      ema50:    ema50d?.values?.[0]?.ema        ? parseFloat(ema50d.values[0].ema)              : null,
+      ema200:   ema200d?.values?.[0]?.ema       ? parseFloat(ema200d.values[0].ema)             : null,
+      bbUpper:  bbands?.values?.[0]?.upper_band ? parseFloat(bbands.values[0].upper_band)       : null,
+      bbMiddle: bbands?.values?.[0]?.middle_band? parseFloat(bbands.values[0].middle_band)      : null,
+      bbLower:  bbands?.values?.[0]?.lower_band ? parseFloat(bbands.values[0].lower_band)       : null,
+      adx:      adx?.values?.[0]?.adx           ? parseFloat(adx.values[0].adx)                : null,
+      stochK:   stoch?.values?.[0]?.slow_k      ? parseFloat(stoch.values[0].slow_k)           : null,
+      stochD:   stoch?.values?.[0]?.slow_d      ? parseFloat(stoch.values[0].slow_d)           : null,
+      volume:   ts?.values?.[0]?.volume         ? parseFloat(ts.values[0].volume)              : null,
     };
   } catch(e) { return {}; }
 }
