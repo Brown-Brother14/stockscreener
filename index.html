@@ -1198,17 +1198,21 @@ function impactColor(name, impact) {
 
 async function fetchFFWeek(file) {
   const res = await fetch(`${PROXY}/forexfactory/${file}`);
-  if (!res.ok) return [];
-  const data = await res.json();
-  return Array.isArray(data) ? data : [];
+  const text = await res.text();
+  console.log(`FF ${file} response (first 200):`, text.slice(0,200));
+  if (!text.trim().startsWith('[') && !text.trim().startsWith('{')) {
+    console.error('FF returned HTML not JSON — Cloudflare blocked it');
+    return [];
+  }
+  try { return JSON.parse(text); } catch(e) { return []; }
 }
 
 async function loadEconCalendar() {
   try {
     // Fetch this week + next week from Forex Factory
     const [thisWeek, nextWeek] = await Promise.all([
-      fetchFFWeek('ff_calendar_thisweek.json'),
-      fetchFFWeek('ff_calendar_nextweek.json'),
+      fetchFFWeek('thisweek'),
+      fetchFFWeek('nextweek'),
     ]);
     const raw = [...thisWeek, ...nextWeek];
     console.log('FF calendar raw:', JSON.stringify(raw).slice(0,300));
