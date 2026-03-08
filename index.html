@@ -584,12 +584,18 @@ async function runScan() {
     updateLoadingText(`Analyzing ${ticker}... (${i+1}/${tickers.length})`);
 
     try {
-      const [quote, profile, financials, rsi, macd] = await Promise.all([
-        fetchQuote(ticker), fetchProfile(ticker), fetchFinancials(ticker),
-        fetchRSI(ticker), fetchMACD(ticker)
+      const [quote, profile, financials] = await Promise.all([
+        fetchQuote(ticker), fetchProfile(ticker), fetchFinancials(ticker)
       ]);
       await delay(300);
-      if (!quote) continue;
+      if (!quote) { console.warn(`No quote for ${ticker}`); continue; }
+
+      // Fetch RSI + MACD separately — if they fail scan still works
+      const [rsi, macd] = await Promise.all([
+        fetchRSI(ticker).catch(()=>null),
+        fetchMACD(ticker).catch(()=>null)
+      ]);
+      console.log(`${ticker} — RSI:${rsi} MACD:${macd?.bullish}`);
 
       const pe = financials?.pe || null;
       const high52w = financials?.high52w || null;
