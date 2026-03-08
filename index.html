@@ -1171,11 +1171,28 @@ async function getAIAnalysis(stock) {}  // disabled — no API key
 let econEvents = [];
 let weekOffset = 0;
 
-const HIGH_IMPACT = ['fomc','federal reserve','interest rate decision','cpi','consumer price index','inflation','nonfarm','non-farm payroll','gdp','unemployment','pce','retail sales','ppi','producer price','ism manufacturing','ism services','housing starts','durable goods','trade balance','powell','beige book','treasury','auction'];
+const ECON_DATA_2026 = [
+  {date:'2026-01-28',time:'2:00 PM',event:'FOMC Rate Decision',impact:'high'},{date:'2026-03-18',time:'2:00 PM',event:'FOMC Rate Decision',impact:'high'},{date:'2026-05-06',time:'2:00 PM',event:'FOMC Rate Decision',impact:'high'},{date:'2026-06-17',time:'2:00 PM',event:'FOMC Rate Decision',impact:'high'},{date:'2026-07-29',time:'2:00 PM',event:'FOMC Rate Decision',impact:'high'},{date:'2026-09-16',time:'2:00 PM',event:'FOMC Rate Decision',impact:'high'},{date:'2026-11-04',time:'2:00 PM',event:'FOMC Rate Decision',impact:'high'},{date:'2026-12-16',time:'2:00 PM',event:'FOMC Rate Decision',impact:'high'},
+  {date:'2026-01-15',time:'8:30 AM',event:'CPI (Dec)',impact:'high'},{date:'2026-02-12',time:'8:30 AM',event:'CPI (Jan)',impact:'high'},{date:'2026-03-11',time:'8:30 AM',event:'CPI (Feb)',impact:'high'},{date:'2026-04-10',time:'8:30 AM',event:'CPI (Mar)',impact:'high'},{date:'2026-05-13',time:'8:30 AM',event:'CPI (Apr)',impact:'high'},{date:'2026-06-11',time:'8:30 AM',event:'CPI (May)',impact:'high'},{date:'2026-07-14',time:'8:30 AM',event:'CPI (Jun)',impact:'high'},{date:'2026-08-13',time:'8:30 AM',event:'CPI (Jul)',impact:'high'},{date:'2026-09-11',time:'8:30 AM',event:'CPI (Aug)',impact:'high'},{date:'2026-10-14',time:'8:30 AM',event:'CPI (Sep)',impact:'high'},{date:'2026-11-12',time:'8:30 AM',event:'CPI (Oct)',impact:'high'},{date:'2026-12-11',time:'8:30 AM',event:'CPI (Nov)',impact:'high'},
+  {date:'2026-01-16',time:'8:30 AM',event:'PPI (Dec)',impact:'medium'},{date:'2026-02-13',time:'8:30 AM',event:'PPI (Jan)',impact:'medium'},{date:'2026-03-12',time:'8:30 AM',event:'PPI (Feb)',impact:'medium'},{date:'2026-04-11',time:'8:30 AM',event:'PPI (Mar)',impact:'medium'},{date:'2026-05-14',time:'8:30 AM',event:'PPI (Apr)',impact:'medium'},{date:'2026-06-12',time:'8:30 AM',event:'PPI (May)',impact:'medium'},{date:'2026-07-15',time:'8:30 AM',event:'PPI (Jun)',impact:'medium'},{date:'2026-08-14',time:'8:30 AM',event:'PPI (Jul)',impact:'medium'},{date:'2026-09-12',time:'8:30 AM',event:'PPI (Aug)',impact:'medium'},{date:'2026-10-15',time:'8:30 AM',event:'PPI (Sep)',impact:'medium'},{date:'2026-11-13',time:'8:30 AM',event:'PPI (Oct)',impact:'medium'},{date:'2026-12-12',time:'8:30 AM',event:'PPI (Nov)',impact:'medium'},
+  {date:'2026-01-09',time:'8:30 AM',event:'Nonfarm Payrolls (Dec)',impact:'high'},{date:'2026-02-06',time:'8:30 AM',event:'Nonfarm Payrolls (Jan)',impact:'high'},{date:'2026-03-06',time:'8:30 AM',event:'Nonfarm Payrolls (Feb)',impact:'high'},{date:'2026-04-03',time:'8:30 AM',event:'Nonfarm Payrolls (Mar)',impact:'high'},{date:'2026-05-08',time:'8:30 AM',event:'Nonfarm Payrolls (Apr)',impact:'high'},{date:'2026-06-05',time:'8:30 AM',event:'Nonfarm Payrolls (May)',impact:'high'},{date:'2026-07-10',time:'8:30 AM',event:'Nonfarm Payrolls (Jun)',impact:'high'},{date:'2026-08-07',time:'8:30 AM',event:'Nonfarm Payrolls (Jul)',impact:'high'},{date:'2026-09-04',time:'8:30 AM',event:'Nonfarm Payrolls (Aug)',impact:'high'},{date:'2026-10-02',time:'8:30 AM',event:'Nonfarm Payrolls (Sep)',impact:'high'},{date:'2026-11-06',time:'8:30 AM',event:'Nonfarm Payrolls (Oct)',impact:'high'},{date:'2026-12-04',time:'8:30 AM',event:'Nonfarm Payrolls (Nov)',impact:'high'},
+  {date:'2026-01-29',time:'8:30 AM',event:'GDP Advance Q4 2025',impact:'high'},{date:'2026-04-29',time:'8:30 AM',event:'GDP Advance Q1 2026',impact:'high'},{date:'2026-07-30',time:'8:30 AM',event:'GDP Advance Q2 2026',impact:'high'},{date:'2026-10-29',time:'8:30 AM',event:'GDP Advance Q3 2026',impact:'high'},
+  {date:'2026-01-30',time:'8:30 AM',event:'PCE Price Index (Dec)',impact:'high'},{date:'2026-02-27',time:'8:30 AM',event:'PCE Price Index (Jan)',impact:'high'},{date:'2026-03-27',time:'8:30 AM',event:'PCE Price Index (Feb)',impact:'high'},{date:'2026-04-30',time:'8:30 AM',event:'PCE Price Index (Mar)',impact:'high'},{date:'2026-05-29',time:'8:30 AM',event:'PCE Price Index (Apr)',impact:'high'},{date:'2026-06-26',time:'8:30 AM',event:'PCE Price Index (May)',impact:'high'},{date:'2026-07-31',time:'8:30 AM',event:'PCE Price Index (Jun)',impact:'high'},{date:'2026-08-28',time:'8:30 AM',event:'PCE Price Index (Jul)',impact:'high'},{date:'2026-09-25',time:'8:30 AM',event:'PCE Price Index (Aug)',impact:'high'},{date:'2026-10-30',time:'8:30 AM',event:'PCE Price Index (Sep)',impact:'high'},{date:'2026-11-25',time:'8:30 AM',event:'PCE Price Index (Oct)',impact:'high'},{date:'2026-12-23',time:'8:30 AM',event:'PCE Price Index (Nov)',impact:'high'},
+  {date:'2026-01-16',time:'8:30 AM',event:'Retail Sales (Dec)',impact:'medium'},{date:'2026-02-13',time:'8:30 AM',event:'Retail Sales (Jan)',impact:'medium'},{date:'2026-03-17',time:'8:30 AM',event:'Retail Sales (Feb)',impact:'medium'},{date:'2026-04-15',time:'8:30 AM',event:'Retail Sales (Mar)',impact:'medium'},{date:'2026-05-15',time:'8:30 AM',event:'Retail Sales (Apr)',impact:'medium'},{date:'2026-06-16',time:'8:30 AM',event:'Retail Sales (May)',impact:'medium'},{date:'2026-07-16',time:'8:30 AM',event:'Retail Sales (Jun)',impact:'medium'},{date:'2026-08-14',time:'8:30 AM',event:'Retail Sales (Jul)',impact:'medium'},{date:'2026-09-15',time:'8:30 AM',event:'Retail Sales (Aug)',impact:'medium'},{date:'2026-10-15',time:'8:30 AM',event:'Retail Sales (Sep)',impact:'medium'},{date:'2026-11-17',time:'8:30 AM',event:'Retail Sales (Oct)',impact:'medium'},{date:'2026-12-16',time:'8:30 AM',event:'Retail Sales (Nov)',impact:'medium'},
+  {date:'2026-03-02',time:'10:00 AM',event:'ISM Manufacturing PMI',impact:'medium'},{date:'2026-04-01',time:'10:00 AM',event:'ISM Manufacturing PMI',impact:'medium'},{date:'2026-05-01',time:'10:00 AM',event:'ISM Manufacturing PMI',impact:'medium'},{date:'2026-06-01',time:'10:00 AM',event:'ISM Manufacturing PMI',impact:'medium'},{date:'2026-07-01',time:'10:00 AM',event:'ISM Manufacturing PMI',impact:'medium'},{date:'2026-08-03',time:'10:00 AM',event:'ISM Manufacturing PMI',impact:'medium'},{date:'2026-09-01',time:'10:00 AM',event:'ISM Manufacturing PMI',impact:'medium'},{date:'2026-10-01',time:'10:00 AM',event:'ISM Manufacturing PMI',impact:'medium'},{date:'2026-11-02',time:'10:00 AM',event:'ISM Manufacturing PMI',impact:'medium'},{date:'2026-12-01',time:'10:00 AM',event:'ISM Manufacturing PMI',impact:'medium'},
+  {date:'2026-03-04',time:'10:00 AM',event:'ISM Services PMI',impact:'medium'},{date:'2026-04-06',time:'10:00 AM',event:'ISM Services PMI',impact:'medium'},{date:'2026-05-06',time:'10:00 AM',event:'ISM Services PMI',impact:'medium'},{date:'2026-06-03',time:'10:00 AM',event:'ISM Services PMI',impact:'medium'},{date:'2026-07-07',time:'10:00 AM',event:'ISM Services PMI',impact:'medium'},{date:'2026-08-05',time:'10:00 AM',event:'ISM Services PMI',impact:'medium'},{date:'2026-09-03',time:'10:00 AM',event:'ISM Services PMI',impact:'medium'},{date:'2026-10-05',time:'10:00 AM',event:'ISM Services PMI',impact:'medium'},{date:'2026-11-04',time:'10:00 AM',event:'ISM Services PMI',impact:'medium'},{date:'2026-12-03',time:'10:00 AM',event:'ISM Services PMI',impact:'medium'},
+  {date:'2026-03-10',time:'10:00 AM',event:'JOLTS Job Openings',impact:'medium'},{date:'2026-04-07',time:'10:00 AM',event:'JOLTS Job Openings',impact:'medium'},{date:'2026-05-06',time:'10:00 AM',event:'JOLTS Job Openings',impact:'medium'},{date:'2026-06-09',time:'10:00 AM',event:'JOLTS Job Openings',impact:'medium'},{date:'2026-07-07',time:'10:00 AM',event:'JOLTS Job Openings',impact:'medium'},{date:'2026-08-11',time:'10:00 AM',event:'JOLTS Job Openings',impact:'medium'},{date:'2026-09-09',time:'10:00 AM',event:'JOLTS Job Openings',impact:'medium'},
+  {date:'2026-03-12',time:'8:30 AM',event:'Initial Jobless Claims',impact:'low'},{date:'2026-03-19',time:'8:30 AM',event:'Initial Jobless Claims',impact:'low'},{date:'2026-03-26',time:'8:30 AM',event:'Initial Jobless Claims',impact:'low'},{date:'2026-04-02',time:'8:30 AM',event:'Initial Jobless Claims',impact:'low'},{date:'2026-04-09',time:'8:30 AM',event:'Initial Jobless Claims',impact:'low'},{date:'2026-04-16',time:'8:30 AM',event:'Initial Jobless Claims',impact:'low'},{date:'2026-04-23',time:'8:30 AM',event:'Initial Jobless Claims',impact:'low'},{date:'2026-04-30',time:'8:30 AM',event:'Initial Jobless Claims',impact:'low'},{date:'2026-05-07',time:'8:30 AM',event:'Initial Jobless Claims',impact:'low'},{date:'2026-05-14',time:'8:30 AM',event:'Initial Jobless Claims',impact:'low'},{date:'2026-05-21',time:'8:30 AM',event:'Initial Jobless Claims',impact:'low'},{date:'2026-05-28',time:'8:30 AM',event:'Initial Jobless Claims',impact:'low'},
+  {date:'2026-01-28',time:'8:30 AM',event:'Durable Goods Orders',impact:'medium'},{date:'2026-02-25',time:'8:30 AM',event:'Durable Goods Orders',impact:'medium'},{date:'2026-03-25',time:'8:30 AM',event:'Durable Goods Orders',impact:'medium'},{date:'2026-04-24',time:'8:30 AM',event:'Durable Goods Orders',impact:'medium'},{date:'2026-05-27',time:'8:30 AM',event:'Durable Goods Orders',impact:'medium'},{date:'2026-06-24',time:'8:30 AM',event:'Durable Goods Orders',impact:'medium'},
+  {date:'2026-03-18',time:'8:30 AM',event:'Housing Starts',impact:'low'},{date:'2026-04-16',time:'8:30 AM',event:'Housing Starts',impact:'low'},{date:'2026-05-19',time:'8:30 AM',event:'Housing Starts',impact:'low'},{date:'2026-06-17',time:'8:30 AM',event:'Housing Starts',impact:'low'},
+  {date:'2026-03-23',time:'10:00 AM',event:'Existing Home Sales',impact:'low'},{date:'2026-04-22',time:'10:00 AM',event:'Existing Home Sales',impact:'low'},{date:'2026-05-20',time:'10:00 AM',event:'Existing Home Sales',impact:'low'},
+  {date:'2026-03-31',time:'10:00 AM',event:'Consumer Confidence',impact:'medium'},{date:'2026-04-28',time:'10:00 AM',event:'Consumer Confidence',impact:'medium'},{date:'2026-05-26',time:'10:00 AM',event:'Consumer Confidence',impact:'medium'},{date:'2026-06-30',time:'10:00 AM',event:'Consumer Confidence',impact:'medium'},
+  {date:'2026-03-13',time:'10:00 AM',event:'UMich Consumer Sentiment',impact:'medium'},{date:'2026-04-10',time:'10:00 AM',event:'UMich Consumer Sentiment',impact:'medium'},{date:'2026-05-08',time:'10:00 AM',event:'UMich Consumer Sentiment',impact:'medium'},{date:'2026-06-12',time:'10:00 AM',event:'UMich Consumer Sentiment',impact:'medium'},
+];
 
 function getWeekRange(offset) {
   const now = new Date();
-  const day = now.getDay(); // 0=Sun
+  const day = now.getDay();
   const monday = new Date(now);
   monday.setDate(now.getDate() - (day===0?6:day-1) + offset*7);
   monday.setHours(0,0,0,0);
@@ -1185,62 +1202,15 @@ function getWeekRange(offset) {
   return {monday, friday};
 }
 
-function fmtDate(d) { return d.toISOString().slice(0,10); }
-
-function impactColor(name, impact) {
-  const n = (name||'').toLowerCase();
-  if (HIGH_IMPACT.some(k=>n.includes(k))) return 'var(--accent3)';
-  const imp = (impact||'').toString().toLowerCase();
-  if (imp==='high'||imp==='3') return 'var(--accent3)';
-  if (imp==='medium'||imp==='2'||imp==='moderate') return 'var(--accent4)';
+function impactColor(impact) {
+  if (impact==='high') return 'var(--accent3)';
+  if (impact==='medium') return 'var(--accent4)';
   return 'var(--border)';
 }
 
-async function fetchFFWeek(file) {
-  const res = await fetch(`${PROXY}/forexfactory/${file}`);
-  const text = await res.text();
-  console.log(`FF ${file} response (first 200):`, text.slice(0,200));
-  if (!text.trim().startsWith('[') && !text.trim().startsWith('{')) {
-    console.error('FF returned HTML not JSON — Cloudflare blocked it');
-    return [];
-  }
-  try { return JSON.parse(text); } catch(e) { return []; }
-}
-
-async function loadEconCalendar() {
-  try {
-    // Fetch this week + next week from Forex Factory
-    const [thisWeek, nextWeek] = await Promise.all([
-      fetchFFWeek('thisweek'),
-      fetchFFWeek('nextweek'),
-    ]);
-    const raw = [...thisWeek, ...nextWeek];
-    console.log('FF calendar raw:', JSON.stringify(raw).slice(0,300));
-
-    econEvents = raw
-      .filter(e => (e.title||e.name||e.event||'').trim())
-      .filter(e => (e.country||'').toUpperCase() === 'USD' || (e.currency||'').toUpperCase() === 'USD')
-      .map(e => ({
-        event:    e.title || e.name || e.event || '',
-        date:     (e.date||'').slice(0,10),
-        time:     e.date || '',
-        timeStr:  e.time || '',
-        impact:   e.impact || e.importance || '',
-        actual:   e.actual || null,
-        estimate: e.forecast || e.estimate || null,
-        prev:     e.previous || e.prev || null,
-      }))
-      .sort((a,b) => new Date(a.date) - new Date(b.date));
-
-    if (!econEvents.length) {
-      document.getElementById('econCalendar').innerHTML = `<div style="padding:24px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;text-align:center">No events returned — check console</div>`;
-      return;
-    }
-    renderWeek();
-  } catch(e) {
-    console.error('Econ calendar error:', e);
-    document.getElementById('econCalendar').innerHTML = `<div style="padding:20px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px">Failed to load calendar.</div>`;
-  }
+function loadEconCalendar() {
+  econEvents = ECON_DATA_2026.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  renderWeek();
 }
 
 function shiftWeek(dir) { weekOffset += dir; renderWeek(); }
@@ -1248,88 +1218,55 @@ function goToCurrentWeek() { weekOffset = 0; renderWeek(); }
 
 function renderWeek() {
   const {monday, friday} = getWeekRange(weekOffset);
-  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
   const today = new Date(); today.setHours(0,0,0,0);
 
-  // Update week label
   const opts = {month:'short', day:'numeric'};
   document.getElementById('weekLabel').textContent =
-    `${monday.toLocaleDateString('en-US',opts)} – ${friday.toLocaleDateString('en-US',opts)}`;
+    monday.toLocaleDateString('en-US',opts) + ' – ' + friday.toLocaleDateString('en-US',opts);
 
-  // Filter events for this week
-  const weekEvents = econEvents.filter(e => {
-    const d = new Date(e.time||e.date);
-    return d >= monday && d <= friday;
-  });
-
-  if (!econEvents.length) {
-    document.getElementById('econCalendar').innerHTML = `<div style="padding:24px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;text-align:center">No data loaded yet — check API connection</div>`;
-    return;
-  }
-
-  // Group by day
   const byDay = {};
   for (let i=0; i<5; i++) {
     const d = new Date(monday); d.setDate(monday.getDate()+i);
     byDay[d.toISOString().slice(0,10)] = [];
   }
-  weekEvents.forEach(e => {
-    const key = (e.time||e.date||'').slice(0,10);
-    if (byDay[key]) byDay[key].push(e);
-  });
+  econEvents.forEach(e => { if (byDay[e.date]!==undefined) byDay[e.date].push(e); });
 
   const html = Object.entries(byDay).map(([dateKey, events]) => {
-    const d = new Date(dateKey);
-    const isToday = d.getTime()===today.getTime();
+    const d = new Date(dateKey + 'T12:00:00');
+    const isToday = d.toDateString() === today.toDateString();
     const isPast  = d < today;
     const dayName = d.toLocaleDateString('en-US',{weekday:'long'});
     const dateFmt = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-
-    const dayHeaderBg = isToday ? 'rgba(0,229,255,0.08)' : 'var(--surface)';
-    const dayHeaderBorder = isToday ? 'border-left:3px solid var(--accent)' : 'border-left:3px solid transparent';
+    const dayColor = isToday ? 'var(--accent)' : isPast ? 'var(--muted)' : 'var(--text)';
+    const dayBg    = isToday ? 'rgba(0,229,255,0.06)' : 'var(--surface)';
+    const dayBorderL = isToday ? '3px solid var(--accent)' : '3px solid transparent';
 
     const eventsHtml = events.length === 0
-      ? `<div style="padding:10px 20px;font-family:'Space Mono',monospace;font-size:11px;color:var(--border)">No scheduled events</div>`
+      ? '<div style="padding:10px 20px;font-family:\'Space Mono\',monospace;font-size:11px;color:rgba(255,255,255,0.12)">No scheduled events</div>'
       : events.map(e => {
-          const ic = impactColor(e.event, e.impact);
-          const isHigh = ic === 'var(--accent3)';
-          const actual = e.actual != null ? String(e.actual) : null;
-          const est    = e.estimate != null ? String(e.estimate) : null;
-          const prev   = e.prev != null ? String(e.prev) : null;
-          const actualColor = (actual && est)
-            ? (parseFloat(actual) >= parseFloat(est) ? 'var(--accent2)' : 'var(--accent3)')
-            : 'var(--text)';
-          const time = e.timeStr || (e.time ? new Date(e.time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:'America/New_York'}) : '');
-
-          return `<div style="display:grid;grid-template-columns:60px 12px 1fr 90px 90px 90px;align-items:center;padding:10px 20px;border-bottom:1px solid rgba(30,42,53,0.4);transition:background 0.15s;${isHigh&&!isPast?'background:rgba(255,77,109,0.03)':''}" onmouseover="this.style.background='rgba(0,229,255,0.04)'" onmouseout="this.style.background='${isHigh&&!isPast?'rgba(255,77,109,0.03)':''}'">
-            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">${time}</div>
-            <div style="width:8px;height:8px;border-radius:50%;background:${ic};box-shadow:${ic!=='var(--border)'?'0 0 6px '+ic:'none'}"></div>
-            <div style="padding-left:10px">
-              <div style="font-size:13px;font-weight:700;color:${isPast?'var(--muted)':'var(--text)'}">${e.event||'--'}</div>
-            </div>
-            <div style="font-family:'Space Mono',monospace;font-size:11px;text-align:right;color:${actualColor};font-weight:700">${actual||'--'}</div>
-            <div style="font-family:'Space Mono',monospace;font-size:11px;text-align:right;color:var(--accent4)">${est||'--'}</div>
-            <div style="font-family:'Space Mono',monospace;font-size:11px;text-align:right;color:var(--muted)">${prev||'--'}</div>
-          </div>`;
+          const ic = impactColor(e.impact);
+          const glow = ic !== 'var(--border)' ? 'box-shadow:0 0 6px ' + ic : '';
+          const rowBg = e.impact==='high' && !isPast ? 'rgba(255,77,109,0.02)' : '';
+          return '<div style="display:grid;grid-template-columns:80px 14px 1fr;align-items:center;padding:10px 20px;border-bottom:1px solid rgba(30,42,53,0.5);background:' + rowBg + '" onmouseover="this.style.background=\'rgba(0,229,255,0.04)\'" onmouseout="this.style.background=\'' + rowBg + '\'">'
+            + '<div style="font-family:\'Space Mono\',monospace;font-size:10px;color:var(--muted)">' + (e.time||'') + '</div>'
+            + '<div style="width:8px;height:8px;border-radius:50%;background:' + ic + ';flex-shrink:0;' + glow + '"></div>'
+            + '<div style="padding-left:10px;font-size:13px;font-weight:700;color:' + (isPast?'var(--muted)':'var(--text)') + '">' + e.event + '</div>'
+            + '</div>';
         }).join('');
 
-    return `<div>
-      <div style="padding:10px 20px;background:${dayHeaderBg};${dayHeaderBorder};display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
-        <div style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:${isToday?'var(--accent)':isPast?'var(--muted)':'var(--text)'}">
-          ${dayName} <span style="font-weight:400;margin-left:6px">${dateFmt}</span>
-          ${isToday?'<span style="margin-left:8px;font-size:9px;color:var(--accent);background:rgba(0,229,255,0.1);padding:2px 6px;border-radius:3px;border:1px solid rgba(0,229,255,0.2)">TODAY</span>':''}
-        </div>
-        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">${events.length} event${events.length!==1?'s':''}</div>
-      </div>
-      <div style="display:grid;grid-template-columns:60px 12px 1fr 90px 90px 90px;padding:6px 20px;background:rgba(13,17,23,0.5);font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">
-        <span>Time ET</span><span></span><span style="padding-left:10px">Event</span><span style="text-align:right">Actual</span><span style="text-align:right">Estimate</span><span style="text-align:right">Previous</span>
-      </div>
-      ${eventsHtml}
-    </div>`;
-  }).join(`<div style="height:1px;background:var(--border)"></div>`);
+    return '<div>'
+      + '<div style="padding:10px 20px;background:' + dayBg + ';border-left:' + dayBorderL + ';display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">'
+      + '<div style="font-family:\'Space Mono\',monospace;font-size:11px;font-weight:700;color:' + dayColor + '">'
+      + dayName + ' <span style="font-weight:400;margin-left:6px">' + dateFmt + '</span>'
+      + (isToday ? '<span style="margin-left:8px;font-size:9px;color:var(--accent);background:rgba(0,229,255,0.1);padding:2px 6px;border-radius:3px;border:1px solid rgba(0,229,255,0.2)">TODAY</span>' : '')
+      + '</div>'
+      + '<div style="font-family:\'Space Mono\',monospace;font-size:10px;color:var(--muted)">' + events.length + ' event' + (events.length!==1?'s':'') + '</div>'
+      + '</div>'
+      + eventsHtml
+      + '</div>';
+  }).join('<div style="height:1px;background:var(--border)"></div>');
 
-  document.getElementById('econCalendar').innerHTML = html ||
-    `<div style="padding:24px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;text-align:center">No events this week</div>`;
+  document.getElementById('econCalendar').innerHTML = html;
 }
 
 loadEconCalendar();
