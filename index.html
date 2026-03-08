@@ -671,9 +671,11 @@ async function fetchFinancials(ticker) {
 
 // Analyst consensus + upgrades/downgrades (free tier)
 async function fetchAnalystTargets(ticker) {
+  // Go back 1 year for upgrades/downgrades
+  const from = new Date(Date.now() - 365*24*60*60*1000).toISOString().slice(0,10);
   const [rec, upgrades, pt] = await Promise.all([
     finnhubFetch('stock/recommendation', {symbol: ticker}),
-    finnhubFetch('stock/upgrade-downgrade', {symbol: ticker}),
+    finnhubFetch('stock/upgrade-downgrade', {symbol: ticker, from}),
     finnhubFetch('stock/price-target', {symbol: ticker}),
   ]);
   const latest = Array.isArray(rec) && rec.length ? rec[0] : null;
