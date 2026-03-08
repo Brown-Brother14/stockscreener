@@ -1362,40 +1362,12 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
         </div>
       </div>` : ''}
     `;
-      <!-- 3-month trend -->
-      <div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--surface);border-top:1px solid var(--border);cursor:pointer;user-select:none" onclick="const b=this.nextElementSibling;b.style.display=b.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=b.style.display==='none'?'▼ Show':'▲ Hide'">
-          <div style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700">📈 Rating Trend — Last 3 Months</div>
-          <span class="arr" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent)">▲ Hide</span>
-        </div>
-        <div>
-          <div style="display:grid;grid-template-columns:90px 60px 1fr 60px 60px 60px;gap:8px;padding:6px 20px;background:rgba(13,17,23,0.6);font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border)">
-            <span>Period</span><span>Verdict</span><span>Breakdown</span><span style="text-align:right">Buy</span><span style="text-align:right">Hold</span><span style="text-align:right">Sell</span>
-          </div>
-          ${trendRows}
-        </div>
-      </div>` : ''}
-    `;
   } catch(e) {
     console.error('Analyst error:', e);
     document.getElementById('analystSection').innerHTML = '<div style="padding:16px 20px;color:var(--muted);font-family:\'Space Mono\',monospace;font-size:11px">Analyst data unavailable</div>';
   }
 }
-    const total = (a.strongBuy||0) + (a.buy||0) + (a.hold||0) + (a.sell||0) + (a.strongSell||0);
 
-    if (!total && !a.upgrades?.length) {
-      el.innerHTML = '<div style="padding:16px 20px;color:var(--muted);font-family:\'Space Mono\',monospace;font-size:11px">No analyst coverage data available</div>';
-      return;
-    }
-
-    const pct = v => total ? Math.round(((v||0)/total)*100) : 0;
-    const rows = [
-      {label:'Strong Buy',  val:a.strongBuy,  color:'#00ff88'},
-      {label:'Buy',         val:a.buy,         color:'#00e5ff'},
-      {label:'Hold',        val:a.hold,        color:'#ffd60a'},
-      {label:'Sell',        val:a.sell,        color:'#ff6b6b'},
-      {label:'Strong Sell', val:a.strongSell,  color:'#ff4d6d'},
-    ];
 async function fetchNews(ticker) {
   try {
     const to = new Date().toISOString().slice(0,10);
