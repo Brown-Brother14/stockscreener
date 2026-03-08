@@ -1190,22 +1190,41 @@ function fmtDate(d) { return d.toISOString().slice(0,10); }
 function impactColor(name, impact) {
   const n = (name||'').toLowerCase();
   if (HIGH_IMPACT.some(k=>n.includes(k))) return 'var(--accent3)';
-  if (impact==='high') return 'var(--accent3)';
-  if (impact==='medium'||impact==='2') return 'var(--accent4)';
+  const imp = (impact||'').toString().toLowerCase();
+  if (imp==='high'||imp==='3'||imp==='critical') return 'var(--accent3)';
+  if (imp==='medium'||imp==='2'||imp==='moderate') return 'var(--accent4)';
   return 'var(--border)';
 }
 
 async function loadEconCalendar() {
-  // Fetch 3 months of data once and cache
+  // Fetch 3 months of data once and cache — using Twelve Data (free tier)
   const from = fmtDate(new Date(Date.now() - 7*24*60*60*1000));
   const to   = fmtDate(new Date(Date.now() + 90*24*60*60*1000));
   try {
-    const d = await finnhubFetch('calendar/economic', {from, to});
-    econEvents = (d?.economicCalendar || [])
-      .filter(e => e.country==='US' && (e.event||'').trim())
-      .sort((a,b)=>new Date(a.time||a.date)-new Date(b.time||b.date));
+    const d = await twelveFetch('economic_calendar', {start_date: from, end_date: to, country: 'US'});
+    console.log('Econ calendar raw response:', JSON.stringify(d).slice(0,500));
+    const raw = d?.result || d?.data || d?.events || [];
+    econEvents = raw
+      .filter(e => (e.event||e.name||'').trim())
+      .map(e => ({
+        event:    e.event || e.name || '',
+        time:     e.date || e.time || '',
+        date:     (e.date||e.time||'').slice(0,10),
+        country:  e.country || 'US',
+        impact:   e.importance || e.impact || '',
+        actual:   e.actual ?? null,
+        estimate: e.forecast ?? e.estimate ?? null,
+        prev:     e.previous ?? e.prev ?? null,
+      }))
+      .sort((a,b) => new Date(a.time||a.date) - new Date(b.time||b.date));
+
+    if (!econEvents.length) {
+      document.getElementById('econCalendar').innerHTML = `<div style="padding:24px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;text-align:center">No events returned from API</div>`;
+      return;
+    }
     renderWeek();
   } catch(e) {
+    console.error('Econ calendar error:', e);
     document.getElementById('econCalendar').innerHTML = `<div style="padding:20px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px">Failed to load calendar. Check your connection.</div>`;
   }
 }
