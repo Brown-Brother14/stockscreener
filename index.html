@@ -1197,7 +1197,7 @@ function impactColor(name, impact) {
 }
 
 async function fetchFFWeek(file) {
-  const res = await fetch(`${WORKER}/forexfactory/${file}`);
+  const res = await fetch(`${PROXY}/forexfactory/${file}`);
   if (!res.ok) return [];
   const data = await res.json();
   return Array.isArray(data) ? data : [];
