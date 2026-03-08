@@ -848,15 +848,16 @@ function openChart(ticker) {
   // RSI
   if (s.rsi != null) {
     const rsiPct = Math.max(2, Math.min(98, s.rsi));
+    const rsiColor = s.rsi>=70?'var(--accent3)':s.rsi>=50?'var(--accent2)':s.rsi<30?'var(--accent4)':'var(--muted)';
     const rsiMarker = document.getElementById('rsiMarker');
     rsiMarker.style.left = rsiPct+'%';
-    rsiMarker.style.color = s.rsi>=70?'var(--accent3)':s.rsi>=50?'var(--accent2)':s.rsi<30?'var(--accent4)':'var(--muted)';
-    rsiMarker.style.background = s.rsi>=70?'var(--accent3)':s.rsi>=50?'var(--accent2)':s.rsi<30?'var(--accent4)':'var(--muted)';
+    rsiMarker.style.background = rsiColor;
+    rsiMarker.style.boxShadow = `0 0 8px ${rsiColor}`;
     document.getElementById('rsiBig').textContent = s.rsi.toFixed(1);
-    document.getElementById('rsiBig').style.color = s.rsi>=70?'var(--accent3)':s.rsi>=50?'var(--accent2)':s.rsi<30?'var(--accent4)':'var(--muted)';
+    document.getElementById('rsiBig').style.color = rsiColor;
     const rsiLabelText = s.rsi>=70?'⚠ Overbought — consider taking profits':s.rsi>=50&&s.rsi<=65?'✓ Healthy momentum zone (50–65)':s.rsi>=65?'↑ Elevated — watch for reversal':s.rsi<30?'⚠ Oversold — potential bounce':'→ Neutral zone';
     document.getElementById('rsiLabel').textContent = rsiLabelText;
-    document.getElementById('rsiLabel').style.color = s.rsi>=70?'var(--accent3)':s.rsi>=50?'var(--accent2)':s.rsi<30?'var(--accent4)':'var(--muted)';
+    document.getElementById('rsiLabel').style.color = rsiColor;
   }
 
   // MACD
@@ -892,19 +893,25 @@ function openChart(ticker) {
 
 async function fetchEarningsDate(ticker) {
   try {
-    const d = await finnhubFetch('stock/earnings', {symbol: ticker, limit: 4});
-    if (!d || !d.length) { document.getElementById('earnDate').textContent='--'; document.getElementById('earnCountdown').textContent=''; return; }
-    const now = Date.now();
-    // Find next upcoming earnings
-    const upcoming = d.filter(e=>new Date(e.date)>new Date()).sort((a,b)=>new Date(a.date)-new Date(b.date));
-    const next = upcoming[0] || d[0];
+    // Use Twelve Data earnings calendar
+    const d = await twelveFetch('earnings', {symbol: ticker, outputsize: 4});
+    if (!d?.earnings?.length) {
+      document.getElementById('earnDate').textContent='--';
+      document.getElementById('earnCountdown').textContent='Not available';
+      return;
+    }
+    const upcoming = d.earnings.filter(e=>new Date(e.date)>=new Date()).sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const next = upcoming[0] || d.earnings[0];
     if (next?.date) {
       const dt = new Date(next.date);
       document.getElementById('earnDate').textContent = dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
       const days = Math.round((dt-new Date())/(1000*60*60*24));
       document.getElementById('earnCountdown').textContent = days>0?`⏳ ${days} days away`:days===0?'📅 Today!':'Last reported';
     }
-  } catch(e) {}
+  } catch(e) {
+    document.getElementById('earnDate').textContent='--';
+    document.getElementById('earnCountdown').textContent='';
+  }
 }
 
 async function fetchNews(ticker) {
