@@ -454,10 +454,29 @@ function ema(prices, period) {
   return val;
 }
 
+function emaArray(prices, period) {
+  const k = 2/(period+1);
+  const result = [];
+  let val = prices.slice(0,period).reduce((a,b)=>a+b,0)/period;
+  result.push(val);
+  for (let i=period; i<prices.length; i++) {
+    val = prices[i]*k + val*(1-k);
+    result.push(val);
+  }
+  return result;
+}
+
 function calcMACD(closes) {
   if (!closes || closes.length < 35) return null;
-  const macdLine = ema(closes,12) - ema(closes,26);
-  const signalLine = ema(closes.slice(-9).map(()=>macdLine), 9);
+  const ema12 = emaArray(closes, 12);
+  const ema26 = emaArray(closes, 26);
+  const len = Math.min(ema12.length, ema26.length);
+  const macdArr = [];
+  for (let i=0; i<len; i++) macdArr.push(ema12[ema12.length-len+i] - ema26[ema26.length-len+i]);
+  if (macdArr.length < 9) return null;
+  const signalArr = emaArray(macdArr, 9);
+  const macdLine = macdArr[macdArr.length-1];
+  const signalLine = signalArr[signalArr.length-1];
   return {macd: macdLine, signal: signalLine, hist: macdLine-signalLine, bullish: macdLine>signalLine};
 }
 
@@ -544,7 +563,7 @@ async function runScan() {
       const [quote, profile, financials, candles] = await Promise.all([
         fetchQuote(ticker), fetchProfile(ticker), fetchFinancials(ticker), fetchCandles(ticker)
       ]);
-      await delay(150);
+      await delay(300);
       if (!quote) continue;
 
       const rsi = calcRSI(candles?.closes);
