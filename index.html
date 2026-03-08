@@ -1014,8 +1014,11 @@ function openChart(ticker) {
     stochLabelEl.textContent = stochTxt;
     stochLabelEl.style.color = s.stochK>=80?'var(--accent3)':s.stochK<=20?'var(--accent4)':s.stochK>s.stochD?'var(--accent2)':'var(--muted)';
   } else { stochLabelEl.textContent='No data'; stochLabelEl.style.color='var(--muted)'; }
-  epsEl2.textContent = s.eps!=null?(s.eps>=0?'+':'')+s.eps.toFixed(2):'--';
-  epsEl2.style.color = s.eps>0?'var(--accent2)':s.eps<0?'var(--accent3)':'var(--muted)';
+
+  // Earnings
+  const earnEpsEl = document.getElementById('earnEPS');
+  earnEpsEl.textContent = s.eps!=null?(s.eps>=0?'+':'')+s.eps.toFixed(2):'--';
+  earnEpsEl.style.color = s.eps>0?'var(--accent2)':s.eps<0?'var(--accent3)':'var(--muted)';
   document.getElementById('earnEPSSub').textContent = 'Diluted TTM';
   const egEl = document.getElementById('earnGrowth');
   egEl.textContent = s.epsGrowth!=null?(s.epsGrowth>=0?'+':'')+(s.epsGrowth*100).toFixed(1)+'%':'--';
