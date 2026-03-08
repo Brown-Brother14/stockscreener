@@ -496,7 +496,18 @@ async function twelveFetch(endpoint, params={}) {
     const res = await fetch(`${PROXY}/twelvedata/${endpoint}?${qs}`);
     if (!res.ok) return null;
     const data = await res.json();
-    if (data?.code === 400 || data?.status === 'error') return null;
+    if (data?.code === 429) {
+      console.warn(`Twelve Data rate limit hit on ${endpoint} — waiting 60s`);
+      await delay(60000);
+      // retry once
+      const res2 = await fetch(`${PROXY}/twelvedata/${endpoint}?${qs}`);
+      const data2 = await res2.json();
+      return data2;
+    }
+    if (data?.code === 400 || data?.status === 'error') {
+      console.warn(`Twelve Data error on ${endpoint}:`, data?.message);
+      return null;
+    }
     return data;
   } catch(e) { return null; }
 }
@@ -832,6 +843,9 @@ async function runScan() {
       document.getElementById('topPick').textContent=top?top.ticker:'--';
       renderTable();
     } catch(e) { console.warn(`Failed ${ticker}:`, e); }
+    // Respect Twelve Data rate limit: ~8 req/min on free tier
+    // Each stock uses ~9 calls so we need ~8s between stocks
+    if (i < tickers.length - 1) await delay(8000);
   }
 
   document.getElementById('progressFill').style.width='100%';
