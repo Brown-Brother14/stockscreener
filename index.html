@@ -677,10 +677,23 @@ async function fetchAnalystTargets(ticker) {
     finnhubFetch('stock/price-target', {symbol: ticker}),
   ]);
   const latest = Array.isArray(rec) && rec.length ? rec[0] : null;
+  const upgradeList = Array.isArray(upgrades) ? upgrades.slice(0, 25) : [];
+
+  // Calculate avg price target from individual entries if paid endpoint returns null
+  let targetMean = pt?.targetMean || null;
+  let targetHigh = pt?.targetHigh || null;
+  let targetLow  = pt?.targetLow  || null;
+  if (!targetMean) {
+    const pts = upgradeList.map(u => u.priceTarget).filter(p => p && p > 0);
+    if (pts.length) {
+      targetMean = pts.reduce((a,b)=>a+b,0) / pts.length;
+      targetHigh = Math.max(...pts);
+      targetLow  = Math.min(...pts);
+    }
+  }
+
   return {
-    targetHigh:   pt?.targetHigh   || null,
-    targetLow:    pt?.targetLow    || null,
-    targetMean:   pt?.targetMean   || null,
+    targetHigh, targetLow, targetMean,
     targetMedian: pt?.targetMedian || null,
     strongBuy:  latest?.strongBuy  || 0,
     buy:        latest?.buy        || 0,
@@ -688,7 +701,7 @@ async function fetchAnalystTargets(ticker) {
     sell:       latest?.sell       || 0,
     strongSell: latest?.strongSell || 0,
     period:     latest?.period     || null,
-    upgrades:   Array.isArray(upgrades) ? upgrades.slice(0, 20) : [],
+    upgrades:   upgradeList,
   };
 }
 
@@ -1274,15 +1287,17 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
 
     const upgradeRows = (a.upgrades||[]).map(u => {
       const date = u.gradeDate ? new Date(u.gradeDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}) : '';
-      const action = u.fromGrade && u.toGrade ? `${u.fromGrade} → ${u.toGrade}` : u.toGrade || u.action || '';
+      const fromTo = u.fromGrade && u.toGrade ? `${u.fromGrade} → ${u.toGrade}` : (u.toGrade || u.fromGrade || '--');
       const actionType = (u.action||'').toLowerCase();
-      const badge = actionType.includes('upgrade') ? '<span style="color:#00ff88;font-size:9px">▲ UPGRADE</span>'
-                  : actionType.includes('downgrade') ? '<span style="color:#ff4d6d;font-size:9px">▼ DOWNGRADE</span>'
-                  : '<span style="color:#ffd60a;font-size:9px">— MAINTAIN</span>';
-      return `<div style="display:grid;grid-template-columns:90px 1fr 1fr 80px;align-items:center;padding:9px 20px;border-bottom:1px solid rgba(30,42,53,0.4)" onmouseover="this.style.background='rgba(0,229,255,0.03)'" onmouseout="this.style.background=''">
+      const badge = actionType.includes('upgrade')   ? '<span style="color:#00ff88;font-size:9px;font-weight:700">▲ UP</span>'
+                  : actionType.includes('downgrade') ? '<span style="color:#ff4d6d;font-size:9px;font-weight:700">▼ DOWN</span>'
+                  : '<span style="color:#ffd60a;font-size:9px">— HOLD</span>';
+      const ptStr = u.priceTarget ? `<span style="color:var(--accent2);font-weight:700">$${u.priceTarget.toFixed(2)}</span>` : '<span style="color:var(--muted)">--</span>';
+      return `<div style="display:grid;grid-template-columns:80px 1fr 140px 70px 60px;align-items:center;padding:9px 20px;border-bottom:1px solid rgba(30,42,53,0.4)" onmouseover="this.style.background='rgba(0,229,255,0.03)'" onmouseout="this.style.background=''">
         <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">${date}</div>
         <div style="font-size:12px;font-weight:700">${u.company||'--'}</div>
-        <div style="font-family:'Space Mono',monospace;font-size:10px;color:${ratingColor(u.toGrade)}">${action||'--'}</div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:${ratingColor(u.toGrade)}">${fromTo}</div>
+        <div style="font-family:'Space Mono',monospace;font-size:11px;text-align:right">${ptStr}</div>
         <div style="text-align:right">${badge}</div>
       </div>`;
     }).join('');
@@ -1344,13 +1359,13 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
       ${upgradeRows ? `
       <!-- Individual Analyst Ratings -->
       <div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--surface);border-top:1px solid var(--border);cursor:pointer;user-select:none" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.toggle-arrow').textContent=this.nextElementSibling.style.display==='none'?'▼':'▲'">
-          <div style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700">📋 Individual Analyst Ratings <span style="color:var(--muted);font-weight:400">(${a.upgrades.length})</span></div>
-          <span class="toggle-arrow" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">▼</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--surface);border-top:1px solid var(--border);cursor:pointer;user-select:none" onclick="const b=this.nextElementSibling;b.style.display=b.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=b.style.display==='none'?'▼ Show':'▲ Hide'">
+          <div style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700">📋 Individual Analyst Ratings <span style="color:var(--muted);font-weight:400">(${a.upgrades.length} firms)</span></div>
+          <span class="arr" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent)">▲ Hide</span>
         </div>
-        <div style="display:none">
-          <div style="display:grid;grid-template-columns:90px 1fr 1fr 80px;padding:6px 20px;background:rgba(13,17,23,0.6);font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border)">
-            <span>Date</span><span>Firm</span><span>Rating</span><span style="text-align:right">Action</span>
+        <div>
+          <div style="display:grid;grid-template-columns:80px 1fr 140px 70px 60px;padding:6px 20px;background:rgba(13,17,23,0.6);font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border)">
+            <span>Date</span><span>Firm</span><span>Rating</span><span style="text-align:right">Target</span><span style="text-align:right">Action</span>
           </div>
           ${upgradeRows}
         </div>
