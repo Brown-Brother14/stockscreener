@@ -54,7 +54,7 @@
   thead th:hover{color:var(--accent)}
   tbody tr{border-bottom:1px solid rgba(30,42,53,0.5);transition:background 0.15s;animation:fadeIn 0.3s ease forwards;opacity:0;cursor:pointer}
   @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-  tbody tr:hover{background:rgba(0,229,255,0.06)}
+  tbody tr:hover{filter:brightness(1.4)}
   tbody tr:last-child{border-bottom:none}
   td{padding:16px 20px;font-size:14px;vertical-align:middle}
   .ticker{font-family:'Space Mono',monospace;font-weight:700;font-size:16px;color:var(--accent)}
@@ -964,7 +964,11 @@ function renderTable() {
     const extChange = d.extPrice ? (((d.extPrice - d.price) / d.price) * 100) : null;
     const extLabel = d.extPrice ? `${d.extSession==='pre'?'PRE':'AFTER'} $${d.extPrice.toFixed(2)} (${extChange>=0?'+':''}${extChange.toFixed(2)}%)` : null;
 
-    return `<tr style="animation-delay:${i*0.03}s" onclick="openChart('${d.ticker}')">
+    const rowBg = d.score >= 78 ? 'rgba(0,255,136,0.05)'
+                : d.score >= 68 ? 'rgba(0,229,255,0.04)'
+                : d.score >= 55 ? 'rgba(255,214,10,0.03)'
+                : 'rgba(255,77,109,0.05)';
+    return `<tr style="animation-delay:${i*0.03}s;background:${rowBg}" onclick="openChart('${d.ticker}')">
       <td><div class="ticker">${d.ticker}</div><div class="company-name">${d.name!==d.ticker?d.name:''}</div></td>
       <td><div class="price">$${d.price.toFixed(2)}</div>${extLabel?`<div class="ext-price ${d.extSession}">${extLabel}</div>`:''}</td>
       <td><span class="change ${cc}">${d.change>=0?'+':''}${d.change.toFixed(2)}%</span></td>
