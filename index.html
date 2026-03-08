@@ -682,6 +682,8 @@ async function fetchAnalystTargets(ticker) {
     const res = await fetch(`${PROXY}/finviz/${ticker}`);
     const d = await res.json();
     console.log(`Finviz ${ticker}: ${d.ratings?.length} ratings, avgTarget: ${d.avgTarget}, html_len: ${d.html_len}`);
+    if (d.pt_snippet) console.log('PT snippet:', d.pt_snippet);
+    if (d.rating_snippet) console.log('Rating snippet:', d.rating_snippet);
     firmRatings = d.ratings || [];
     avgTarget = d.avgTarget || null;
 
