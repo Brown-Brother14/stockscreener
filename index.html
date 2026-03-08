@@ -189,8 +189,10 @@
     </div>
     <div class="header-right">
       <span class="speed-badge">⚡ FINNHUB POWERED</span>
-      <div class="status-dot"></div>
-      <div class="status-text" id="marketStatus">CHECKING MARKET...</div>
+      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);text-align:right">
+        <div id="marketStatus" style="display:flex;align-items:center;gap:6px"><div class="status-dot"></div><span id="marketStatusText">CHECKING...</span></div>
+        <div id="marketCountdown" style="color:var(--accent4);font-size:12px;font-weight:700;margin-top:2px"></div>
+      </div>
     </div>
   </header>
 
@@ -503,16 +505,16 @@ async function fetchQuote(ticker) {
 // Pre/after market price from Twelve Data
 async function fetchExtendedHours(ticker) {
   try {
-    // Get last 2 1-min bars in pre/post market session
     const now = new Date();
     const etNow = new Date(now.toLocaleString('en-US', {timeZone:'America/New_York'}));
     const hour = etNow.getHours() + etNow.getMinutes()/60;
     const isWeekday = etNow.getDay()>=1 && etNow.getDay()<=5;
-    if (!isWeekday) return null;
 
-    const isPreMarket  = hour >= 4 && hour < 9.5;
-    const isAfterHours = hour >= 16 && hour < 20;
-    if (!isPreMarket && !isAfterHours) return null;
+    // Determine session label
+    let session = null;
+    if (isWeekday && hour >= 4 && hour < 9.5)  session = 'pre';
+    if (isWeekday && hour >= 16 && hour < 20)  session = 'after';
+    if (!session) return null;
 
     const d = await twelveFetch('time_series', {symbol: ticker, interval: '1min', outputsize: 1});
     if (!d?.values?.[0]) return null;
@@ -520,7 +522,7 @@ async function fetchExtendedHours(ticker) {
     return {
       extPrice: parseFloat(latest.close),
       extTime: latest.datetime,
-      session: isPreMarket ? 'pre' : 'after',
+      session,
     };
   } catch(e) { return null; }
 }
@@ -767,7 +769,7 @@ async function runScan() {
   setTimeout(()=>document.getElementById('progressBar').style.display='none', 600);
   btn.disabled=false; btn.textContent='⚡ Run Scan';
   document.getElementById('lastUpdated').textContent=`Updated ${new Date().toLocaleTimeString()} · Finnhub`;
-  document.getElementById('marketStatus').textContent='DATA LOADED';
+  document.getElementById('marketStatusText').textContent='DATA LOADED';
   if (!allResults.length) showError('No data returned. Check your tickers and try again.');
   else { renderTable(); document.getElementById('clickHint').style.display='block'; }
 }
@@ -1142,26 +1144,63 @@ function closeModalOutside(e) {
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 
 function checkMarketStatus() {
-  const et=new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
-  const t=et.getHours()+et.getMinutes()/60;
-  const wd=et.getDay();
-  const dot=document.querySelector('.status-dot');
-  const statusEl=document.getElementById('marketStatus');
-  if (wd>=1&&wd<=5&&t>=9.5&&t<16) {
-    statusEl.textContent='MARKET OPEN';
-    dot.style.background='var(--accent2)'; dot.style.boxShadow='0 0 8px var(--accent2)';
-  } else if (wd>=1&&wd<=5&&t>=4&&t<9.5) {
-    statusEl.textContent='PRE-MARKET';
+  const now = new Date();
+  const et = new Date(now.toLocaleString('en-US', {timeZone:'America/New_York'}));
+  const h = et.getHours(), m = et.getMinutes(), s = et.getSeconds();
+  const t = h + m/60 + s/3600;
+  const wd = et.getDay();
+  const dot = document.querySelector('.status-dot');
+  const statusText = document.getElementById('marketStatusText');
+  const countdown = document.getElementById('marketCountdown');
+
+  function fmt(totalSecs) {
+    const hh = Math.floor(totalSecs/3600);
+    const mm = Math.floor((totalSecs%3600)/60);
+    const ss = totalSecs%60;
+    return `${hh>0?hh+'h ':''}${mm}m ${ss}s`;
+  }
+
+  const isWeekday = wd>=1 && wd<=5;
+  const secsNow = h*3600 + m*60 + s;
+  const marketOpen  = 9*3600 + 30*60;   // 9:30 AM ET
+  const marketClose = 16*3600;           // 4:00 PM ET
+  const preOpen     = 4*3600;            // 4:00 AM ET
+  const afterClose  = 20*3600;           // 8:00 PM ET
+
+  if (!isWeekday) {
+    // Weekend — count to Monday 9:30am
+    const daysToMon = wd===0 ? 1 : 2;
+    const secsToMon = daysToMon*86400 + (marketOpen - secsNow);
+    statusText.textContent = 'MARKET CLOSED';
+    countdown.textContent = `Opens in ${fmt(secsToMon)}`;
+    dot.style.background='var(--accent3)'; dot.style.boxShadow='0 0 8px var(--accent3)';
+  } else if (secsNow >= preOpen && secsNow < marketOpen) {
+    // Pre-market
+    statusText.textContent = 'PRE-MARKET';
+    countdown.textContent = `Market opens in ${fmt(marketOpen - secsNow)}`;
     dot.style.background='#a78bfa'; dot.style.boxShadow='0 0 8px #a78bfa';
-  } else if (wd>=1&&wd<=5&&t>=16&&t<20) {
-    statusEl.textContent='AFTER-HOURS';
+  } else if (secsNow >= marketOpen && secsNow < marketClose) {
+    // Market open — count down to close
+    statusText.textContent = 'MARKET OPEN';
+    countdown.textContent = `Closes in ${fmt(marketClose - secsNow)}`;
+    dot.style.background='var(--accent2)'; dot.style.boxShadow='0 0 8px var(--accent2)';
+  } else if (secsNow >= marketClose && secsNow < afterClose) {
+    // After-hours
+    statusText.textContent = 'AFTER-HOURS';
+    countdown.textContent = `Extended hours end in ${fmt(afterClose - secsNow)}`;
     dot.style.background='#fb923c'; dot.style.boxShadow='0 0 8px #fb923c';
   } else {
-    statusEl.textContent='MARKET CLOSED';
+    // Closed — count to tomorrow 9:30am (or Monday if Friday)
+    const isFriday = wd===5;
+    const daysAhead = isFriday ? 3 : 1;
+    const secsToOpen = daysAhead*86400 + (marketOpen - secsNow);
+    statusText.textContent = 'MARKET CLOSED';
+    countdown.textContent = `Opens in ${fmt(secsToOpen)}`;
     dot.style.background='var(--accent3)'; dot.style.boxShadow='0 0 8px var(--accent3)';
   }
 }
 checkMarketStatus();
+setInterval(checkMarketStatus, 1000);
 </script>
 </body>
 </html>
