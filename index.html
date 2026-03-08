@@ -678,6 +678,8 @@ async function fetchAnalystTargets(ticker) {
     finnhubFetch('stock/upgrade-downgrade', {symbol: ticker, from}),
     finnhubFetch('stock/price-target', {symbol: ticker}),
   ]);
+  console.log('Raw upgrades response:', JSON.stringify(upgrades).slice(0,300));
+  console.log('Raw pt response:', JSON.stringify(pt));
   const latest = Array.isArray(rec) && rec.length ? rec[0] : null;
   const upgradeList = Array.isArray(upgrades) ? upgrades.slice(0, 25) : [];
 
