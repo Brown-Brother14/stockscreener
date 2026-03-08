@@ -1248,6 +1248,8 @@ async function fetchEarningsDate(ticker) {
 async function fetchAndRenderAnalyst(ticker, currentPrice) {
   try {
     const a = await fetchAnalystTargets(ticker);
+    console.log('Analyst upgrades sample:', JSON.stringify(a.upgrades?.slice(0,2)));
+    console.log('Analyst targetMean:', a.targetMean, 'upgrades count:', a.upgrades?.length);
     const el = document.getElementById('analystSection');
     const total = (a.strongBuy||0) + (a.buy||0) + (a.hold||0) + (a.sell||0) + (a.strongSell||0);
 
