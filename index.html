@@ -667,12 +667,13 @@ async function runScan() {
       await delay(300);
       if (!quote) { console.warn(`No quote for ${ticker}`); continue; }
 
-      // Fetch all Twelve Data indicators together
-      const [rsi, macd, tech] = await Promise.all([
+      // Fetch all Twelve Data indicators — staggered to avoid rate limits
+      const [rsi, macd] = await Promise.all([
         fetchRSI(ticker).catch(()=>null),
         fetchMACD(ticker).catch(()=>null),
-        fetchTechnicals(ticker).catch(()=>({})),
       ]);
+      await delay(200);
+      const tech = await fetchTechnicals(ticker).catch(()=>({}));
       console.log(`${ticker} — RSI:${rsi?.toFixed(1)} MACD:${macd?.bullish} EMA20:${tech?.ema20?.toFixed(2)}`);
 
       const pe = financials?.pe || null;
