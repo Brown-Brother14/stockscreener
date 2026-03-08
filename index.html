@@ -628,7 +628,6 @@ async function runScan() {
         revenueGrowth,
         roe: financials?.roe || null,
         debtToEquity: financials?.debtToEquity || null,
-        candles
       });
 
       document.getElementById('totalScanned').textContent=allResults.length;
