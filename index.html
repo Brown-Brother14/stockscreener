@@ -759,8 +759,6 @@ function renderTable() {
   data.sort((a,b)=>{ let av=a[sortField],bv=b[sortField]; if(sortField==='ticker') return sortDir*av.localeCompare(bv); return sortDir*((av??-999)-(bv??-999)); });
   if (!data.length&&allResults.length>0) { document.getElementById('tableBody').innerHTML=`<tr class="loading-row"><td colspan="14"><div style="color:var(--muted);font-family:'Space Mono',monospace;font-size:13px">No stocks match this filter</div></td></tr>`; return; }
 
-  const mono = "font-family:'Space Mono',monospace;font-size:12px";
-
   document.getElementById('tableBody').innerHTML=data.map((d,i)=>{
     const sc=getScoreClass(d.score), cc=d.change>=0?'up':'down';
     const mono = "font-family:'Space Mono',monospace;font-size:12px";
