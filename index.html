@@ -136,7 +136,7 @@
   .score-bar-val{font-family:'Space Mono',monospace;font-size:11px;width:64px;text-align:right;flex-shrink:0}
   .score-bar-pts{font-family:'Space Mono',monospace;font-size:10px;width:48px;text-align:right;flex-shrink:0}
   /* technicals */
-  .tech-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+  .tech-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)}
   .tech-card{background:var(--card);padding:18px 20px}
   .tech-title{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
   .rsi-track{height:8px;background:var(--border);border-radius:4px;position:relative;margin-bottom:10px}
@@ -164,6 +164,12 @@
   .news-meta{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);display:flex;gap:10px}
   .news-src{color:var(--accent)}
   .news-loading{padding:24px;text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)}
+  .ema-badges{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px}
+  .ema-dot{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
+  .ema-dot.above{color:var(--accent2);background:rgba(0,255,136,0.1)}
+  .ema-dot.below{color:var(--accent3);background:rgba(255,77,109,0.1)}
+  .adx-badge{font-family:'Space Mono',monospace;font-size:10px;font-weight:700}
+  .adx-strong{color:var(--accent2)}.adx-weak{color:var(--muted)}.adx-mid{color:var(--accent4)}
   @media(max-width:1000px){.stats-bar{grid-template-columns:repeat(3,1fr)}.hide-mobile{display:none}.watchlist-input{width:100%}}
   @media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr)}.modal-stats-strip{grid-template-columns:repeat(4,1fr)}}
 </style>
@@ -225,13 +231,14 @@
           <th onclick="sortBy('ticker')">Ticker ↕</th>
           <th onclick="sortBy('price')">Price ↕</th>
           <th onclick="sortBy('change')">Change % ↕</th>
+          <th onclick="sortBy('rsi')">RSI ↕</th>
+          <th>EMA Trend</th>
+          <th onclick="sortBy('adx')">ADX ↕</th>
           <th onclick="sortBy('volume')">Volume ↕</th>
-          <th onclick="sortBy('avgVolume')">Avg Volume ↕</th>
           <th onclick="sortBy('marketCap')">Mkt Cap ↕</th>
           <th onclick="sortBy('pe')">P/E ↕</th>
           <th onclick="sortBy('eps')">EPS dil TTM ↕</th>
-          <th onclick="sortBy('epsGrowth')">EPS dil growth TTM YoY ↕</th>
-          <th onclick="sortBy('divYield')">Div Yield ↕</th>
+          <th onclick="sortBy('epsGrowth')">EPS Growth YoY ↕</th>
           <th>Sector</th>
           <th onclick="sortBy('score')">Score ↕</th>
           <th>Signal</th>
@@ -239,7 +246,7 @@
       </thead>
       <tbody id="tableBody">
         <tr class="loading-row">
-          <td colspan="13">
+          <td colspan="14">
             <div style="text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:13px">
               Enter tickers above and click ⚡ Run Scan to begin
             </div>
@@ -350,6 +357,35 @@
         <div class="macd-row"><span class="macd-key">Signal Line</span><span class="macd-val" id="macdSig">--</span></div>
         <div class="macd-row"><span class="macd-key">Histogram</span><span class="macd-val" id="macdHist">--</span></div>
       </div>
+      <div class="tech-card">
+        <div class="tech-title">EMA Levels</div>
+        <div class="macd-row"><span class="macd-key">EMA 20</span><span class="macd-val" id="techEMA20">--</span></div>
+        <div class="macd-row"><span class="macd-key">EMA 50</span><span class="macd-val" id="techEMA50">--</span></div>
+        <div class="macd-row"><span class="macd-key">EMA 200</span><span class="macd-val" id="techEMA200">--</span></div>
+        <div style="margin-top:10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)" id="emaTrend">--</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-title">Bollinger Bands</div>
+        <div class="macd-row"><span class="macd-key">Upper Band</span><span class="macd-val" id="bbUpper">--</span></div>
+        <div class="macd-row"><span class="macd-key">Middle Band</span><span class="macd-val" id="bbMiddle">--</span></div>
+        <div class="macd-row"><span class="macd-key">Lower Band</span><span class="macd-val" id="bbLower">--</span></div>
+        <div style="margin-top:10px;font-family:'Space Mono',monospace;font-size:10px" id="bbLabel">--</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-title">ADX — Trend Strength</div>
+        <div class="rsi-big" id="adxBig" style="font-size:22px">--</div>
+        <div style="font-family:'Space Mono',monospace;font-size:11px;margin-top:6px" id="adxLabel">--</div>
+        <div style="margin-top:10px;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+          <div id="adxBar" style="height:100%;border-radius:3px;background:var(--accent);width:0%;transition:width 0.8s"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px"><span>Weak &lt;20</span><span>Moderate</span><span>Strong &gt;25</span></div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-title">Stochastic</div>
+        <div class="macd-row"><span class="macd-key">%K (Slow)</span><span class="macd-val" id="stochK">--</span></div>
+        <div class="macd-row"><span class="macd-key">%D (Signal)</span><span class="macd-val" id="stochD">--</span></div>
+        <div style="margin-top:10px;font-family:'Space Mono',monospace;font-size:10px" id="stochLabel">--</div>
+      </div>
     </div>
 
     <!-- Earnings -->
@@ -426,10 +462,34 @@ async function fetchMACD(ticker) {
   const d = await twelveFetch('macd', {symbol: ticker, interval: '1day', outputsize: 1});
   if (!d?.values?.[0]) return null;
   const v = d.values[0];
-  const macdLine = parseFloat(v.macd);
-  const signalLine = parseFloat(v.macd_signal);
-  const hist = parseFloat(v.macd_hist);
-  return {macd: macdLine, signal: signalLine, hist, bullish: macdLine > signalLine};
+  return {macd: parseFloat(v.macd), signal: parseFloat(v.macd_signal), hist: parseFloat(v.macd_hist), bullish: parseFloat(v.macd) > parseFloat(v.macd_signal)};
+}
+
+// Fetch EMA 20, 50, 200 + Bollinger Bands + ADX + Stochastic + real volume in one batch call
+async function fetchTechnicals(ticker) {
+  try {
+    const [ema20d, ema50d, ema200d, bbands, adx, stoch, timeseries] = await Promise.all([
+      twelveFetch('ema', {symbol:ticker, interval:'1day', time_period:20, outputsize:1}),
+      twelveFetch('ema', {symbol:ticker, interval:'1day', time_period:50, outputsize:1}),
+      twelveFetch('ema', {symbol:ticker, interval:'1day', time_period:200, outputsize:1}),
+      twelveFetch('bbands', {symbol:ticker, interval:'1day', outputsize:1}),
+      twelveFetch('adx', {symbol:ticker, interval:'1day', time_period:14, outputsize:1}),
+      twelveFetch('stoch', {symbol:ticker, interval:'1day', outputsize:1}),
+      twelveFetch('time_series', {symbol:ticker, interval:'1day', outputsize:2}),
+    ]);
+    return {
+      ema20: ema20d?.values?.[0]?.ema ? parseFloat(ema20d.values[0].ema) : null,
+      ema50: ema50d?.values?.[0]?.ema ? parseFloat(ema50d.values[0].ema) : null,
+      ema200: ema200d?.values?.[0]?.ema ? parseFloat(ema200d.values[0].ema) : null,
+      bbUpper: bbands?.values?.[0]?.upper_band ? parseFloat(bbands.values[0].upper_band) : null,
+      bbMiddle: bbands?.values?.[0]?.middle_band ? parseFloat(bbands.values[0].middle_band) : null,
+      bbLower: bbands?.values?.[0]?.lower_band ? parseFloat(bbands.values[0].lower_band) : null,
+      adx: adx?.values?.[0]?.adx ? parseFloat(adx.values[0].adx) : null,
+      stochK: stoch?.values?.[0]?.slow_k ? parseFloat(stoch.values[0].slow_k) : null,
+      stochD: stoch?.values?.[0]?.slow_d ? parseFloat(stoch.values[0].slow_d) : null,
+      volume: timeseries?.values?.[0]?.volume ? parseFloat(timeseries.values[0].volume) : null,
+    };
+  } catch(e) { return {}; }
 }
 
 // Real-time quote: price, change, high, low
@@ -516,8 +576,9 @@ function calcRSI(closes, period=14) {
   return 100-(100/(1+rs));
 }
 
-function calculateScore({rsi, macd, change, pe, pos52w, revenueGrowth}) {
+function calculateScore({rsi, macd, change, pe, pos52w, revenueGrowth, emaAbove20, emaAbove50, adx, bbPos}) {
   let score = 50;
+  // RSI (max ±22)
   if (rsi!=null) {
     if (rsi>=50&&rsi<=65) score+=22;
     else if (rsi>=40&&rsi<50) score+=10;
@@ -525,17 +586,33 @@ function calculateScore({rsi, macd, change, pe, pos52w, revenueGrowth}) {
     else if (rsi>=75) score-=15;
     else if (rsi<30) score-=8;
   }
+  // MACD (max ±15)
   if (macd) {
     if (macd.bullish&&macd.hist>0) score+=15;
     else if (macd.bullish) score+=8;
     else if (!macd.bullish&&macd.hist<0) score-=12;
     else score-=5;
   }
+  // Price change (max ±10)
   if (change>3) score+=10; else if (change>1) score+=6; else if (change>0) score+=3;
   else if (change<-3) score-=10; else if (change<-1) score-=6; else if (change<0) score-=3;
+  // 52W position (max ±8)
   if (pos52w!=null) { if (pos52w>=70) score+=8; else if (pos52w>=50) score+=4; else if (pos52w<20) score-=5; }
+  // P/E (max ±8)
   if (pe&&pe>0&&pe<500) { if (pe<15) score+=8; else if (pe<25) score+=4; else if (pe>80) score-=4; }
+  // Revenue growth (max +5)
   if (revenueGrowth&&revenueGrowth>0.15) score+=5;
+  // EMA trend (max +10)
+  if (emaAbove20) score+=4;
+  if (emaAbove50) score+=4;
+  // ADX — trend strength (max +6)
+  if (adx!=null) { if (adx>=25) score+=6; else if (adx>=20) score+=3; else score-=2; }
+  // Bollinger Band position (max ±5)
+  if (bbPos!=null) {
+    if (bbPos>=80) score-=5;       // near upper band = overbought
+    else if (bbPos>=50) score+=3;  // above midline = bullish
+    else if (bbPos<=20) score+=5;  // near lower band = potential bounce
+  }
   return Math.max(0, Math.min(100, Math.round(score)));
 }
 
@@ -590,12 +667,13 @@ async function runScan() {
       await delay(300);
       if (!quote) { console.warn(`No quote for ${ticker}`); continue; }
 
-      // Fetch RSI + MACD separately — if they fail scan still works
-      const [rsi, macd] = await Promise.all([
+      // Fetch all Twelve Data indicators together
+      const [rsi, macd, tech] = await Promise.all([
         fetchRSI(ticker).catch(()=>null),
-        fetchMACD(ticker).catch(()=>null)
+        fetchMACD(ticker).catch(()=>null),
+        fetchTechnicals(ticker).catch(()=>({})),
       ]);
-      console.log(`${ticker} — RSI:${rsi} MACD:${macd?.bullish}`);
+      console.log(`${ticker} — RSI:${rsi?.toFixed(1)} MACD:${macd?.bullish} EMA20:${tech?.ema20?.toFixed(2)}`);
 
       const pe = financials?.pe || null;
       const high52w = financials?.high52w || null;
@@ -604,10 +682,21 @@ async function runScan() {
       const revenueGrowth = financials?.revenueGrowth || null;
       const name = profile?.name || ticker;
       const marketCap = profile?.marketCap ? profile.marketCap / 1000 : null;
-      const volume = financials?.avgVolume || null;
+      const volume = tech?.volume || financials?.avgVolume || null;
       const avgVolume = financials?.avgVolume || null;
 
-      const score = calculateScore({rsi, macd, change:quote.change, pe, pos52w, revenueGrowth});
+      // EMA trend: price vs EMA20/50/200
+      const emaAbove20 = tech?.ema20 && quote.price > tech.ema20;
+      const emaAbove50 = tech?.ema50 && quote.price > tech.ema50;
+      const emaAbove200 = tech?.ema200 && quote.price > tech.ema200;
+
+      // Bollinger band position
+      let bbPos = null;
+      if (tech?.bbUpper && tech?.bbLower) {
+        bbPos = ((quote.price - tech.bbLower) / (tech.bbUpper - tech.bbLower)) * 100;
+      }
+
+      const score = calculateScore({rsi, macd, change:quote.change, pe, pos52w, revenueGrowth, emaAbove20, emaAbove50, adx:tech?.adx, bbPos});
       const signal = getSignal(score, macd);
 
       if (signal.cls==='breakout') breakouts++;
@@ -628,6 +717,11 @@ async function runScan() {
         revenueGrowth,
         roe: financials?.roe || null,
         debtToEquity: financials?.debtToEquity || null,
+        ema20: tech?.ema20||null, ema50: tech?.ema50||null, ema200: tech?.ema200||null,
+        emaAbove20, emaAbove50, emaAbove200,
+        bbUpper: tech?.bbUpper||null, bbMiddle: tech?.bbMiddle||null, bbLower: tech?.bbLower||null, bbPos,
+        adx: tech?.adx||null,
+        stochK: tech?.stochK||null, stochD: tech?.stochD||null,
       });
 
       document.getElementById('totalScanned').textContent=allResults.length;
@@ -650,7 +744,7 @@ async function runScan() {
 }
 
 function showLoading(msg) {
-  document.getElementById('tableBody').innerHTML=`<tr class="loading-row"><td colspan="13"><div style="text-align:center"><div class="loader"></div><div class="loading-text" id="loadingMsg">${msg}</div></div></td></tr>`;
+  document.getElementById('tableBody').innerHTML=`<tr class="loading-row"><td colspan="14"><div style="text-align:center"><div class="loader"></div><div class="loading-text" id="loadingMsg">${msg}</div></div></td></tr>`;
 }
 function updateLoadingText(msg) { const el=document.getElementById('loadingMsg'); if(el) el.textContent=msg; }
 function filterBy(type, btn) { currentFilter=type; document.querySelectorAll('.filter-group .btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderTable(); }
@@ -663,51 +757,44 @@ function renderTable() {
   else if (currentFilter==='top') data=data.sort((a,b)=>b.score-a.score).slice(0,5);
   else if (currentFilter==='weak') data=data.filter(d=>d.signal.cls==='weak');
   data.sort((a,b)=>{ let av=a[sortField],bv=b[sortField]; if(sortField==='ticker') return sortDir*av.localeCompare(bv); return sortDir*((av??-999)-(bv??-999)); });
-  if (!data.length&&allResults.length>0) { document.getElementById('tableBody').innerHTML=`<tr class="loading-row"><td colspan="13"><div style="color:var(--muted);font-family:'Space Mono',monospace;font-size:13px">No stocks match this filter</div></td></tr>`; return; }
+  if (!data.length&&allResults.length>0) { document.getElementById('tableBody').innerHTML=`<tr class="loading-row"><td colspan="14"><div style="color:var(--muted);font-family:'Space Mono',monospace;font-size:13px">No stocks match this filter</div></td></tr>`; return; }
 
   const mono = "font-family:'Space Mono',monospace;font-size:12px";
 
   document.getElementById('tableBody').innerHTML=data.map((d,i)=>{
     const sc=getScoreClass(d.score), cc=d.change>=0?'up':'down';
-
-    // Today's Volume — from last candle
+    const mono = "font-family:'Space Mono',monospace;font-size:12px";
     const fmtVol = v => !v ? '--' : v >= 1e9 ? (v/1e9).toFixed(2)+'B' : v >= 1e6 ? (v/1e6).toFixed(2)+'M' : (v/1e3).toFixed(0)+'K';
-    const vol = fmtVol(d.volume);
-    const avgVol = fmtVol(d.avgVolume);
-
-    // Market cap (in billions from FMP)
     const mc = d.marketCap;
     const mcLabel = !mc ? '--' : mc >= 1000 ? (mc/1000).toFixed(1)+'T' : mc >= 1 ? mc.toFixed(1)+'B' : (mc*1000).toFixed(0)+'M';
-
-    // P/E
     const peLabel = d.pe && d.pe > 0 && d.pe < 999 ? d.pe.toFixed(1) : '--';
-
-    // EPS
     const epsLabel = d.eps != null ? (d.eps >= 0 ? '+' : '') + d.eps.toFixed(2) : '--';
     const epsColor = d.eps > 0 ? 'var(--accent2)' : d.eps < 0 ? 'var(--accent3)' : 'var(--muted)';
-
-    // EPS Growth
     const eg = d.epsGrowth;
     const egLabel = eg != null ? (eg >= 0 ? '+' : '') + (eg*100).toFixed(1)+'%' : '--';
     const egColor = eg > 0 ? 'var(--accent2)' : eg < 0 ? 'var(--accent3)' : 'var(--muted)';
-
-    // Div Yield
-    const divLabel = d.divYield && d.divYield > 0 ? d.divYield.toFixed(2)+'%' : '--';
-
-    // Sector from FMP (more accurate than Finnhub industry)
     const sector = (d.sector || d.industry || '--').replace('Technology','Tech').replace('Communication','Comm').replace('Consumer','Cons').replace('Services','Svcs');
+    const rsiColor = d.rsi==null?'var(--muted)':d.rsi>=70?'var(--accent3)':d.rsi>=50?'var(--accent2)':d.rsi<30?'var(--accent4)':'var(--muted)';
+    const emaBadges = [
+      d.ema20!=null ? `<span class="ema-dot ${d.emaAbove20?'above':'below'}">20</span>` : '',
+      d.ema50!=null ? `<span class="ema-dot ${d.emaAbove50?'above':'below'}">50</span>` : '',
+      d.ema200!=null ? `<span class="ema-dot ${d.emaAbove200?'above':'below'}">200</span>` : '',
+    ].join('');
+    const adxClass = d.adx>=25?'adx-strong':d.adx>=20?'adx-mid':'adx-weak';
+    const adxDesc = d.adx>=25?' S':d.adx>=20?' M':d.adx!=null?' W':'';
 
     return `<tr style="animation-delay:${i*0.03}s" onclick="openChart('${d.ticker}')">
       <td><div class="ticker">${d.ticker}</div><div class="company-name">${d.name!==d.ticker?d.name:''}</div></td>
       <td><div class="price">$${d.price.toFixed(2)}</div></td>
       <td><span class="change ${cc}">${d.change>=0?'+':''}${d.change.toFixed(2)}%</span></td>
-      <td style="${mono};color:var(--text)">${vol}</td>
-      <td style="${mono};color:var(--muted)">${avgVol}</td>
+      <td><span style="${mono};color:${rsiColor};font-weight:700">${d.rsi!=null?d.rsi.toFixed(1):'--'}</span></td>
+      <td><div class="ema-badges">${emaBadges||'<span style="color:var(--muted);font-size:10px">--</span>'}</div></td>
+      <td><span class="${adxClass}" style="${mono};font-weight:700">${d.adx!=null?d.adx.toFixed(0):'--'}<span style="font-size:9px">${adxDesc}</span></span></td>
+      <td style="${mono};color:var(--text)">${fmtVol(d.volume)}</td>
       <td style="${mono};color:var(--muted)">${mcLabel}</td>
       <td style="${mono};color:var(--muted)">${peLabel}</td>
       <td style="${mono};color:${epsColor}">${epsLabel}</td>
       <td style="${mono};color:${egColor}">${egLabel}</td>
-      <td style="${mono};color:var(--muted)">${divLabel}</td>
       <td style="font-size:11px;color:var(--muted);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sector}</td>
       <td class="score-cell"><div class="score-bar-wrap"><span class="score-num ${sc}">${d.score}</span><div class="score-bar"><div class="score-fill ${sc}" style="width:${d.score}%"></div></div></div></td>
       <td><span class="signal ${d.signal.cls}">${d.signal.label}</span></td>
@@ -823,14 +910,20 @@ function openChart(ticker) {
   const w52Pts = s.pos52w!=null ? (s.pos52w>=70?8:s.pos52w>=50?4:s.pos52w<20?-5:0) : null;
   const pePts = s.pe&&s.pe>0&&s.pe<500 ? (s.pe<15?8:s.pe<25?4:s.pe>80?-4:0) : null;
   const revPts = s.revenueGrowth&&s.revenueGrowth>0.15 ? 5 : 0;
+  const emaPts = (s.emaAbove20?4:0)+(s.emaAbove50?4:0);
+  const adxPts = s.adx!=null?(s.adx>=25?6:s.adx>=20?3:-2):null;
+  const bbPts = s.bbPos!=null?(s.bbPos>=80?-5:s.bbPos>=50?3:s.bbPos<=20?5:0):null;
 
   const bars = [
     {label:'RSI', val: s.rsi!=null?s.rsi.toFixed(1):'--', pts:rsiPts, pct: s.rsi!=null?s.rsi:0},
     {label:'MACD', val: s.macd?(s.macd.bullish?'Bullish ✓':'Bearish ✗'):'--', pts:macdPts, pct: s.macd?(s.macd.bullish?90:30):0},
     {label:'Price Change', val: (s.change>=0?'+':'')+s.change.toFixed(2)+'%', pts:changePts, pct: Math.min(100,Math.abs(s.change)*15)},
     {label:'52W Position', val: s.pos52w!=null?s.pos52w.toFixed(0)+'%':'--', pts:w52Pts, pct: s.pos52w??0},
-    {label:'P/E Ratio', val: s.pe&&s.pe>0?s.pe.toFixed(1):'--', pts:pePts, pct: s.pe&&s.pe>0?Math.max(5,100-s.pe):'0'},
+    {label:'P/E Ratio', val: s.pe&&s.pe>0?s.pe.toFixed(1):'--', pts:pePts, pct: s.pe&&s.pe>0?Math.max(5,100-s.pe):0},
     {label:'Rev Growth', val: s.revenueGrowth!=null?(s.revenueGrowth*100).toFixed(0)+'%':'--', pts:revPts, pct: s.revenueGrowth!=null?Math.min(100,s.revenueGrowth*200):0},
+    {label:'EMA Trend', val: s.ema20?`${[s.emaAbove20,s.emaAbove50,s.emaAbove200].filter(Boolean).length}/3 above`:'--', pts:emaPts, pct: emaPts*12.5},
+    {label:'ADX Strength', val: s.adx!=null?s.adx.toFixed(0):'--', pts:adxPts, pct: s.adx!=null?Math.min(100,s.adx*2):0},
+    {label:'Bollinger', val: s.bbPos!=null?s.bbPos.toFixed(0)+'%':'--', pts:bbPts, pct: s.bbPos??0},
   ];
   document.getElementById('scoreBars').innerHTML = bars.map(b => {
     const c = b.pts>0?'var(--accent2)':b.pts<0?'var(--accent3)':'var(--muted)';
@@ -842,7 +935,7 @@ function openChart(ticker) {
       <div class="score-bar-pts" style="color:${c}">${ptsStr}</div>
     </div>`;
   }).join('') + `<div style="margin-top:6px;padding-top:10px;border-top:1px solid var(--border);font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">
-    Base 50 + RSI ${rsiPts??0} + MACD ${macdPts??0} + Change ${changePts} + 52W ${w52Pts??0} + P/E ${pePts??0} + RevGrowth ${revPts} = <span style="color:${scoreColor}">${s.score}/100</span>
+    RSI ${rsiPts??0} + MACD ${macdPts??0} + Chg ${changePts} + 52W ${w52Pts??0} + P/E ${pePts??0} + Rev ${revPts} + EMA ${emaPts} + ADX ${adxPts??0} + BB ${bbPts??0} + 50 base = <span style="color:${scoreColor}">${s.score}/100</span>
   </div>`;
 
   // RSI
@@ -872,8 +965,57 @@ function openChart(ticker) {
     document.getElementById('macdHist').style.color = s.macd.hist>0?'var(--accent2)':'var(--accent3)';
   }
 
-  // Earnings
-  const epsEl2 = document.getElementById('earnEPS');
+  // EMA Levels
+  const fmtPrice = v => v ? '$'+v.toFixed(2) : '--';
+  const ema20El = document.getElementById('techEMA20');
+  ema20El.textContent = fmtPrice(s.ema20);
+  ema20El.style.color = s.ema20 ? (s.emaAbove20?'var(--accent2)':'var(--accent3)') : 'var(--muted)';
+  const ema50El = document.getElementById('techEMA50');
+  ema50El.textContent = fmtPrice(s.ema50);
+  ema50El.style.color = s.ema50 ? (s.emaAbove50?'var(--accent2)':'var(--accent3)') : 'var(--muted)';
+  const ema200El = document.getElementById('techEMA200');
+  ema200El.textContent = fmtPrice(s.ema200);
+  ema200El.style.color = s.ema200 ? (s.emaAbove200?'var(--accent2)':'var(--accent3)') : 'var(--muted)';
+  const aboveCount = [s.emaAbove20,s.emaAbove50,s.emaAbove200].filter(Boolean).length;
+  const emaTrendEl = document.getElementById('emaTrend');
+  emaTrendEl.textContent = s.ema20 ? (aboveCount===3?'✓ Price above all EMAs — strong uptrend':aboveCount===0?'✗ Price below all EMAs — downtrend':aboveCount>=2?'↑ Above most EMAs — mild uptrend':'↓ Below most EMAs — mixed') : 'No EMA data';
+  emaTrendEl.style.color = aboveCount>=2?'var(--accent2)':aboveCount===0?'var(--accent3)':'var(--accent4)';
+
+  // Bollinger Bands
+  document.getElementById('bbUpper').textContent = fmtPrice(s.bbUpper);
+  document.getElementById('bbMiddle').textContent = fmtPrice(s.bbMiddle);
+  document.getElementById('bbLower').textContent = fmtPrice(s.bbLower);
+  const bbLabelEl = document.getElementById('bbLabel');
+  if (s.bbPos!=null) {
+    const bbTxt = s.bbPos>=80?'⚠ Near upper band — overbought':s.bbPos<=20?'⚡ Near lower band — potential bounce':s.bbPos>=50?'↑ Above midline — bullish':'↓ Below midline — bearish';
+    const bbCol = s.bbPos>=80?'var(--accent3)':s.bbPos<=20?'var(--accent4)':s.bbPos>=50?'var(--accent2)':'var(--muted)';
+    bbLabelEl.textContent = bbTxt;
+    bbLabelEl.style.color = bbCol;
+  } else { bbLabelEl.textContent = 'No data'; bbLabelEl.style.color='var(--muted)'; }
+
+  // ADX
+  const adxBigEl = document.getElementById('adxBig');
+  adxBigEl.textContent = s.adx!=null ? s.adx.toFixed(1) : '--';
+  const adxColor = s.adx>=25?'var(--accent2)':s.adx>=20?'var(--accent4)':'var(--muted)';
+  adxBigEl.style.color = adxColor;
+  document.getElementById('adxLabel').textContent = s.adx!=null?(s.adx>=25?'✓ Strong trend — momentum is real':s.adx>=20?'→ Moderate trend forming':'⚠ Weak trend — may be choppy'):'--';
+  document.getElementById('adxLabel').style.color = adxColor;
+  document.getElementById('adxBar').style.width = s.adx!=null?Math.min(100,s.adx*2)+'%':'0%';
+  document.getElementById('adxBar').style.background = adxColor;
+
+  // Stochastic
+  const skEl = document.getElementById('stochK');
+  skEl.textContent = s.stochK!=null ? s.stochK.toFixed(1) : '--';
+  skEl.style.color = s.stochK>=80?'var(--accent3)':s.stochK<=20?'var(--accent4)':'var(--accent2)';
+  const sdEl = document.getElementById('stochD');
+  sdEl.textContent = s.stochD!=null ? s.stochD.toFixed(1) : '--';
+  sdEl.style.color = s.stochD>=80?'var(--accent3)':s.stochD<=20?'var(--accent4)':'var(--accent2)';
+  const stochLabelEl = document.getElementById('stochLabel');
+  if (s.stochK!=null) {
+    const stochTxt = s.stochK>=80?'⚠ Overbought zone (>80)':s.stochK<=20?'⚡ Oversold zone (<20) — watch for reversal':s.stochK>s.stochD?'↑ %K above %D — bullish':'↓ %K below %D — bearish';
+    stochLabelEl.textContent = stochTxt;
+    stochLabelEl.style.color = s.stochK>=80?'var(--accent3)':s.stochK<=20?'var(--accent4)':s.stochK>s.stochD?'var(--accent2)':'var(--muted)';
+  } else { stochLabelEl.textContent='No data'; stochLabelEl.style.color='var(--muted)'; }
   epsEl2.textContent = s.eps!=null?(s.eps>=0?'+':'')+s.eps.toFixed(2):'--';
   epsEl2.style.color = s.eps>0?'var(--accent2)':s.eps<0?'var(--accent3)':'var(--muted)';
   document.getElementById('earnEPSSub').textContent = 'Diluted TTM';
