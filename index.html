@@ -386,12 +386,13 @@
 
 <script>
 const FINNHUB_KEY = 'd6m8fvhr01qi0ajlajn0d6m8fvhr01qi0ajlajng';
+const TWELVE_KEY = 'a16c1fb6b0024d948d876fa2e92223c5';
 const PROXY = 'https://broken-butterfly-8148.jai-mistry14.workers.dev';
 let allResults=[], currentFilter='all', sortField='score', sortDir=-1;
 let currentTicker='', currentInterval='W';
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
-// ── All data via Finnhub through Cloudflare Worker ──
+// ── Finnhub via Cloudflare Worker ──
 async function finnhubFetch(endpoint, params={}) {
   try {
     const qs = new URLSearchParams({...params, token: FINNHUB_KEY}).toString();
@@ -399,6 +400,36 @@ async function finnhubFetch(endpoint, params={}) {
     if (!res.ok) return null;
     return await res.json();
   } catch(e) { return null; }
+}
+
+// ── Twelve Data via Cloudflare Worker ──
+async function twelveFetch(endpoint, params={}) {
+  try {
+    const qs = new URLSearchParams({...params, apikey: TWELVE_KEY}).toString();
+    const res = await fetch(`${PROXY}/twelvedata/${endpoint}?${qs}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data?.code === 400 || data?.status === 'error') return null;
+    return data;
+  } catch(e) { return null; }
+}
+
+// Fetch RSI from Twelve Data
+async function fetchRSI(ticker) {
+  const d = await twelveFetch('rsi', {symbol: ticker, interval: '1day', time_period: 14, outputsize: 1});
+  if (!d?.values?.[0]?.rsi) return null;
+  return parseFloat(d.values[0].rsi);
+}
+
+// Fetch MACD from Twelve Data
+async function fetchMACD(ticker) {
+  const d = await twelveFetch('macd', {symbol: ticker, interval: '1day', outputsize: 1});
+  if (!d?.values?.[0]) return null;
+  const v = d.values[0];
+  const macdLine = parseFloat(v.macd);
+  const signalLine = parseFloat(v.macd_signal);
+  const hist = parseFloat(v.macd_hist);
+  return {macd: macdLine, signal: signalLine, hist, bullish: macdLine > signalLine};
 }
 
 // Real-time quote: price, change, high, low
@@ -438,14 +469,7 @@ async function fetchFinancials(ticker) {
   };
 }
 
-// 90 days of candles for RSI + MACD
-async function fetchCandles(ticker) {
-  const to = Math.floor(Date.now()/1000);
-  const from = to - (120*24*60*60);
-  const d = await finnhubFetch('stock/candle', {symbol: ticker, resolution: 'D', from, to});
-  if (!d || d.s !== 'ok' || !d.c) return null;
-  return {closes: d.c, opens: d.o, highs: d.h, lows: d.l, volumes: d.v, timestamps: d.t};
-}
+// RSI and MACD now fetched directly from Twelve Data
 
 function ema(prices, period) {
   const k = 2/(period+1);
@@ -560,26 +584,22 @@ async function runScan() {
     updateLoadingText(`Analyzing ${ticker}... (${i+1}/${tickers.length})`);
 
     try {
-      const [quote, profile, financials, candles] = await Promise.all([
-        fetchQuote(ticker), fetchProfile(ticker), fetchFinancials(ticker), fetchCandles(ticker)
+      const [quote, profile, financials, rsi, macd] = await Promise.all([
+        fetchQuote(ticker), fetchProfile(ticker), fetchFinancials(ticker),
+        fetchRSI(ticker), fetchMACD(ticker)
       ]);
       await delay(300);
       if (!quote) continue;
 
-      const rsi = calcRSI(candles?.closes);
-      const macd = calcMACD(candles?.closes);
       const pe = financials?.pe || null;
       const high52w = financials?.high52w || null;
       const low52w = financials?.low52w || null;
       const pos52w = (high52w&&low52w) ? ((quote.price-low52w)/(high52w-low52w))*100 : null;
       const revenueGrowth = financials?.revenueGrowth || null;
       const name = profile?.name || ticker;
-      const marketCap = profile?.marketCap ? profile.marketCap / 1000 : null; // Finnhub gives millions, convert to billions
-      // Get last available volume (works when market is closed)
-      const lastVol = candles?.volumes ? [...candles.volumes].reverse().find(v => v > 0) : null;
-      const volume = lastVol || financials?.avgVolume || null;
+      const marketCap = profile?.marketCap ? profile.marketCap / 1000 : null;
+      const volume = financials?.avgVolume || null;
       const avgVolume = financials?.avgVolume || null;
-      // Rel vol = today's volume vs 10-day average
 
       const score = calculateScore({rsi, macd, change:quote.change, pe, pos52w, revenueGrowth});
       const signal = getSignal(score, macd);
