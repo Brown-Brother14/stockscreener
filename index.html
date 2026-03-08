@@ -1274,6 +1274,34 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
                     : bearish/total >= 0.4  ? {label:'BEARISH', color:'var(--accent3)'}
                     : {label:'NEUTRAL', color:'var(--accent4)'};
 
+    // Avg price target
+    const hasPT = a.avgTarget != null && a.avgTarget > 0;
+    const upside = hasPT && currentPrice ? (((a.avgTarget - currentPrice) / currentPrice) * 100) : null;
+    const upsideColor = upside != null ? (upside >= 0 ? 'var(--accent2)' : 'var(--accent3)') : 'var(--muted)';
+
+    // Firm ratings
+    const ratingColor = r => {
+      const v = (r||'').toLowerCase();
+      if (v.includes('strong buy')||v.includes('outperform')||v.includes('overweight')||v.includes('buy')) return '#00ff88';
+      if (v.includes('sell')||v.includes('underweight')||v.includes('underperform')) return '#ff4d6d';
+      return '#ffd60a';
+    };
+    const firmRows = (a.firmRatings||[]).map(r => {
+      const actionType = (r.action||'').toLowerCase();
+      const badge = actionType.includes('upgrade')   ? '<span style="color:#00ff88;font-size:9px;font-weight:700">▲ UP</span>'
+                  : actionType.includes('downgrade') ? '<span style="color:#ff4d6d;font-size:9px;font-weight:700">▼ DOWN</span>'
+                  : actionType.includes('init')      ? '<span style="color:#00e5ff;font-size:9px;font-weight:700">★ INIT</span>'
+                  : '<span style="color:#ffd60a;font-size:9px">— REIT</span>';
+      const pt = r.target ? `<span style="color:var(--accent2);font-weight:700">${r.target.startsWith('$')?r.target:'$'+r.target}</span>` : '<span style="color:var(--muted)">--</span>';
+      return `<div style="display:grid;grid-template-columns:80px 1fr 160px 70px 55px;align-items:center;padding:9px 20px;border-bottom:1px solid rgba(30,42,53,0.4)" onmouseover="this.style.background='rgba(0,229,255,0.03)'" onmouseout="this.style.background=''">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">${r.date||''}</div>
+        <div style="font-size:12px;font-weight:700">${r.firm||'--'}</div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:${ratingColor(r.rating)}">${r.rating||'--'}</div>
+        <div style="font-family:'Space Mono',monospace;font-size:11px;text-align:right">${pt}</div>
+        <div style="text-align:right">${badge}</div>
+      </div>`;
+    }).join('');
+
     // 3-month trend rows
     const trendRows = a.history.map(h => {
       const t = (h.strongBuy||0)+(h.buy||0)+(h.hold||0)+(h.sell||0)+(h.strongSell||0);
