@@ -277,16 +277,26 @@
   <!-- Economic Calendar -->
   <div style="margin-top:24px">
     <div class="table-wrapper">
-      <div class="table-header-bar" style="display:flex;align-items:center;justify-content:space-between">
-        <div class="table-title">📅 Economic Calendar <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:8px">High-impact events · Next 30 days</span></div>
-        <div style="display:flex;gap:10px;font-family:'Space Mono',monospace;font-size:10px">
-          <span style="color:var(--accent3)">● High</span>
-          <span style="color:var(--accent4)">● Medium</span>
-          <span style="color:var(--muted)">● Low</span>
+      <div class="table-header-bar">
+        <div class="table-title">📅 Economic Calendar</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;gap:10px;font-family:'Space Mono',monospace;font-size:10px">
+            <span style="color:var(--accent3)">● High</span>
+            <span style="color:var(--accent4)">● Medium</span>
+            <span style="color:var(--muted)">● Low</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="btn btn-outline" onclick="shiftWeek(-1)" style="padding:6px 12px;font-size:12px">← Prev</button>
+            <div id="weekLabel" style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);min-width:140px;text-align:center"></div>
+            <button class="btn btn-outline" onclick="shiftWeek(1)" style="padding:6px 12px;font-size:12px">Next →</button>
+            <button class="btn btn-outline" onclick="goToCurrentWeek()" style="padding:6px 12px;font-size:11px">Today</button>
+          </div>
         </div>
       </div>
-      <div id="econCalendar" style="padding:20px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)">
-        <div style="display:flex;align-items:center;gap:10px"><div class="loader" style="width:16px;height:16px;border-width:2px"></div> Loading economic events...</div>
+      <div id="econCalendar" style="min-height:100px">
+        <div style="padding:20px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:10px">
+          <div class="loader" style="width:16px;height:16px;border-width:2px"></div> Loading economic events...
+        </div>
       </div>
     </div>
   </div>
@@ -1158,75 +1168,135 @@ function timeAgo(date) {
 async function getAIAnalysis(stock) {}  // disabled — no API key
 
 // ── ECONOMIC CALENDAR ──
-const HIGH_IMPACT_KEYWORDS = ['fomc','federal reserve','interest rate','cpi','consumer price','inflation','nonfarm','non-farm','payroll','gdp','unemployment','pce','retail sales','ppi','producer price','ism','housing','durable goods','trade balance','fed chair','powell','earnings per share'];
+let econEvents = [];
+let weekOffset = 0;
+
+const HIGH_IMPACT = ['fomc','federal reserve','interest rate decision','cpi','consumer price index','inflation','nonfarm','non-farm payroll','gdp','unemployment','pce','retail sales','ppi','producer price','ism manufacturing','ism services','housing starts','durable goods','trade balance','powell','beige book','treasury','auction'];
+
+function getWeekRange(offset) {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (day===0?6:day-1) + offset*7);
+  monday.setHours(0,0,0,0);
+  const friday = new Date(monday);
+  friday.setDate(monday.getDate() + 4);
+  friday.setHours(23,59,59,0);
+  return {monday, friday};
+}
+
+function fmtDate(d) { return d.toISOString().slice(0,10); }
+
+function impactColor(name, impact) {
+  const n = (name||'').toLowerCase();
+  if (HIGH_IMPACT.some(k=>n.includes(k))) return 'var(--accent3)';
+  if (impact==='high') return 'var(--accent3)';
+  if (impact==='medium'||impact==='2') return 'var(--accent4)';
+  return 'var(--border)';
+}
 
 async function loadEconCalendar() {
+  // Fetch 3 months of data once and cache
+  const from = fmtDate(new Date(Date.now() - 7*24*60*60*1000));
+  const to   = fmtDate(new Date(Date.now() + 90*24*60*60*1000));
   try {
-    const from = new Date().toISOString().slice(0,10);
-    const to = new Date(Date.now() + 45*24*60*60*1000).toISOString().slice(0,10);
     const d = await finnhubFetch('calendar/economic', {from, to});
-
-    if (!d?.economicCalendar?.length) {
-      document.getElementById('econCalendar').innerHTML = `<div style="color:var(--muted);padding:8px">No upcoming events found</div>`;
-      return;
-    }
-
-    // Filter to US events and sort by date
-    let events = d.economicCalendar
-      .filter(e => e.country === 'US')
-      .sort((a,b) => new Date(a.time||a.date) - new Date(b.time||b.date));
-
-    // Prioritise high-impact events
-    const highImpact = events.filter(e => {
-      const name = (e.event||'').toLowerCase();
-      return HIGH_IMPACT_KEYWORDS.some(k => name.includes(k));
-    });
-
-    // Show high impact first, then fill with others up to 30 total
-    const others = events.filter(e => !highImpact.includes(e)).slice(0, Math.max(0, 25 - highImpact.length));
-    events = [...highImpact, ...others].sort((a,b) => new Date(a.time||a.date) - new Date(b.time||b.date)).slice(0,30);
-
-    const today = new Date().toISOString().slice(0,10);
-
-    const impactColor = e => {
-      const n = (e.event||'').toLowerCase();
-      const isHigh = HIGH_IMPACT_KEYWORDS.some(k=>n.includes(k));
-      if (isHigh) return 'var(--accent3)';
-      if (e.impact === 'high') return 'var(--accent3)';
-      if (e.impact === 'medium') return 'var(--accent4)';
-      return 'var(--muted)';
-    };
-
-    document.getElementById('econCalendar').innerHTML = `
-      <div class="econ-header">
-        <span>Date</span><span></span><span>Event</span><span>Actual</span><span>Estimate</span><span>Previous</span>
-      </div>
-      ${events.map(e => {
-        const dateStr = (e.time||e.date||'').slice(0,10);
-        const isToday = dateStr === today;
-        const dt = new Date(dateStr);
-        const dateFmt = dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-        const dayName = dt.toLocaleDateString('en-US',{weekday:'short'});
-        const actual = e.actual != null ? e.actual : '--';
-        const est    = e.estimate != null ? e.estimate : '--';
-        const prev   = e.prev != null ? e.prev : '--';
-        const actualColor = (e.actual != null && e.estimate != null)
-          ? (parseFloat(e.actual) >= parseFloat(e.estimate) ? 'var(--accent2)' : 'var(--accent3)')
-          : 'var(--text)';
-
-        return `<div class="econ-event${isToday?' today-marker':''}">
-          <div class="econ-date">${dayName} ${dateFmt}${isToday?' <span style="color:var(--accent);font-size:9px">TODAY</span>':''}</div>
-          <div class="econ-impact" style="background:${impactColor(e)};box-shadow:0 0 6px ${impactColor(e)}"></div>
-          <div class="econ-name">${e.event||'--'}</div>
-          <div class="econ-val" style="color:${actualColor}">${actual}</div>
-          <div class="econ-est">${est}</div>
-          <div class="econ-prev">${prev}</div>
-        </div>`;
-      }).join('')}
-    `;
-  } catch(err) {
-    document.getElementById('econCalendar').innerHTML = `<div style="color:var(--muted);padding:8px">Could not load calendar</div>`;
+    econEvents = (d?.economicCalendar || [])
+      .filter(e => e.country==='US' && (e.event||'').trim())
+      .sort((a,b)=>new Date(a.time||a.date)-new Date(b.time||b.date));
+    renderWeek();
+  } catch(e) {
+    document.getElementById('econCalendar').innerHTML = `<div style="padding:20px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px">Failed to load calendar. Check your connection.</div>`;
   }
+}
+
+function shiftWeek(dir) { weekOffset += dir; renderWeek(); }
+function goToCurrentWeek() { weekOffset = 0; renderWeek(); }
+
+function renderWeek() {
+  const {monday, friday} = getWeekRange(weekOffset);
+  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // Update week label
+  const opts = {month:'short', day:'numeric'};
+  document.getElementById('weekLabel').textContent =
+    `${monday.toLocaleDateString('en-US',opts)} – ${friday.toLocaleDateString('en-US',opts)}`;
+
+  // Filter events for this week
+  const weekEvents = econEvents.filter(e => {
+    const d = new Date(e.time||e.date);
+    return d >= monday && d <= friday;
+  });
+
+  if (!econEvents.length) {
+    document.getElementById('econCalendar').innerHTML = `<div style="padding:24px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;text-align:center">No data loaded yet — check API connection</div>`;
+    return;
+  }
+
+  // Group by day
+  const byDay = {};
+  for (let i=0; i<5; i++) {
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
+    byDay[d.toISOString().slice(0,10)] = [];
+  }
+  weekEvents.forEach(e => {
+    const key = (e.time||e.date||'').slice(0,10);
+    if (byDay[key]) byDay[key].push(e);
+  });
+
+  const html = Object.entries(byDay).map(([dateKey, events]) => {
+    const d = new Date(dateKey);
+    const isToday = d.getTime()===today.getTime();
+    const isPast  = d < today;
+    const dayName = d.toLocaleDateString('en-US',{weekday:'long'});
+    const dateFmt = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+
+    const dayHeaderBg = isToday ? 'rgba(0,229,255,0.08)' : 'var(--surface)';
+    const dayHeaderBorder = isToday ? 'border-left:3px solid var(--accent)' : 'border-left:3px solid transparent';
+
+    const eventsHtml = events.length === 0
+      ? `<div style="padding:10px 20px;font-family:'Space Mono',monospace;font-size:11px;color:var(--border)">No scheduled events</div>`
+      : events.map(e => {
+          const ic = impactColor(e.event, e.impact);
+          const isHigh = ic === 'var(--accent3)';
+          const actual = e.actual != null ? String(e.actual) : null;
+          const est    = e.estimate != null ? String(e.estimate) : null;
+          const prev   = e.prev != null ? String(e.prev) : null;
+          const actualColor = (actual && est)
+            ? (parseFloat(actual) >= parseFloat(est) ? 'var(--accent2)' : 'var(--accent3)')
+            : 'var(--text)';
+          const time = e.time ? new Date(e.time).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:'America/New_York'}) : '';
+
+          return `<div style="display:grid;grid-template-columns:60px 12px 1fr 90px 90px 90px;align-items:center;padding:10px 20px;border-bottom:1px solid rgba(30,42,53,0.4);transition:background 0.15s;${isHigh&&!isPast?'background:rgba(255,77,109,0.03)':''}" onmouseover="this.style.background='rgba(0,229,255,0.04)'" onmouseout="this.style.background='${isHigh&&!isPast?'rgba(255,77,109,0.03)':''}'">
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">${time}</div>
+            <div style="width:8px;height:8px;border-radius:50%;background:${ic};box-shadow:${ic!=='var(--border)'?'0 0 6px '+ic:'none'}"></div>
+            <div style="padding-left:10px">
+              <div style="font-size:13px;font-weight:700;color:${isPast?'var(--muted)':'var(--text)'}">${e.event||'--'}</div>
+            </div>
+            <div style="font-family:'Space Mono',monospace;font-size:11px;text-align:right;color:${actualColor};font-weight:700">${actual||'--'}</div>
+            <div style="font-family:'Space Mono',monospace;font-size:11px;text-align:right;color:var(--accent4)">${est||'--'}</div>
+            <div style="font-family:'Space Mono',monospace;font-size:11px;text-align:right;color:var(--muted)">${prev||'--'}</div>
+          </div>`;
+        }).join('');
+
+    return `<div>
+      <div style="padding:10px 20px;background:${dayHeaderBg};${dayHeaderBorder};display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
+        <div style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:${isToday?'var(--accent)':isPast?'var(--muted)':'var(--text)'}">
+          ${dayName} <span style="font-weight:400;margin-left:6px">${dateFmt}</span>
+          ${isToday?'<span style="margin-left:8px;font-size:9px;color:var(--accent);background:rgba(0,229,255,0.1);padding:2px 6px;border-radius:3px;border:1px solid rgba(0,229,255,0.2)">TODAY</span>':''}
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">${events.length} event${events.length!==1?'s':''}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:60px 12px 1fr 90px 90px 90px;padding:6px 20px;background:rgba(13,17,23,0.5);font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">
+        <span>Time ET</span><span></span><span style="padding-left:10px">Event</span><span style="text-align:right">Actual</span><span style="text-align:right">Estimate</span><span style="text-align:right">Previous</span>
+      </div>
+      ${eventsHtml}
+    </div>`;
+  }).join(`<div style="height:1px;background:var(--border)"></div>`);
+
+  document.getElementById('econCalendar').innerHTML = html ||
+    `<div style="padding:24px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;text-align:center">No events this week</div>`;
 }
 
 loadEconCalendar();
