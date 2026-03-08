@@ -512,44 +512,110 @@ async function twelveFetch(endpoint, params={}) {
   } catch(e) { return null; }
 }
 
-// Fetch RSI from Twelve Data
-async function fetchRSI(ticker) {
-  const d = await twelveFetch('rsi', {symbol: ticker, interval: '1day', time_period: 14, outputsize: 1});
-  if (!d?.values?.[0]?.rsi) return null;
-  return parseFloat(d.values[0].rsi);
+// ── CALCULATE ALL TECHNICALS FROM A SINGLE TIME SERIES CALL ──
+function calcEMA(closes, period) {
+  if (closes.length < period) return null;
+  const k = 2 / (period + 1);
+  let ema = closes.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  for (let i = period; i < closes.length; i++) ema = closes[i] * k + ema * (1 - k);
+  return ema;
 }
 
-// Fetch MACD from Twelve Data
-async function fetchMACD(ticker) {
-  const d = await twelveFetch('macd', {symbol: ticker, interval: '1day', outputsize: 1});
-  if (!d?.values?.[0]) return null;
-  const v = d.values[0];
-  return {macd: parseFloat(v.macd), signal: parseFloat(v.macd_signal), hist: parseFloat(v.macd_hist), bullish: parseFloat(v.macd) > parseFloat(v.macd_signal)};
+function calcRSI(closes, period=14) {
+  if (closes.length < period + 1) return null;
+  let gains = 0, losses = 0;
+  for (let i = 1; i <= period; i++) {
+    const d = closes[i] - closes[i-1];
+    if (d > 0) gains += d; else losses -= d;
+  }
+  let avgGain = gains / period, avgLoss = losses / period;
+  for (let i = period + 1; i < closes.length; i++) {
+    const d = closes[i] - closes[i-1];
+    avgGain = (avgGain * (period-1) + Math.max(d, 0)) / period;
+    avgLoss = (avgLoss * (period-1) + Math.max(-d, 0)) / period;
+  }
+  return avgLoss === 0 ? 100 : 100 - (100 / (1 + avgGain / avgLoss));
 }
 
-// Fetch EMA 20, 50, 200 + Bollinger Bands + ADX + Stochastic + real volume sequentially
-async function fetchTechnicals(ticker) {
-  try {
-    const ema20d   = await twelveFetch('ema',         {symbol:ticker, interval:'1day', time_period:20,  outputsize:1});
-    const ema50d   = await twelveFetch('ema',         {symbol:ticker, interval:'1day', time_period:50,  outputsize:1});
-    const ema200d  = await twelveFetch('ema',         {symbol:ticker, interval:'1day', time_period:200, outputsize:1});
-    const bbands   = await twelveFetch('bbands',      {symbol:ticker, interval:'1day', outputsize:1});
-    const adx      = await twelveFetch('adx',         {symbol:ticker, interval:'1day', time_period:14,  outputsize:1});
-    const stoch    = await twelveFetch('stoch',       {symbol:ticker, interval:'1day', outputsize:1});
-    const ts       = await twelveFetch('time_series', {symbol:ticker, interval:'1day', outputsize:2});
-    return {
-      ema20:    ema20d?.values?.[0]?.ema        ? parseFloat(ema20d.values[0].ema)              : null,
-      ema50:    ema50d?.values?.[0]?.ema        ? parseFloat(ema50d.values[0].ema)              : null,
-      ema200:   ema200d?.values?.[0]?.ema       ? parseFloat(ema200d.values[0].ema)             : null,
-      bbUpper:  bbands?.values?.[0]?.upper_band ? parseFloat(bbands.values[0].upper_band)       : null,
-      bbMiddle: bbands?.values?.[0]?.middle_band? parseFloat(bbands.values[0].middle_band)      : null,
-      bbLower:  bbands?.values?.[0]?.lower_band ? parseFloat(bbands.values[0].lower_band)       : null,
-      adx:      adx?.values?.[0]?.adx           ? parseFloat(adx.values[0].adx)                : null,
-      stochK:   stoch?.values?.[0]?.slow_k      ? parseFloat(stoch.values[0].slow_k)           : null,
-      stochD:   stoch?.values?.[0]?.slow_d      ? parseFloat(stoch.values[0].slow_d)           : null,
-      volume:   ts?.values?.[0]?.volume         ? parseFloat(ts.values[0].volume)              : null,
-    };
-  } catch(e) { return {}; }
+function calcMACD(closes) {
+  if (closes.length < 35) return null;
+  const ema12 = calcEMA(closes, 12);
+  const ema26 = calcEMA(closes, 26);
+  if (!ema12 || !ema26) return null;
+  const macdLine = ema12 - ema26;
+  // signal = 9-period EMA of macd values
+  const macdSeries = [];
+  for (let i = 26; i <= closes.length; i++) {
+    const e12 = calcEMA(closes.slice(0, i), 12);
+    const e26 = calcEMA(closes.slice(0, i), 26);
+    if (e12 && e26) macdSeries.push(e12 - e26);
+  }
+  const signal = calcEMA(macdSeries, 9) || macdSeries[macdSeries.length-1];
+  const hist   = macdLine - signal;
+  return { macd: macdLine, signal, hist, bullish: macdLine > signal };
+}
+
+function calcBollinger(closes, period=20) {
+  if (closes.length < period) return null;
+  const slice = closes.slice(-period);
+  const mean  = slice.reduce((a,b)=>a+b,0) / period;
+  const std   = Math.sqrt(slice.reduce((a,b)=>a+(b-mean)**2, 0) / period);
+  return { upper: mean + 2*std, middle: mean, lower: mean - 2*std };
+}
+
+function calcADX(highs, lows, closes, period=14) {
+  if (closes.length < period + 1) return null;
+  const trues = [], plusDM = [], minusDM = [];
+  for (let i = 1; i < closes.length; i++) {
+    const hl = highs[i] - lows[i];
+    const hpc = Math.abs(highs[i] - closes[i-1]);
+    const lpc = Math.abs(lows[i] - closes[i-1]);
+    trues.push(Math.max(hl, hpc, lpc));
+    const upMove = highs[i] - highs[i-1];
+    const downMove = lows[i-1] - lows[i];
+    plusDM.push(upMove > downMove && upMove > 0 ? upMove : 0);
+    minusDM.push(downMove > upMove && downMove > 0 ? downMove : 0);
+  }
+  const atr  = trues.slice(0, period).reduce((a,b)=>a+b,0);
+  const pDM  = plusDM.slice(0, period).reduce((a,b)=>a+b,0);
+  const mDM  = minusDM.slice(0, period).reduce((a,b)=>a+b,0);
+  const pDI  = (pDM / atr) * 100;
+  const mDI  = (mDM / atr) * 100;
+  const dx   = Math.abs(pDI - mDI) / (pDI + mDI) * 100;
+  return dx;
+}
+
+function calcStoch(highs, lows, closes, period=14) {
+  if (closes.length < period) return null;
+  const slice_h = highs.slice(-period), slice_l = lows.slice(-period);
+  const highH = Math.max(...slice_h), lowL = Math.min(...slice_l);
+  const k = highH === lowL ? 50 : ((closes[closes.length-1] - lowL) / (highH - lowL)) * 100;
+  return { k, d: k }; // simplified
+}
+
+// Single Twelve Data call — fetch 220 days of OHLCV, compute everything
+async function fetchAllTechnicals(ticker) {
+  const d = await twelveFetch('time_series', {symbol: ticker, interval: '1day', outputsize: 220});
+  if (!d?.values?.length) return {};
+  // values come newest-first, reverse to oldest-first
+  const bars  = [...d.values].reverse();
+  const closes = bars.map(b => parseFloat(b.close));
+  const highs  = bars.map(b => parseFloat(b.high));
+  const lows   = bars.map(b => parseFloat(b.low));
+  const volume = parseFloat(bars[bars.length-1].volume);
+
+  const rsi   = calcRSI(closes);
+  const macd  = calcMACD(closes);
+  const ema20 = calcEMA(closes, 20);
+  const ema50 = calcEMA(closes, 50);
+  const ema200= calcEMA(closes, 200);
+  const bb    = calcBollinger(closes);
+  const adx   = calcADX(highs, lows, closes);
+  const stoch = calcStoch(highs, lows, closes);
+
+  return { rsi, macd, ema20, ema50, ema200,
+    bbUpper: bb?.upper||null, bbMiddle: bb?.middle||null, bbLower: bb?.lower||null,
+    adx, stochK: stoch?.k||null, stochD: stoch?.d||null, volume };
 }
 
 // Real-time quote: price, change, high, low
@@ -772,17 +838,14 @@ async function runScan() {
       const [quote, profile, financials] = await Promise.all([
         fetchQuote(ticker), fetchProfile(ticker), fetchFinancials(ticker)
       ]);
-      await delay(400);
+      await delay(300);
       if (!quote) { console.warn(`No quote for ${ticker}`); continue; }
 
-      // Fetch all Twelve Data indicators — staggered to avoid rate limits
-      const [rsi, macd] = await Promise.all([
-        fetchRSI(ticker).catch(()=>null),
-        fetchMACD(ticker).catch(()=>null),
-      ]);
-      await delay(400);
-      const tech = await fetchTechnicals(ticker).catch(()=>({}));
-      const ext = await fetchExtendedHours(ticker).catch(()=>null);
+      // ONE Twelve Data call — calculates everything from price history
+      const tech = await fetchAllTechnicals(ticker).catch(()=>({}));
+      const rsi  = tech.rsi   ?? null;
+      const macd = tech.macd  ?? null;
+      const ext  = await fetchExtendedHours(ticker).catch(()=>null);
       console.log(`${ticker} — RSI:${rsi?.toFixed(1)} MACD:${macd?.bullish} EMA20:${tech?.ema20?.toFixed(2)}`);
 
       const pe = financials?.pe || null;
@@ -843,9 +906,6 @@ async function runScan() {
       document.getElementById('topPick').textContent=top?top.ticker:'--';
       renderTable();
     } catch(e) { console.warn(`Failed ${ticker}:`, e); }
-    // Respect Twelve Data rate limit: ~8 req/min on free tier
-    // Each stock uses ~9 calls so we need ~8s between stocks
-    if (i < tickers.length - 1) await delay(8000);
   }
 
   document.getElementById('progressFill').style.width='100%';
