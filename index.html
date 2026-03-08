@@ -603,21 +603,26 @@ async function fetchFinancials(ticker) {
   };
 }
 
-// Analyst buy/sell/hold consensus (free tier)
+// Analyst consensus + upgrades/downgrades (free tier)
 async function fetchAnalystTargets(ticker) {
-  const rec = await finnhubFetch('stock/recommendation', {symbol: ticker});
+  const [rec, upgrades, pt] = await Promise.all([
+    finnhubFetch('stock/recommendation', {symbol: ticker}),
+    finnhubFetch('stock/upgrade-downgrade', {symbol: ticker}),
+    finnhubFetch('stock/price-target', {symbol: ticker}),
+  ]);
   const latest = Array.isArray(rec) && rec.length ? rec[0] : null;
   return {
-    targetHigh:   null,
-    targetLow:    null,
-    targetMean:   null,
-    targetMedian: null,
+    targetHigh:   pt?.targetHigh   || null,
+    targetLow:    pt?.targetLow    || null,
+    targetMean:   pt?.targetMean   || null,
+    targetMedian: pt?.targetMedian || null,
     strongBuy:  latest?.strongBuy  || 0,
     buy:        latest?.buy        || 0,
     hold:       latest?.hold       || 0,
     sell:       latest?.sell       || 0,
     strongSell: latest?.strongSell || 0,
     period:     latest?.period     || null,
+    upgrades:   Array.isArray(upgrades) ? upgrades.slice(0, 20) : [],
   };
 }
 
@@ -1169,12 +1174,12 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
     const el = document.getElementById('analystSection');
     const total = (a.strongBuy||0) + (a.buy||0) + (a.hold||0) + (a.sell||0) + (a.strongSell||0);
 
-    if (!total) {
+    if (!total && !a.upgrades?.length) {
       el.innerHTML = '<div style="padding:16px 20px;color:var(--muted);font-family:\'Space Mono\',monospace;font-size:11px">No analyst coverage data available</div>';
       return;
     }
 
-    const pct = v => Math.round(((v||0)/total)*100);
+    const pct = v => total ? Math.round(((v||0)/total)*100) : 0;
     const rows = [
       {label:'Strong Buy',  val:a.strongBuy,  color:'#00ff88'},
       {label:'Buy',         val:a.buy,         color:'#00e5ff'},
@@ -1182,57 +1187,113 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
       {label:'Sell',        val:a.sell,        color:'#ff6b6b'},
       {label:'Strong Sell', val:a.strongSell,  color:'#ff4d6d'},
     ];
-
-    // Overall sentiment label
-    const bullish = (a.strongBuy||0) + (a.buy||0);
-    const bearish  = (a.sell||0) + (a.strongSell||0);
+    const bullish   = (a.strongBuy||0) + (a.buy||0);
+    const bearish   = (a.sell||0) + (a.strongSell||0);
     const sentiment = bullish/total >= 0.6 ? {label:'BULLISH', color:'var(--accent2)'}
                     : bearish/total >= 0.4  ? {label:'BEARISH', color:'var(--accent3)'}
                     : {label:'NEUTRAL', color:'var(--accent4)'};
 
+    // Price target section
+    const hasPT = a.targetMean != null;
+    const upside = hasPT && currentPrice ? (((a.targetMean - currentPrice) / currentPrice) * 100) : null;
+    const upsideColor = upside >= 0 ? 'var(--accent2)' : 'var(--accent3)';
+    const rangePos = (hasPT && a.targetHigh > a.targetLow && currentPrice)
+      ? Math.min(100, Math.max(0, ((currentPrice - a.targetLow) / (a.targetHigh - a.targetLow)) * 100)) : null;
+
+    // Individual upgrades/downgrades
+    const ratingColor = r => {
+      const v = (r||'').toLowerCase();
+      if (v.includes('strong buy')||v.includes('outperform')||v.includes('overweight')||v.includes('buy')) return '#00ff88';
+      if (v.includes('sell')||v.includes('underweight')||v.includes('underperform')) return '#ff4d6d';
+      return '#ffd60a';
+    };
+
+    const upgradeRows = (a.upgrades||[]).map(u => {
+      const date = u.gradeDate ? new Date(u.gradeDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}) : '';
+      const action = u.fromGrade && u.toGrade ? `${u.fromGrade} → ${u.toGrade}` : u.toGrade || u.action || '';
+      const actionType = (u.action||'').toLowerCase();
+      const badge = actionType.includes('upgrade') ? '<span style="color:#00ff88;font-size:9px">▲ UPGRADE</span>'
+                  : actionType.includes('downgrade') ? '<span style="color:#ff4d6d;font-size:9px">▼ DOWNGRADE</span>'
+                  : '<span style="color:#ffd60a;font-size:9px">— MAINTAIN</span>';
+      return `<div style="display:grid;grid-template-columns:90px 1fr 1fr 80px;align-items:center;padding:9px 20px;border-bottom:1px solid rgba(30,42,53,0.4)" onmouseover="this.style.background='rgba(0,229,255,0.03)'" onmouseout="this.style.background=''">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">${date}</div>
+        <div style="font-size:12px;font-weight:700">${u.company||'--'}</div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:${ratingColor(u.toGrade)}">${action||'--'}</div>
+        <div style="text-align:right">${badge}</div>
+      </div>`;
+    }).join('');
+
     el.innerHTML = `
-      <div style="padding:20px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-          <div>
-            <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:${sentiment.color}">${sentiment.label}</div>
-            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px">${total} analyst ratings${a.period?' · '+a.period:''}</div>
+      <div style="display:grid;grid-template-columns:${hasPT?'1fr 1fr':'1fr'};gap:1px;background:var(--border)">
+
+        <!-- Consensus -->
+        <div style="padding:20px;background:var(--card)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div>
+              <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:${sentiment.color}">${sentiment.label}</div>
+              <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px">${total} analyst ratings${a.period?' · '+a.period:''}</div>
+            </div>
+            <div style="display:flex;gap:14px">
+              <div style="text-align:center"><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:#00ff88">${bullish}</div><div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">BUY</div></div>
+              <div style="text-align:center"><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:#ffd60a">${a.hold||0}</div><div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">HOLD</div></div>
+              <div style="text-align:center"><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:#ff4d6d">${bearish}</div><div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">SELL</div></div>
+            </div>
           </div>
-          <div style="display:flex;gap:16px">
-            <div style="text-align:center">
-              <div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:#00ff88">${bullish}</div>
-              <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">BUY</div>
-            </div>
-            <div style="text-align:center">
-              <div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:#ffd60a">${a.hold||0}</div>
-              <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">HOLD</div>
-            </div>
-            <div style="text-align:center">
-              <div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:#ff4d6d">${bearish}</div>
-              <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">SELL</div>
-            </div>
+          <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:14px">
+            ${rows.map(r=>`<div style="width:${pct(r.val)}%;background:${r.color}" title="${r.label}: ${r.val}"></div>`).join('')}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            ${rows.map(r=>`
+              <div style="display:grid;grid-template-columns:100px 1fr 32px;align-items:center;gap:8px">
+                <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">${r.label}</div>
+                <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
+                  <div style="height:100%;width:${pct(r.val)}%;background:${r.color};border-radius:3px"></div>
+                </div>
+                <div style="font-family:'Space Mono',monospace;font-size:11px;color:${r.color};font-weight:700;text-align:right">${r.val||0}</div>
+              </div>`).join('')}
           </div>
         </div>
 
-        <!-- Stacked bar -->
-        <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;margin-bottom:16px">
-          ${rows.map(r=>`<div style="width:${pct(r.val)}%;background:${r.color};transition:width 0.6s ease" title="${r.label}: ${r.val}"></div>`).join('')}
-        </div>
-
-        <!-- Breakdown rows -->
-        <div style="display:flex;flex-direction:column;gap:8px">
-          ${rows.map(r=>`
-            <div style="display:grid;grid-template-columns:100px 1fr 40px;align-items:center;gap:10px">
-              <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">${r.label}</div>
-              <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
-                <div style="height:100%;width:${pct(r.val)}%;background:${r.color};border-radius:3px"></div>
-              </div>
-              <div style="font-family:'Space Mono',monospace;font-size:11px;color:${r.color};font-weight:700;text-align:right">${r.val||0}</div>
+        ${hasPT ? `
+        <!-- Price Target -->
+        <div style="padding:20px;background:var(--card)">
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Avg Price Target</div>
+          <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px">
+            <div style="font-family:'Space Mono',monospace;font-size:28px;font-weight:700">$${a.targetMean.toFixed(2)}</div>
+            ${upside!=null?`<div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:${upsideColor}">${upside>=0?'+':''}${upside.toFixed(1)}%</div>`:''}
+          </div>
+          ${a.targetMedian?`<div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:16px">Median $${a.targetMedian.toFixed(2)}</div>`:''}
+          ${rangePos!=null?`
+          <div style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px">
+              <span>Low $${a.targetLow.toFixed(2)}</span><span>High $${a.targetHigh.toFixed(2)}</span>
             </div>
-          `).join('')}
-        </div>
+            <div style="position:relative;height:6px;background:rgba(255,255,255,0.06);border-radius:3px">
+              <div style="position:absolute;left:0;top:0;height:100%;width:${rangePos}%;background:linear-gradient(90deg,var(--accent3),var(--accent4),var(--accent2));border-radius:3px"></div>
+              <div style="position:absolute;top:-4px;left:calc(${rangePos}% - 6px);width:14px;height:14px;background:white;border-radius:50%;border:2px solid var(--bg);box-shadow:0 0 6px rgba(255,255,255,0.3)"></div>
+            </div>
+            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:10px;text-align:center">Current $${currentPrice.toFixed(2)}</div>
+          </div>` : ''}
+        </div>` : ''}
       </div>
+
+      ${upgradeRows ? `
+      <!-- Individual Analyst Ratings -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--surface);border-top:1px solid var(--border);cursor:pointer;user-select:none" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.toggle-arrow').textContent=this.nextElementSibling.style.display==='none'?'▼':'▲'">
+          <div style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700">📋 Individual Analyst Ratings <span style="color:var(--muted);font-weight:400">(${a.upgrades.length})</span></div>
+          <span class="toggle-arrow" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">▼</span>
+        </div>
+        <div style="display:none">
+          <div style="display:grid;grid-template-columns:90px 1fr 1fr 80px;padding:6px 20px;background:rgba(13,17,23,0.6);font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border)">
+            <span>Date</span><span>Firm</span><span>Rating</span><span style="text-align:right">Action</span>
+          </div>
+          ${upgradeRows}
+        </div>
+      </div>` : ''}
     `;
   } catch(e) {
+    console.error('Analyst render error:', e);
     document.getElementById('analystSection').innerHTML = '<div style="padding:16px 20px;color:var(--muted);font-family:\'Space Mono\',monospace;font-size:11px">Analyst data unavailable</div>';
   }
 }
