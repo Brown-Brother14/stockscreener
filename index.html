@@ -1169,6 +1169,7 @@ async function fetchEarningsDate(ticker) {
 async function fetchAndRenderAnalyst(ticker, currentPrice) {
   try {
     const a = await fetchAnalystTargets(ticker);
+    console.log('Analyst data for', ticker, JSON.stringify(a));
     const el = document.getElementById('analystSection');
     if (!a || !a.targetMean) {
       el.innerHTML = '<div style="padding:16px 20px;color:var(--muted);font-family:\'Space Mono\',monospace;font-size:11px">No analyst coverage data available</div>';
