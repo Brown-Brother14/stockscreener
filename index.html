@@ -443,7 +443,17 @@
       <div style="padding:16px 20px;background:var(--surface);border-bottom:1px solid var(--border)">
         <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">S&P 500 Sector Performance (Today)</div>
         <div id="sectorGrid" style="display:grid;grid-template-columns:repeat(11,1fr);gap:6px">
-          ${['XLK','XLF','XLE','XLV','XLI','XLY','XLP','XLU','XLRE','XLB','XLC'].map(s=>`<div id="sector-${s}" style="border-radius:8px;padding:10px 6px;text-align:center;background:var(--border);min-height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:var(--muted)">${s}</div><div style="width:16px;height:2px;background:var(--border);border-radius:1px"></div></div>`).join('')}
+          <div id="sector-XLK"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
+          <div id="sector-XLF"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
+          <div id="sector-XLE"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
+          <div id="sector-XLV"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
+          <div id="sector-XLI"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
+          <div id="sector-XLY"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
+          <div id="sector-XLP"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
+          <div id="sector-XLU"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
+          <div id="sector-XLRE" class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
+          <div id="sector-XLB"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
+          <div id="sector-XLC"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
         </div>
       </div>
 
@@ -2119,14 +2129,20 @@ const EXTRA_META = {
   TLT:  {name:'20yr Bonds', id:'TLT'},
 };
 
-function getFngFromVix(vix) {
-  // Map VIX to Fear & Greed (inverted — high VIX = extreme fear)
-  if (vix >= 40)  return {score: Math.max(2,  Math.round(5  - (vix-40)*0.1)),  label:'EXTREME FEAR',  color:'#ef4444'};
-  if (vix >= 28)  return {score: Math.round(5  + (40-vix)  * 1.5),              label:'FEAR',          color:'#f97316'};
-  if (vix >= 20)  return {score: Math.round(20 + (28-vix)  * 3.75),             label:'FEAR',          color:'#f97316'};
-  if (vix >= 15)  return {score: Math.round(50 + (20-vix)  * 4),                label:'NEUTRAL',       color:'#eab308'};
-  if (vix >= 12)  return {score: Math.round(70 + (15-vix)  * 3.33),             label:'GREED',         color:'#84cc16'};
-  return              {score: Math.min(98, Math.round(80 + (12-vix)*3)),         label:'EXTREME GREED', color:'#22c55e'};
+function getFngColor(score) {
+  if (score <= 25) return '#ef4444';
+  if (score <= 45) return '#f97316';
+  if (score <= 55) return '#eab308';
+  if (score <= 75) return '#84cc16';
+  return '#22c55e';
+}
+
+function getFngLabel(score) {
+  if (score <= 25) return 'EXTREME FEAR';
+  if (score <= 45) return 'FEAR';
+  if (score <= 55) return 'NEUTRAL';
+  if (score <= 75) return 'GREED';
+  return 'EXTREME GREED';
 }
 
 function drawFngGauge(score, color) {
@@ -2242,66 +2258,96 @@ function renderExtraCard(id, quote, name) {
 }
 
 async function loadMacroDashboard() {
-  // Fetch all tickers in parallel using existing Finnhub proxy
-  const allTickers = ['SPY','QQQ','IWM','XLK','XLF','XLE','XLV','XLI','XLY','XLP','XLU','XLRE','XLB','XLC','UUP','GLD','USO','TLT'];
+  const WORKER = 'https://broken-butterfly-8148.jai-mistry14.workers.dev';
 
-  // Show loading spinners on index cards
+  // Show loading spinners
   ['VIX','SPY','QQQ','IWM'].forEach(t => {
     const el = document.getElementById(`macro-${t}`);
     if (el) el.innerHTML = '<div class="mi-loading"></div>';
   });
 
+  // ── 1. Real CNN Fear & Greed Index ──────────────────────────
   try {
-    // Fetch VIX via Twelve Data
-    let vixScore = 18; // fallback
-    try {
-      const vixData = await twelveFetch('quote', {symbol: 'VIX'});
-      if (vixData?.close) {
-        vixScore = parseFloat(vixData.close);
-        renderIndexCard('VIX', {c: vixScore, dp: parseFloat(vixData.percent_change||0)});
-      }
-    } catch(e) {
-      renderIndexCard('VIX', {c: vixScore, dp: 0});
+    const fngRes = await fetch(`${WORKER}/feargreed`);
+    const fngJson = await fngRes.json();
+    // CNN returns { fear_and_greed: { score, rating, timestamp }, ... }
+    const fngData = fngJson?.fear_and_greed;
+    if (fngData?.score != null) {
+      const score = Math.round(fngData.score);
+      const color = getFngColor(score);
+      const label = getFngLabel(score);
+      document.getElementById('fngValue').textContent = score;
+      document.getElementById('fngValue').style.color = color;
+      document.getElementById('fngLabel').textContent = label;
+      document.getElementById('fngLabel').style.color = color;
+      // Update subtitle to show it's real CNN data
+      const sub = document.querySelector('#fngCard div:last-child');
+      if (sub) sub.textContent = 'Source: CNN Business';
+      drawFngGauge(score, color);
     }
-
-    // Fetch all equity tickers from Finnhub in parallel (batched)
-    const quotes = {};
-    await Promise.all(allTickers.map(async t => {
-      try {
-        const q = await finnhubFetch('quote', {symbol: t});
-        if (q?.c) quotes[t] = q;
-      } catch(e) {}
-    }));
-
-    // Render market indices
-    ['SPY','QQQ','IWM'].forEach(t => {
-      if (quotes[t]) renderIndexCard(t, quotes[t]);
-    });
-
-    // Render sectors
-    Object.keys(SECTOR_META).forEach(t => {
-      if (quotes[t]) renderSectorTile(t, quotes[t]);
-    });
-
-    // Render extras
-    const extraMap = {UUP:'DXY', GLD:'GLD', USO:'USO', TLT:'TLT'};
-    Object.entries(extraMap).forEach(([ticker, id]) => {
-      if (quotes[ticker]) renderExtraCard(id, quotes[ticker]);
-    });
-
-    // Draw Fear & Greed from VIX
-    const fng = getFngFromVix(vixScore);
-    document.getElementById('fngValue').textContent = fng.score;
-    document.getElementById('fngValue').style.color = fng.color;
-    document.getElementById('fngLabel').textContent = fng.label;
-    document.getElementById('fngLabel').style.color = fng.color;
-    drawFngGauge(fng.score, fng.color);
-
-    document.getElementById('macroLastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-
   } catch(e) {
-    console.error('Macro load error:', e);
+    console.warn('F&G fetch failed:', e);
+    document.getElementById('fngLabel').textContent = 'UNAVAILABLE';
   }
+
+  // ── 2. Fetch all equity tickers in parallel via Finnhub ─────
+  const allTickers = ['SPY','QQQ','IWM','XLK','XLF','XLE','XLV','XLI','XLY','XLP','XLU','XLRE','XLB','XLC','UUP','GLD','USO','TLT'];
+  const quotes = {};
+  await Promise.all(allTickers.map(async t => {
+    try {
+      const q = await finnhubFetch('quote', {symbol: t});
+      if (q?.c) quotes[t] = q;
+    } catch(e) {}
+  }));
+
+  // ── 3. VIX via Twelve Data ───────────────────────────────────
+  try {
+    const vixData = await twelveFetch('quote', {symbol: 'VIX'});
+    if (vixData?.close) {
+      const vixPrice = parseFloat(vixData.close);
+      const vixChg = parseFloat(vixData.percent_change || 0);
+      // For VIX: up = bad (red), down = good (green) — inverted
+      const chgColor = vixChg <= 0 ? 'var(--accent2)' : 'var(--accent3)';
+      const chgBg    = vixChg <= 0 ? 'var(--green-bg)' : 'var(--red-bg)';
+      const el = document.getElementById('macro-VIX');
+      if (el) el.innerHTML = `
+        <div class="mi-label">VIX</div>
+        <div class="mi-name">Volatility Index</div>
+        <div class="mi-price">${vixPrice.toFixed(2)}</div>
+        <div class="mi-change" style="color:${chgColor};background:${chgBg}">${vixChg>=0?'+':''}${vixChg.toFixed(2)}%</div>
+      `;
+    }
+  } catch(e) {
+    const el = document.getElementById('macro-VIX');
+    if (el) el.innerHTML = '<div style="padding:16px;font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted)">VIX unavailable</div>';
+  }
+
+  // ── 4. Render market indices ─────────────────────────────────
+  ['SPY','QQQ','IWM'].forEach(t => {
+    if (quotes[t]) renderIndexCard(t, quotes[t]);
+    else {
+      const el = document.getElementById(`macro-${t}`);
+      if (el) el.innerHTML = `<div class="mi-label">${t}</div><div class="mi-name" style="color:var(--muted);font-size:10px">No data</div>`;
+    }
+  });
+
+  // ── 5. Render sector tiles ────────────────────────────────────
+  Object.keys(SECTOR_META).forEach(t => {
+    if (quotes[t]) renderSectorTile(t, quotes[t]);
+    else {
+      const el = document.getElementById(`sector-${t}`);
+      if (el) el.innerHTML = `<div class="sector-ticker" style="color:var(--muted)">${t}</div><div style="font-size:9px;color:var(--muted)">--</div>`;
+    }
+  });
+
+  // ── 6. Render extras ─────────────────────────────────────────
+  const extraMap = {UUP:'DXY', GLD:'GLD', USO:'USO', TLT:'TLT'};
+  Object.entries(extraMap).forEach(([ticker, id]) => {
+    if (quotes[ticker]) renderExtraCard(id, quotes[ticker]);
+  });
+
+  document.getElementById('macroLastUpdated').textContent =
+    'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 }
 
 // Load on page ready
