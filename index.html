@@ -380,6 +380,7 @@ function loadPreset(name) {
   runScan();
 }
 
+const delay = ms => new Promise(r => setTimeout(r, ms));
 
 
 //  Finnhub via Cloudflare Worker 
