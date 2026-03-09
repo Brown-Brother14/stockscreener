@@ -46,6 +46,21 @@
   }
   /* Dark mode — all handled via CSS variables above */
   body.dark #themeToggle{ border-color:var(--border) }
+
+  /* Macro dashboard */
+  .macro-index-card{background:var(--card);padding:16px 20px;display:flex;flex-direction:column;justify-content:center;gap:4px}
+  .mi-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .mi-name{font-size:11px;color:var(--muted);margin-top:1px}
+  .mi-price{font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--text)}
+  .mi-change{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;padding:2px 8px;border-radius:5px;display:inline-block;margin-top:2px}
+  .mi-loading{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:16px auto}
+  .sector-tile{border-radius:8px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:transform 0.15s,box-shadow 0.15s;cursor:default}
+  .sector-tile:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.12)}
+  .sector-ticker{font-family:'DM Mono',monospace;font-size:9px;font-weight:700}
+  .sector-name{font-size:8px;opacity:.8}
+  .sector-chg{font-family:'DM Mono',monospace;font-size:11px;font-weight:700}
+  @media(max-width:900px){#macroTopRow{grid-template-columns:1fr}#macroIndices{grid-template-columns:repeat(2,1fr)}#sectorGrid{grid-template-columns:repeat(4,1fr)}}
+  @media(max-width:600px){#sectorGrid{grid-template-columns:repeat(3,1fr)}#macroBreadth{grid-template-columns:repeat(2,1fr)}}
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
   body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
@@ -389,6 +404,76 @@
     </div>
   </div>
 
+  <!-- Macro Dashboard -->
+  <div style="margin-top:24px" id="macroSection">
+    <div class="table-wrapper">
+      <div class="table-header-bar">
+        <div class="table-title">🌍 Macro Dashboard</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="btn btn-outline" onclick="loadMacroDashboard()" style="padding:6px 14px;font-size:12px">↻ Refresh</button>
+          <div id="macroLastUpdated" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)"></div>
+        </div>
+      </div>
+
+      <!-- Row 1: Fear & Greed + VIX + Market Indices -->
+      <div id="macroTopRow" style="display:grid;grid-template-columns:220px 1fr;gap:1px;background:var(--border);border-bottom:1px solid var(--border)">
+
+        <!-- Fear & Greed Gauge -->
+        <div id="fngCard" style="background:var(--card);padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Fear & Greed Index</div>
+          <div style="position:relative;width:160px;height:86px;overflow:hidden">
+            <!-- Semicircle gauge -->
+            <canvas id="fngCanvas" width="160" height="86"></canvas>
+          </div>
+          <div id="fngValue" style="font-family:'DM Mono',monospace;font-size:32px;font-weight:700">--</div>
+          <div id="fngLabel" style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px">LOADING...</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">Based on VIX + momentum</div>
+        </div>
+
+        <!-- VIX + Market Indices -->
+        <div id="macroIndices" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)">
+          <div class="macro-index-card" id="macro-VIX"><div class="mi-loading"></div></div>
+          <div class="macro-index-card" id="macro-SPY"><div class="mi-loading"></div></div>
+          <div class="macro-index-card" id="macro-QQQ"><div class="mi-loading"></div></div>
+          <div class="macro-index-card" id="macro-IWM"><div class="mi-loading"></div></div>
+        </div>
+      </div>
+
+      <!-- Row 2: Sector ETF Heatmap -->
+      <div style="padding:16px 20px;background:var(--surface);border-bottom:1px solid var(--border)">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">S&P 500 Sector Performance (Today)</div>
+        <div id="sectorGrid" style="display:grid;grid-template-columns:repeat(11,1fr);gap:6px">
+          ${['XLK','XLF','XLE','XLV','XLI','XLY','XLP','XLU','XLRE','XLB','XLC'].map(s=>`<div id="sector-${s}" style="border-radius:8px;padding:10px 6px;text-align:center;background:var(--border);min-height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:var(--muted)">${s}</div><div style="width:16px;height:2px;background:var(--border);border-radius:1px"></div></div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Row 3: Market Breadth / Extra stats -->
+      <div id="macroBreadth" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)">
+        <div style="background:var(--card);padding:16px 20px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">DXY (US Dollar)</div>
+          <div id="macro-DXY-val" style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700">--</div>
+          <div id="macro-DXY-chg" style="font-family:'DM Mono',monospace;font-size:11px;margin-top:4px;color:var(--muted)">--</div>
+        </div>
+        <div style="background:var(--card);padding:16px 20px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Gold (GLD)</div>
+          <div id="macro-GLD-val" style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700">--</div>
+          <div id="macro-GLD-chg" style="font-family:'DM Mono',monospace;font-size:11px;margin-top:4px;color:var(--muted)">--</div>
+        </div>
+        <div style="background:var(--card);padding:16px 20px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Oil (USO)</div>
+          <div id="macro-USO-val" style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700">--</div>
+          <div id="macro-USO-chg" style="font-family:'DM Mono',monospace;font-size:11px;margin-top:4px;color:var(--muted)">--</div>
+        </div>
+        <div style="background:var(--card);padding:16px 20px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Bonds (TLT)</div>
+          <div id="macro-TLT-val" style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700">--</div>
+          <div id="macro-TLT-chg" style="font-family:'DM Mono',monospace;font-size:11px;margin-top:4px;color:var(--muted)">--</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <div class="footer-info">
     <div>⚠ Scores are algorithmic estimates only — not financial advice. Always do your own research.</div>
     <div>Powered by Finnhub.io + TradingView + Twelve Data</div>
@@ -399,12 +484,15 @@
 
 <!-- Mobile bottom nav -->
 <div id="mobileNav" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:500;padding:0">
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;height:56px">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;height:56px">
     <button onclick="mobileSwitchTab('screener',this)" id="mobileTab-screener" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--accent);font-family:'DM Mono',monospace;font-size:9px;padding:0">
       <span style="font-size:18px">📊</span><span>SCREENER</span>
     </button>
     <button onclick="mobileSwitchTab('calendar',this)" id="mobileTab-calendar" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;padding:0">
       <span style="font-size:18px">📅</span><span>CALENDAR</span>
+    </button>
+    <button onclick="mobileSwitchTab('macro',this)" id="mobileTab-macro" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;padding:0">
+      <span style="font-size:18px">🌍</span><span>MACRO</span>
     </button>
     <button onclick="mobileSwitchTab('scan',this)" id="mobileTab-scan" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;padding:0">
       <span style="font-size:18px">🔍</span><span>SCAN</span>
@@ -418,33 +506,35 @@ function setupMobileNav() {
   if (window.innerWidth <= 768) {
     document.getElementById('mobileNav').style.display = 'block';
     document.getElementById('mobileNavSpacer').style.height = '56px';
-    // Default: show screener, hide calendar
     document.getElementById('screenerSection').style.display = 'block';
     document.getElementById('econSection').style.display = 'none';
+    document.getElementById('macroSection').style.display = 'none';
   } else {
     document.getElementById('mobileNav').style.display = 'none';
     document.getElementById('mobileNavSpacer').style.height = '0';
     document.getElementById('screenerSection').style.display = 'block';
     document.getElementById('econSection').style.display = 'block';
+    document.getElementById('macroSection').style.display = 'block';
   }
 }
 
 function mobileSwitchTab(tab, btn) {
-  // Update tab styles
   document.querySelectorAll('#mobileNav button').forEach(b => b.style.color = 'var(--muted)');
   btn.style.color = 'var(--accent)';
-
-  if (tab === 'screener' || tab === 'scan') {
+  document.getElementById('screenerSection').style.display = 'none';
+  document.getElementById('econSection').style.display = 'none';
+  document.getElementById('macroSection').style.display = 'none';
+  if (tab === 'screener') {
     document.getElementById('screenerSection').style.display = 'block';
-    document.getElementById('econSection').style.display = 'none';
-    if (tab === 'scan') {
-      // Scroll to top and focus input
-      window.scrollTo({top: 0, behavior: 'smooth'});
-      document.getElementById('tickerInput')?.focus();
-    }
+  } else if (tab === 'scan') {
+    document.getElementById('screenerSection').style.display = 'block';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    document.getElementById('tickerInput')?.focus();
   } else if (tab === 'calendar') {
-    document.getElementById('screenerSection').style.display = 'none';
     document.getElementById('econSection').style.display = 'block';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  } else if (tab === 'macro') {
+    document.getElementById('macroSection').style.display = 'block';
     window.scrollTo({top: 0, behavior: 'smooth'});
   }
 }
@@ -2000,14 +2090,236 @@ setInterval(checkMarketStatus, 1000);
   </div>
 </div>
 <script>
+// ── MACRO DASHBOARD ──────────────────────────────────────────────
+const SECTOR_META = {
+  XLK:  {name:'Technology',    emoji:'💻'},
+  XLF:  {name:'Financials',    emoji:'🏦'},
+  XLE:  {name:'Energy',        emoji:'⛽'},
+  XLV:  {name:'Health Care',   emoji:'🏥'},
+  XLI:  {name:'Industrials',   emoji:'🏭'},
+  XLY:  {name:'Cons. Discret.',emoji:'🛍️'},
+  XLP:  {name:'Cons. Staples', emoji:'🛒'},
+  XLU:  {name:'Utilities',     emoji:'💡'},
+  XLRE: {name:'Real Estate',   emoji:'🏠'},
+  XLB:  {name:'Materials',     emoji:'⚗️'},
+  XLC:  {name:'Comm. Services',emoji:'📡'},
+};
+
+const INDEX_META = {
+  VIX:  {name:'Volatility Index', invertColor: true},
+  SPY:  {name:'S&P 500 ETF'},
+  QQQ:  {name:'Nasdaq 100 ETF'},
+  IWM:  {name:'Russell 2000 ETF'},
+};
+
+const EXTRA_META = {
+  UUP:  {name:'US Dollar', id:'DXY'},
+  GLD:  {name:'Gold', id:'GLD'},
+  USO:  {name:'Crude Oil', id:'USO'},
+  TLT:  {name:'20yr Bonds', id:'TLT'},
+};
+
+function getFngFromVix(vix) {
+  // Map VIX to Fear & Greed (inverted — high VIX = extreme fear)
+  if (vix >= 40)  return {score: Math.max(2,  Math.round(5  - (vix-40)*0.1)),  label:'EXTREME FEAR',  color:'#ef4444'};
+  if (vix >= 28)  return {score: Math.round(5  + (40-vix)  * 1.5),              label:'FEAR',          color:'#f97316'};
+  if (vix >= 20)  return {score: Math.round(20 + (28-vix)  * 3.75),             label:'FEAR',          color:'#f97316'};
+  if (vix >= 15)  return {score: Math.round(50 + (20-vix)  * 4),                label:'NEUTRAL',       color:'#eab308'};
+  if (vix >= 12)  return {score: Math.round(70 + (15-vix)  * 3.33),             label:'GREED',         color:'#84cc16'};
+  return              {score: Math.min(98, Math.round(80 + (12-vix)*3)),         label:'EXTREME GREED', color:'#22c55e'};
+}
+
+function drawFngGauge(score, color) {
+  const canvas = document.getElementById('fngCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  const cx = w/2, cy = h - 4, r = 70;
+
+  // Background arc
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, Math.PI, 0);
+  ctx.lineWidth = 12;
+  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#dde5f0';
+  ctx.stroke();
+
+  // Colour zones
+  const zones = [
+    {start:0,   end:0.2,  color:'#ef4444'},
+    {start:0.2, end:0.4,  color:'#f97316'},
+    {start:0.4, end:0.6,  color:'#eab308'},
+    {start:0.6, end:0.8,  color:'#84cc16'},
+    {start:0.8, end:1.0,  color:'#22c55e'},
+  ];
+  zones.forEach(z => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, Math.PI + z.start*Math.PI, Math.PI + z.end*Math.PI);
+    ctx.lineWidth = 12;
+    ctx.strokeStyle = z.color;
+    ctx.globalAlpha = 0.35;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  });
+
+  // Needle
+  const angle = Math.PI + (score/100) * Math.PI;
+  const nx = cx + (r-6) * Math.cos(angle);
+  const ny = cy + (r-6) * Math.sin(angle);
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(nx, ny);
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = color;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Centre dot
+  ctx.beginPath();
+  ctx.arc(cx, cy, 5, 0, Math.PI*2);
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+function renderIndexCard(ticker, quote) {
+  const meta = INDEX_META[ticker];
+  const chg = quote.dp ?? 0;
+  const isVix = ticker === 'VIX';
+  const chgPositive = isVix ? chg < 0 : chg >= 0;
+  const chgColor = chgPositive ? 'var(--accent2)' : 'var(--accent3)';
+  const chgBg = chgPositive ? 'var(--green-bg)' : 'var(--red-bg)';
+  const el = document.getElementById(`macro-${ticker}`);
+  if (!el) return;
+  el.innerHTML = `
+    <div class="mi-label">${ticker}</div>
+    <div class="mi-name">${meta.name}</div>
+    <div class="mi-price">${isVix ? (quote.c??'--').toFixed(2) : '$'+(quote.c??'--').toFixed(2)}</div>
+    <div class="mi-change" style="color:${chgColor};background:${chgBg}">${chg>=0?'+':''}${chg.toFixed(2)}%</div>
+  `;
+}
+
+function renderSectorTile(ticker, quote) {
+  const meta = SECTOR_META[ticker];
+  const chg = quote.dp ?? 0;
+  const isPos = chg >= 0;
+  // Colour intensity based on magnitude
+  const intensity = Math.min(Math.abs(chg) / 4, 1);
+  const bgColor = isPos
+    ? `rgba(5,150,105,${0.08 + intensity*0.35})`
+    : `rgba(220,38,38,${0.08 + intensity*0.35})`;
+  const textColor = isPos ? 'var(--accent2)' : 'var(--accent3)';
+  const el = document.getElementById(`sector-${ticker}`);
+  if (!el) return;
+  el.style.background = bgColor;
+  el.innerHTML = `
+    <div class="sector-ticker" style="color:${textColor}">${ticker}</div>
+    <div class="sector-name" style="color:${textColor};font-size:8px;opacity:0.8">${meta.emoji} ${meta.name}</div>
+    <div class="sector-chg" style="color:${textColor}">${chg>=0?'+':''}${chg.toFixed(2)}%</div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:${textColor};opacity:0.75">$${(quote.c??0).toFixed(2)}</div>
+  `;
+}
+
+function renderExtraCard(id, quote, name) {
+  const chg = quote.dp ?? 0;
+  const isPos = chg >= 0;
+  const chgColor = isPos ? 'var(--accent2)' : 'var(--accent3)';
+  const chgBg = isPos ? 'var(--green-bg)' : 'var(--red-bg)';
+  const valEl = document.getElementById(`macro-${id}-val`);
+  const chgEl = document.getElementById(`macro-${id}-chg`);
+  if (valEl) valEl.textContent = '$'+(quote.c??0).toFixed(2);
+  if (valEl) valEl.style.color = chgColor;
+  if (chgEl) {
+    chgEl.textContent = `${chg>=0?'+':''}${chg.toFixed(2)}%`;
+    chgEl.style.color = chgColor;
+    chgEl.style.background = chgBg;
+    chgEl.style.padding = '2px 8px';
+    chgEl.style.borderRadius = '5px';
+    chgEl.style.display = 'inline-block';
+    chgEl.style.fontSize = '11px';
+    chgEl.style.fontFamily = "'DM Mono',monospace";
+    chgEl.style.fontWeight = '700';
+  }
+}
+
+async function loadMacroDashboard() {
+  // Fetch all tickers in parallel using existing Finnhub proxy
+  const allTickers = ['SPY','QQQ','IWM','XLK','XLF','XLE','XLV','XLI','XLY','XLP','XLU','XLRE','XLB','XLC','UUP','GLD','USO','TLT'];
+
+  // Show loading spinners on index cards
+  ['VIX','SPY','QQQ','IWM'].forEach(t => {
+    const el = document.getElementById(`macro-${t}`);
+    if (el) el.innerHTML = '<div class="mi-loading"></div>';
+  });
+
+  try {
+    // Fetch VIX via Twelve Data
+    let vixScore = 18; // fallback
+    try {
+      const vixData = await twelveFetch('quote', {symbol: 'VIX'});
+      if (vixData?.close) {
+        vixScore = parseFloat(vixData.close);
+        renderIndexCard('VIX', {c: vixScore, dp: parseFloat(vixData.percent_change||0)});
+      }
+    } catch(e) {
+      renderIndexCard('VIX', {c: vixScore, dp: 0});
+    }
+
+    // Fetch all equity tickers from Finnhub in parallel (batched)
+    const quotes = {};
+    await Promise.all(allTickers.map(async t => {
+      try {
+        const q = await finnhubFetch('quote', {symbol: t});
+        if (q?.c) quotes[t] = q;
+      } catch(e) {}
+    }));
+
+    // Render market indices
+    ['SPY','QQQ','IWM'].forEach(t => {
+      if (quotes[t]) renderIndexCard(t, quotes[t]);
+    });
+
+    // Render sectors
+    Object.keys(SECTOR_META).forEach(t => {
+      if (quotes[t]) renderSectorTile(t, quotes[t]);
+    });
+
+    // Render extras
+    const extraMap = {UUP:'DXY', GLD:'GLD', USO:'USO', TLT:'TLT'};
+    Object.entries(extraMap).forEach(([ticker, id]) => {
+      if (quotes[ticker]) renderExtraCard(id, quotes[ticker]);
+    });
+
+    // Draw Fear & Greed from VIX
+    const fng = getFngFromVix(vixScore);
+    document.getElementById('fngValue').textContent = fng.score;
+    document.getElementById('fngValue').style.color = fng.color;
+    document.getElementById('fngLabel').textContent = fng.label;
+    document.getElementById('fngLabel').style.color = fng.color;
+    drawFngGauge(fng.score, fng.color);
+
+    document.getElementById('macroLastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+  } catch(e) {
+    console.error('Macro load error:', e);
+  }
+}
+
+// Load on page ready
+document.addEventListener('DOMContentLoaded', () => {
+  loadMacroDashboard();
+});
+</script>
+
+<script>
 function toggleTheme() {
   const isDark = document.body.classList.toggle('dark');
   document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
   localStorage.setItem('algoscreen-theme', isDark ? 'dark' : 'light');
-  // Reload TradingView chart with correct theme
-  if (currentTicker) {
-    setTimeout(() => loadTVChart(currentTicker, currentInterval), 100);
-  }
+  if (currentTicker) setTimeout(() => loadTVChart(currentTicker, currentInterval), 100);
+  setTimeout(() => {
+    const scoreEl = document.getElementById('fngValue');
+    if (scoreEl && scoreEl.textContent !== '--') drawFngGauge(parseInt(scoreEl.textContent), scoreEl.style.color);
+  }, 50);
 }
 // Apply saved theme on load
 (function() {
