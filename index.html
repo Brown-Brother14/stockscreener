@@ -18,6 +18,43 @@
     --muted:#64748b;
     --card:#ffffff;
   }
+  body.dark {
+    --bg:#080c10;
+    --surface:#0d1117;
+    --border:#1e2a35;
+    --accent:#00e5ff;
+    --accent2:#00ff88;
+    --accent3:#ff4d6d;
+    --accent4:#ffd60a;
+    --text:#e8f0f7;
+    --muted:#5a7a8a;
+    --card:#0f1923;
+  }
+  /* Dark mode overrides for things hardcoded to light colors */
+  body.dark .modal{ background:var(--card) }
+  body.dark .modal-header{ background:var(--card) }
+  body.dark .tv-loading{ background:var(--card) }
+  body.dark .tech-card{ background:var(--card) }
+  body.dark .earnings-card{ background:var(--card) }
+  body.dark .modal-stat{ background:var(--surface) }
+  body.dark .range-row{ background:var(--surface) }
+  body.dark .detail-section-header{ background:var(--surface) }
+  body.dark .interval-btn{ background:transparent;color:var(--muted) }
+  body.dark .interval-btn:hover, body.dark .interval-btn.active{ background:rgba(0,229,255,0.05);color:var(--accent) }
+  body.dark .table-header-bar{ background:var(--card) }
+  body.dark thead th{ background:var(--surface);color:var(--muted) }
+  body.dark tbody tr{ border-bottom-color:rgba(30,42,53,0.5) }
+  body.dark tbody tr:hover{ background:rgba(0,229,255,0.05) !important }
+  body.dark .btn-outline{ background:transparent;color:var(--text);border-color:var(--border) }
+  body.dark .btn-outline:hover{ background:rgba(0,229,255,0.05);border-color:var(--accent);color:var(--accent) }
+  body.dark .btn-outline.active{ background:rgba(0,229,255,0.05);border-color:var(--accent);color:var(--accent) }
+  body.dark .watchlist-input{ background:var(--surface);border-color:var(--border);color:var(--text) }
+  body.dark .watchlist-input::placeholder{ color:var(--muted) }
+  body.dark .news-item:hover{ background:rgba(0,229,255,0.03) }
+  body.dark .econ-event:hover{ background:rgba(0,229,255,0.03) }
+  body.dark #themeToggle{ border-color:var(--border);background:var(--surface) }
+  body.dark #econEventModal > div > div:first-child{ background:var(--surface) }
+  body.dark #econEventModal > div{ background:var(--card);border-color:var(--border) }
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:#f0f4ff;color:#0f172a;font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
   body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,82,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,82,255,0.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
@@ -258,6 +295,8 @@
     </div>
     <div class="header-right">
       <span class="speed-badge">⚡ FINNHUB POWERED</span>
+      <!-- Dark mode toggle -->
+      <button id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode" style="background:none;border:1px solid #dde5f0;border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0">🌙</button>
       <div style="font-family:'DM Mono',monospace;font-size:11px;color:#64748b;text-align:right">
         <div id="marketStatus" style="display:flex;align-items:center;gap:6px"><div class="status-dot"></div><span id="marketStatusText">CHECKING...</span></div>
         <div id="marketCountdown" style="color:#d97706;font-size:12px;font-weight:700;margin-top:2px"></div>
@@ -1969,5 +2008,22 @@ setInterval(checkMarketStatus, 1000);
     </div>
   </div>
 </div>
+<script>
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('algoscreen-theme', isDark ? 'dark' : 'light');
+}
+// Apply saved theme on load
+(function() {
+  const saved = localStorage.getItem('algoscreen-theme');
+  if (saved === 'dark') {
+    document.body.classList.add('dark');
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('themeToggle').textContent = '☀️';
+    });
+  }
+})();
+</script>
 </body>
 </html>
