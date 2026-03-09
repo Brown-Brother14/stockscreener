@@ -410,7 +410,7 @@
       <div class="table-header-bar">
         <div class="table-title">🌍 Macro Dashboard</div>
         <div style="display:flex;align-items:center;gap:10px">
-          <button class="btn btn-outline" onclick="loadMacroDashboard()" style="padding:6px 14px;font-size:12px">↻ Refresh</button>
+          <button class="btn btn-outline" onclick="macroLoaded=false;loadMacroDashboard()" style="padding:6px 14px;font-size:12px">↻ Refresh</button>
           <div id="macroLastUpdated" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)"></div>
         </div>
       </div>
@@ -546,6 +546,7 @@ function mobileSwitchTab(tab, btn) {
   } else if (tab === 'macro') {
     document.getElementById('macroSection').style.display = 'block';
     window.scrollTo({top: 0, behavior: 'smooth'});
+    if (!macroLoaded) { macroLoaded = true; loadMacroDashboard(); }
   }
 }
 
@@ -2257,20 +2258,34 @@ function renderExtraCard(id, quote, name) {
   }
 }
 
-async function loadMacroDashboard() {
-  const WORKER = 'https://broken-butterfly-8148.jai-mistry14.workers.dev';
+// Fetch a single quote from Yahoo Finance (doesn't use Finnhub rate limit)
+async function yahooQuote(ticker) {
+  try {
+    const res = await fetch(`${PROXY}/yahooquote/${ticker}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const meta = data?.chart?.result?.[0]?.meta;
+    if (!meta?.regularMarketPrice) return null;
+    const price = meta.regularMarketPrice;
+    const prev  = meta.chartPreviousClose || meta.previousClose || price;
+    const chgPct = prev ? ((price - prev) / prev) * 100 : 0;
+    return { c: price, dp: chgPct };
+  } catch(e) { return null; }
+}
 
-  // Show loading spinners
+async function loadMacroDashboard() {
+  const allMacroTickers = ['SPY','QQQ','IWM','XLK','XLF','XLE','XLV','XLI','XLY','XLP','XLU','XLRE','XLB','XLC','UUP','GLD','USO','TLT'];
+
   ['VIX','SPY','QQQ','IWM'].forEach(t => {
     const el = document.getElementById(`macro-${t}`);
     if (el) el.innerHTML = '<div class="mi-loading"></div>';
   });
+  document.getElementById('macroLastUpdated').textContent = 'Loading...';
 
-  // ── 1. Real CNN Fear & Greed Index ──────────────────────────
+  // ── 1. CNN Fear & Greed ──────────────────────────────────────
   try {
-    const fngRes = await fetch(`${WORKER}/feargreed`);
+    const fngRes = await fetch(`${PROXY}/feargreed`);
     const fngJson = await fngRes.json();
-    // CNN returns { fear_and_greed: { score, rating, timestamp }, ... }
     const fngData = fngJson?.fear_and_greed;
     if (fngData?.score != null) {
       const score = Math.round(fngData.score);
@@ -2280,67 +2295,57 @@ async function loadMacroDashboard() {
       document.getElementById('fngValue').style.color = color;
       document.getElementById('fngLabel').textContent = label;
       document.getElementById('fngLabel').style.color = color;
-      // Update subtitle to show it's real CNN data
       const sub = document.querySelector('#fngCard div:last-child');
       if (sub) sub.textContent = 'Source: CNN Business';
       drawFngGauge(score, color);
     }
   } catch(e) {
-    console.warn('F&G fetch failed:', e);
     document.getElementById('fngLabel').textContent = 'UNAVAILABLE';
   }
 
-  // ── 2. Fetch all equity tickers in parallel via Finnhub ─────
-  const allTickers = ['SPY','QQQ','IWM','XLK','XLF','XLE','XLV','XLI','XLY','XLP','XLU','XLRE','XLB','XLC','UUP','GLD','USO','TLT'];
-  const quotes = {};
-  await Promise.all(allTickers.map(async t => {
-    try {
-      const q = await finnhubFetch('quote', {symbol: t});
-      if (q?.c) quotes[t] = q;
-    } catch(e) {}
-  }));
-
-  // ── 3. VIX via Twelve Data ───────────────────────────────────
-  try {
-    const vixData = await twelveFetch('quote', {symbol: 'VIX'});
-    if (vixData?.close) {
-      const vixPrice = parseFloat(vixData.close);
-      const vixChg = parseFloat(vixData.percent_change || 0);
-      // For VIX: up = bad (red), down = good (green) — inverted
-      const chgColor = vixChg <= 0 ? 'var(--accent2)' : 'var(--accent3)';
-      const chgBg    = vixChg <= 0 ? 'var(--green-bg)' : 'var(--red-bg)';
-      const el = document.getElementById('macro-VIX');
-      if (el) el.innerHTML = `
-        <div class="mi-label">VIX</div>
-        <div class="mi-name">Volatility Index</div>
-        <div class="mi-price">${vixPrice.toFixed(2)}</div>
-        <div class="mi-change" style="color:${chgColor};background:${chgBg}">${vixChg>=0?'+':''}${vixChg.toFixed(2)}%</div>
-      `;
-    }
-  } catch(e) {
+  // ── 2. VIX via Yahoo Finance ─────────────────────────────────
+  const vq = await yahooQuote('%5EVIX');
+  if (vq) {
+    const chgColor = vq.dp <= 0 ? 'var(--accent2)' : 'var(--accent3)';
+    const chgBg    = vq.dp <= 0 ? 'var(--green-bg)' : 'var(--red-bg)';
     const el = document.getElementById('macro-VIX');
-    if (el) el.innerHTML = '<div style="padding:16px;font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted)">VIX unavailable</div>';
+    if (el) el.innerHTML = `
+      <div class="mi-label">VIX</div>
+      <div class="mi-name">Volatility Index</div>
+      <div class="mi-price">${vq.c.toFixed(2)}</div>
+      <div class="mi-change" style="color:${chgColor};background:${chgBg}">${vq.dp>=0?'+':''}${vq.dp.toFixed(2)}%</div>
+    `;
+  } else {
+    const el = document.getElementById('macro-VIX');
+    if (el) el.innerHTML = `<div class="mi-label">VIX</div><div class="mi-name" style="color:var(--muted)">Market closed</div>`;
   }
 
-  // ── 4. Render market indices ─────────────────────────────────
+  // ── 3. All ETFs via Yahoo (zero Finnhub calls) ───────────────
+  const quotes = {};
+  await Promise.all(allMacroTickers.map(async t => {
+    const q = await yahooQuote(t);
+    if (q) quotes[t] = q;
+  }));
+
+  // ── 4. Indices ────────────────────────────────────────────────
   ['SPY','QQQ','IWM'].forEach(t => {
     if (quotes[t]) renderIndexCard(t, quotes[t]);
     else {
       const el = document.getElementById(`macro-${t}`);
-      if (el) el.innerHTML = `<div class="mi-label">${t}</div><div class="mi-name" style="color:var(--muted);font-size:10px">No data</div>`;
+      if (el) el.innerHTML = `<div class="mi-label">${t}</div><div class="mi-name" style="color:var(--muted)">Market closed</div>`;
     }
   });
 
-  // ── 5. Render sector tiles ────────────────────────────────────
+  // ── 5. Sectors ────────────────────────────────────────────────
   Object.keys(SECTOR_META).forEach(t => {
     if (quotes[t]) renderSectorTile(t, quotes[t]);
     else {
       const el = document.getElementById(`sector-${t}`);
-      if (el) el.innerHTML = `<div class="sector-ticker" style="color:var(--muted)">${t}</div><div style="font-size:9px;color:var(--muted)">--</div>`;
+      if (el) { el.style.background = 'var(--border)'; el.innerHTML = `<div class="sector-ticker" style="color:var(--muted)">${t}</div><div style="font-size:9px;color:var(--muted)">--</div>`; }
     }
   });
 
-  // ── 6. Render extras ─────────────────────────────────────────
+  // ── 6. Extras ─────────────────────────────────────────────────
   const extraMap = {UUP:'DXY', GLD:'GLD', USO:'USO', TLT:'TLT'};
   Object.entries(extraMap).forEach(([ticker, id]) => {
     if (quotes[ticker]) renderExtraCard(id, quotes[ticker]);
@@ -2348,11 +2353,24 @@ async function loadMacroDashboard() {
 
   document.getElementById('macroLastUpdated').textContent =
     'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  macroLoaded = true;
 }
 
-// Load on page ready
+// Don't auto-load on page start — load only when user visits Macro tab
+// This keeps Finnhub rate limit fully available for the stock scan
+let macroLoaded = false;
+
+// On desktop, all sections are visible — load macro when scrolled into view
 document.addEventListener('DOMContentLoaded', () => {
-  loadMacroDashboard();
+  const macroSection = document.getElementById('macroSection');
+  if (!macroSection) return;
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !macroLoaded) {
+      macroLoaded = true;
+      loadMacroDashboard();
+    }
+  }, { threshold: 0.1 });
+  observer.observe(macroSection);
 });
 </script>
 
