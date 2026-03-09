@@ -579,9 +579,9 @@ async function fetchFinancials(ticker) {
     high52w: m['52WeekHigh'] || null,
     low52w: m['52WeekLow'] || null,
     avgVolume: m['10DayAverageTradingVolume'] ? m['10DayAverageTradingVolume'] * 1e6 : null,
-    epsGrowth: m.epsGrowthTTMYoy || null,
+    epsGrowth: m.epsGrowthTTMYoy != null ? m.epsGrowthTTMYoy / 100 : null,
     divYield: m.dividendYieldIndicatedAnnual || null,
-    revenueGrowth: m.revenueGrowthTTMYoy || null,
+    revenueGrowth: m.revenueGrowthTTMYoy != null ? m.revenueGrowthTTMYoy / 100 : null,
   };
 }
 
