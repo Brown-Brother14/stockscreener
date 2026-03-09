@@ -1986,7 +1986,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script> <script>
 function toggleTheme() {
   const isDark = document.body.classList.toggle('dark');
-  document.getElementById('themeToggle').textContent = isDark ? '' : '';
+  document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
   localStorage.setItem('algoscreen-theme', isDark ? 'dark' : 'light');
   if (currentTicker) setTimeout(() => loadTVChart(currentTicker, currentInterval), 100);
   setTimeout(() => {
@@ -2000,7 +2000,7 @@ function toggleTheme() {
   if (saved === 'dark') {
     document.body.classList.add('dark');
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('themeToggle').textContent = '';
+      document.getElementById('themeToggle').textContent = '🌙';
     });
   }
 })();
