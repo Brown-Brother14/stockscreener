@@ -17,6 +17,13 @@
     --text:#0f172a;
     --muted:#64748b;
     --card:#ffffff;
+    --shadow:rgba(0,82,255,0.08);
+    --row-hover:#eff6ff;
+    --input-bg:#ffffff;
+    --tag-bg:rgba(0,82,255,0.07);
+    --green-bg:rgba(5,150,105,0.08);
+    --red-bg:rgba(220,38,38,0.07);
+    --yellow-bg:rgba(217,119,6,0.08);
   }
   body.dark {
     --bg:#080c10;
@@ -29,201 +36,185 @@
     --text:#e8f0f7;
     --muted:#5a7a8a;
     --card:#0f1923;
+    --shadow:rgba(0,0,0,0.4);
+    --row-hover:rgba(0,229,255,0.05);
+    --input-bg:#0d1117;
+    --tag-bg:rgba(0,229,255,0.08);
+    --green-bg:rgba(0,255,136,0.08);
+    --red-bg:rgba(255,77,109,0.08);
+    --yellow-bg:rgba(255,214,10,0.08);
   }
-  /* Dark mode overrides for things hardcoded to light colors */
-  body.dark .modal{ background:var(--card) }
-  body.dark .modal-header{ background:var(--card) }
-  body.dark .tv-loading{ background:var(--card) }
-  body.dark .tech-card{ background:var(--card) }
-  body.dark .earnings-card{ background:var(--card) }
-  body.dark .modal-stat{ background:var(--surface) }
-  body.dark .range-row{ background:var(--surface) }
-  body.dark .detail-section-header{ background:var(--surface) }
-  body.dark .interval-btn{ background:transparent;color:var(--muted) }
-  body.dark .interval-btn:hover, body.dark .interval-btn.active{ background:rgba(0,229,255,0.05);color:var(--accent) }
-  body.dark .table-header-bar{ background:var(--card) }
-  body.dark thead th{ background:var(--surface);color:var(--muted) }
-  body.dark tbody tr{ border-bottom-color:rgba(30,42,53,0.5) }
-  body.dark tbody tr:hover{ background:rgba(0,229,255,0.05) !important }
-  body.dark .btn-outline{ background:transparent;color:var(--text);border-color:var(--border) }
-  body.dark .btn-outline:hover{ background:rgba(0,229,255,0.05);border-color:var(--accent);color:var(--accent) }
-  body.dark .btn-outline.active{ background:rgba(0,229,255,0.05);border-color:var(--accent);color:var(--accent) }
-  body.dark .watchlist-input{ background:var(--surface);border-color:var(--border);color:var(--text) }
-  body.dark .watchlist-input::placeholder{ color:var(--muted) }
-  body.dark .news-item:hover{ background:rgba(0,229,255,0.03) }
-  body.dark .econ-event:hover{ background:rgba(0,229,255,0.03) }
-  body.dark #themeToggle{ border-color:var(--border);background:var(--surface) }
-  body.dark #econEventModal > div > div:first-child{ background:var(--surface) }
-  body.dark #econEventModal > div{ background:var(--card);border-color:var(--border) }
+  /* Dark mode — all handled via CSS variables above */
+  body.dark #themeToggle{ border-color:var(--border) }
   *{margin:0;padding:0;box-sizing:border-box}
-  body{background:#f0f4ff;color:#0f172a;font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
-  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,82,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,82,255,0.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+  body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
   .container{max-width:100%;margin:0 auto;padding:0 40px;position:relative;z-index:1}
   header{padding:20px 0 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:transparent}
   .logo{display:flex;align-items:center;gap:12px}
   .logo-icon{width:50px;height:50px;background:linear-gradient(135deg,#0052ff,#3b82f6);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 16px rgba(0,82,255,0.2)}
-  .logo h1{font-size:26px;font-weight:900;letter-spacing:-1px;color:#0f172a}
-  .logo span{color:#0052ff}
+  .logo h1{font-size:26px;font-weight:900;letter-spacing:-1px;color:var(--text)}
+  .logo span{color:var(--accent)}
   .header-right{display:flex;align-items:center;gap:14px}
-  .status-dot{width:8px;height:8px;border-radius:50%;background:#059669;box-shadow:0 0 8px #059669;animation:pulse 2s infinite}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--accent2);box-shadow:0 0 6px var(--accent2);animation:pulse 2s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-  .status-text{font-family:'DM Mono',monospace;font-size:11px;color:#64748b}
-  .speed-badge{background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.2);color:#059669;font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:6px;font-weight:700}
+  .status-text{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+  .speed-badge{background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.2);color:var(--accent2);font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:6px;font-weight:700}
   .stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:22px 0;box-shadow:0 2px 12px rgba(0,82,255,0.06)}
-  .stat-item{background:#ffffff;padding:22px 26px;display:flex;flex-direction:column;gap:4px}
-  .stat-label{font-family:'DM Mono',monospace;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:1px}
-  .stat-value{font-size:30px;font-weight:900;color:#0052ff;letter-spacing:-1px}
-  .stat-value.green{color:#059669}.stat-value.yellow{color:#d97706}
+  .stat-item{background:var(--card);padding:22px 26px;display:flex;flex-direction:column;gap:4px}
+  .stat-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .stat-value{font-size:30px;font-weight:900;color:var(--accent);letter-spacing:-1px}
+  .stat-value.green{color:var(--accent2)}.stat-value.yellow{color:var(--accent4)}
   .controls{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
   .btn{padding:11px 24px;border-radius:10px;border:none;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;transition:all 0.2s}
   .btn-primary{background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(0,82,255,0.25)}
   .btn-primary:hover{background:#0041cc;transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,82,255,0.3)}
   .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
-  .btn-outline{background:#fff;color:#0f172a;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-  .btn-outline:hover{border-color:#0052ff;color:#0052ff;background:#f0f4ff}
-  .btn-outline.active{border-color:#0052ff;color:#0052ff;background:#eff6ff}
+  .btn-outline{background:var(--input-bg);color:var(--text);border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+  .btn-outline:hover{border-color:var(--accent);color:var(--accent);background:var(--bg)}
+  .btn-outline.active{border-color:var(--accent);color:var(--accent);background:var(--tag-bg)}
   .filter-group{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
-  .watchlist-input{background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 16px;color:#0f172a;font-family:'DM Mono',monospace;font-size:13px;width:500px;outline:none;transition:border-color 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-  .watchlist-input:focus{border-color:#0052ff;box-shadow:0 0 0 3px rgba(0,82,255,0.1)}
-  .watchlist-input::placeholder{color:#94a3b8}
+  .watchlist-input{background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:11px 16px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;width:500px;outline:none;transition:border-color 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+  .watchlist-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,82,255,0.1)}
+  .watchlist-input::placeholder{color:var(--muted)}
   .progress-bar-outer{width:100%;height:3px;background:var(--border);margin-bottom:20px;border-radius:2px;overflow:hidden;display:none}
   .progress-bar-inner{height:100%;background:linear-gradient(90deg,var(--accent),#3b82f6);border-radius:2px;transition:width 0.3s ease}
-  .error-box{background:rgba(220,38,38,0.04);border:1px solid rgba(220,38,38,0.15);border-radius:10px;padding:14px 18px;margin:14px 0;font-size:13px;color:#dc2626;font-family:'DM Mono',monospace;display:none}
-  .table-wrapper{background:#ffffff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.06)}
+  .error-box{background:rgba(220,38,38,0.04);border:1px solid rgba(220,38,38,0.15);border-radius:10px;padding:14px 18px;margin:14px 0;font-size:13px;color:var(--accent3);font-family:'DM Mono',monospace;display:none}
+  .table-wrapper{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.06)}
   .table-scroll{overflow-x:auto;width:100%}
   .table-scroll::-webkit-scrollbar{height:4px}
   .table-scroll::-webkit-scrollbar-track{background:var(--border)}
   .table-scroll::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
-  .table-header-bar{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#ffffff}
-  .table-title{font-size:14px;font-weight:700;color:#0f172a}
-  .last-updated{font-family:'DM Mono',monospace;font-size:10px;color:#64748b}
+  .table-header-bar{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--card)}
+  .table-title{font-size:14px;font-weight:700;color:var(--text)}
+  .last-updated{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
   table{width:100%;border-collapse:collapse}
-  thead th{padding:10px 16px;text-align:left;font-family:'DM Mono',monospace;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);background:#f8faff;cursor:pointer;user-select:none;white-space:nowrap}
-  thead th:hover{color:#0052ff}
-  tbody tr{border-bottom:1px solid #f1f5f9;transition:background 0.15s;animation:fadeIn 0.3s ease forwards;opacity:0;cursor:pointer}
+  thead th{padding:10px 16px;text-align:left;font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);background:var(--surface);cursor:pointer;user-select:none;white-space:nowrap}
+  thead th:hover{color:var(--accent)}
+  tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;animation:fadeIn 0.3s ease forwards;opacity:0;cursor:pointer}
   @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-  tbody tr:hover{background:#eff6ff !important}
+  tbody tr:hover{background:var(--row-hover) !important}
   tbody tr:last-child{border-bottom:none}
   td{padding:14px 16px;font-size:13px;vertical-align:middle}
-  .ticker{font-family:'DM Mono',monospace;font-weight:700;font-size:15px;color:#0052ff}
-  .company-name{font-size:11px;color:#64748b;margin-top:2px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .price{font-family:'DM Mono',monospace;font-weight:700;font-size:15px;color:#0f172a}
+  .ticker{font-family:'DM Mono',monospace;font-weight:700;font-size:15px;color:var(--accent)}
+  .company-name{font-size:11px;color:var(--muted);margin-top:2px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .price{font-family:'DM Mono',monospace;font-weight:700;font-size:15px;color:var(--text)}
   .change{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px}
-  .change.up{color:#059669;background:rgba(5,150,105,0.08)}.change.down{color:#dc2626;background:rgba(220,38,38,0.08)}
+  .change.up{color:var(--accent2);background:rgba(5,150,105,0.08)}.change.down{color:var(--accent3);background:rgba(220,38,38,0.08)}
   .score-cell{min-width:130px}
   .score-bar-wrap{display:flex;align-items:center;gap:8px}
   .score-num{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;min-width:32px}
-  .score-num.high{color:#059669}.score-num.mid{color:#d97706}.score-num.low{color:#dc2626}
+  .score-num.high{color:var(--accent2)}.score-num.mid{color:var(--accent4)}.score-num.low{color:var(--accent3)}
   .score-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
   .score-fill{height:100%;border-radius:2px;transition:width 0.8s ease}
-  .score-fill.high{background:#059669}.score-fill.mid{background:#d97706}.score-fill.low{background:#dc2626}
+  .score-fill.high{background:var(--accent2)}.score-fill.mid{background:var(--accent4)}.score-fill.low{background:var(--accent3)}
   .signal{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
-  .signal.breakout{background:rgba(5,150,105,0.08);color:#059669;border:1px solid rgba(5,150,105,0.2)}
-  .signal.momentum{background:rgba(0,82,255,0.07);color:#0052ff;border:1px solid rgba(0,82,255,0.2)}
-  .signal.watch{background:rgba(217,119,6,0.08);color:#d97706;border:1px solid rgba(217,119,6,0.2)}
-  .signal.weak{background:rgba(220,38,38,0.07);color:#dc2626;border:1px solid rgba(220,38,38,0.15)}
+  .signal.breakout{background:rgba(5,150,105,0.08);color:var(--accent2);border:1px solid rgba(5,150,105,0.2)}
+  .signal.momentum{background:var(--tag-bg);color:var(--accent);border:1px solid rgba(0,82,255,0.2)}
+  .signal.watch{background:rgba(217,119,6,0.08);color:var(--accent4);border:1px solid rgba(217,119,6,0.2)}
+  .signal.weak{background:rgba(220,38,38,0.07);color:var(--accent3);border:1px solid rgba(220,38,38,0.15)}
   .rsi-badge{font-family:'DM Mono',monospace;font-size:12px;padding:3px 8px;border-radius:6px;font-weight:700}
-  .rsi-badge.overbought{color:#dc2626;background:rgba(220,38,38,0.08)}.rsi-badge.healthy{color:#059669;background:rgba(5,150,105,0.08)}.rsi-badge.oversold{color:#d97706;background:rgba(217,119,6,0.08)}.rsi-badge.neutral{color:#64748b;background:#f1f5f9}
+  .rsi-badge.overbought{color:var(--accent3);background:rgba(220,38,38,0.08)}.rsi-badge.healthy{color:var(--accent2);background:rgba(5,150,105,0.08)}.rsi-badge.oversold{color:var(--accent4);background:rgba(217,119,6,0.08)}.rsi-badge.neutral{color:var(--muted);background:var(--surface)}
   .macd-badge{font-family:'DM Mono',monospace;font-size:12px;font-weight:700}
-  .macd-badge.bull{color:#059669}.macd-badge.bear{color:#dc2626}.macd-badge.none{color:#64748b}
+  .macd-badge.bull{color:var(--accent2)}.macd-badge.bear{color:var(--accent3)}.macd-badge.none{color:var(--muted)}
   .trend-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px}
-  .trend-badge.up{color:#059669;background:rgba(5,150,105,0.08)}.trend-badge.down{color:#dc2626;background:rgba(220,38,38,0.08)}.trend-badge.side{color:#64748b;background:#f1f5f9}
-  .click-hint{font-family:'DM Mono',monospace;font-size:10px;color:#64748b;text-align:center;padding:10px;border-top:1px solid var(--border)}
+  .trend-badge.up{color:var(--accent2);background:rgba(5,150,105,0.08)}.trend-badge.down{color:var(--accent3);background:rgba(220,38,38,0.08)}.trend-badge.side{color:var(--muted);background:var(--surface)}
+  .click-hint{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:10px;border-top:1px solid var(--border)}
   .loading-row td{text-align:center;padding:60px}
-  .loader{display:inline-block;width:32px;height:32px;border:2px solid var(--border);border-top-color:#0052ff;border-radius:50%;animation:spin 0.8s linear infinite}
+  .loader{display:inline-block;width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .loading-text{font-family:'DM Mono',monospace;font-size:12px;color:#64748b;margin-top:12px}
-  .footer-info{display:flex;align-items:center;justify-content:space-between;padding:16px 0;font-family:'DM Mono',monospace;font-size:10px;color:#64748b;border-top:1px solid var(--border);margin-top:24px}
+  .loading-text{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);margin-top:12px}
+  .footer-info{display:flex;align-items:center;justify-content:space-between;padding:16px 0;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);border-top:1px solid var(--border);margin-top:24px}
 
   /* MODAL */
   .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:1000;display:none;align-items:center;justify-content:center;padding:12px;backdrop-filter:blur(8px)}
   .modal-overlay.open{display:flex}
-  .modal{background:#fff;border:1px solid var(--border);border-radius:18px;width:100%;max-width:1400px;height:95vh;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,82,255,0.12)}
+  .modal{background:var(--card);border:1px solid var(--border);border-radius:18px;width:100%;max-width:1400px;height:95vh;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,82,255,0.12)}
   .modal::-webkit-scrollbar{width:4px}
   .modal::-webkit-scrollbar-track{background:var(--border)}
   .modal::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
-  .modal-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;background:#fff;z-index:10}
+  .modal-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;background:var(--card);z-index:10}
   .modal-ticker-wrap{display:flex;align-items:center;gap:16px}
-  .modal-ticker{font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:#0052ff}
-  .modal-name{font-size:13px;color:#64748b}
+  .modal-ticker{font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--accent)}
+  .modal-name{font-size:13px;color:var(--muted)}
   .modal-header-right{display:flex;align-items:center;gap:12px}
-  .modal-close{background:transparent;border:1px solid var(--border);color:#64748b;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
-  .modal-close:hover{border-color:#dc2626;color:#dc2626}
+  .modal-close{background:transparent;border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+  .modal-close:hover{border-color:var(--accent3);color:var(--accent3)}
   .modal-stats-strip{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--border);flex-shrink:0}
-  .modal-stat{background:#f8faff;padding:12px 16px}
-  .modal-stat-label{font-family:'DM Mono',monospace;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
-  .modal-stat-value{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:#0f172a}
-  .range-row{padding:14px 20px;display:flex;align-items:center;gap:14px;background:#f8faff;border-bottom:1px solid var(--border)}
-  .range-lbl{font-family:'DM Mono',monospace;font-size:10px;color:#64748b;white-space:nowrap}
+  .modal-stat{background:var(--surface);padding:12px 16px}
+  .modal-stat-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+  .modal-stat-value{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--text)}
+  .range-row{padding:14px 20px;display:flex;align-items:center;gap:14px;background:var(--surface);border-bottom:1px solid var(--border)}
+  .range-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap}
   .range-track{flex:1;height:6px;background:var(--border);border-radius:3px;position:relative}
   .range-gradient{position:absolute;inset:0;border-radius:3px;background:linear-gradient(90deg,#dc2626,#d97706,#059669)}
-  .range-dot{position:absolute;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:white;border:2px solid var(--accent);box-shadow:0 2px 8px rgba(0,82,255,0.3);z-index:1}
-  .range-price{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:#0f172a}
+  .range-dot{position:absolute;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:var(--card);border:2px solid var(--accent);box-shadow:0 2px 8px rgba(0,82,255,0.3);z-index:1}
+  .range-price{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--text)}
   .tv-container{height:380px;position:relative;flex-shrink:0}
   .tv-container iframe{width:100%;height:100%;border:none;display:none;position:absolute;inset:0}
-  .tv-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;flex-direction:column;gap:12px}
+  .tv-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--card);flex-direction:column;gap:12px}
   .interval-btns{display:flex;gap:6px}
-  .interval-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;color:#64748b;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.15s}
-  .interval-btn:hover,.interval-btn.active{border-color:#0052ff;color:#0052ff;background:#eff6ff}
-  .detail-section-header{padding:12px 20px;font-family:'DM Mono',monospace;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:1.5px;background:#f8faff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .interval-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--input-bg);color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.15s}
+  .interval-btn:hover,.interval-btn.active{border-color:var(--accent);color:var(--accent);background:var(--tag-bg)}
+  .detail-section-header{padding:12px 20px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
   .score-breakdown{display:grid;grid-template-columns:180px 1fr;gap:0}
   .score-big{padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid var(--border)}
   .score-circle{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;margin-bottom:8px}
   .score-circle-num{font-family:'DM Mono',monospace;font-size:28px;font-weight:700}
-  .score-circle-denom{font-family:'DM Mono',monospace;font-size:10px;color:#64748b}
+  .score-circle-denom{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
   .score-bars-list{padding:18px 20px;display:flex;flex-direction:column;gap:10px}
   .score-bar-row{display:flex;align-items:center;gap:10px}
-  .score-bar-lbl{font-family:'DM Mono',monospace;font-size:10px;color:#64748b;width:110px;flex-shrink:0}
+  .score-bar-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);width:110px;flex-shrink:0}
   .score-bar-track{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
   .score-bar-fill{height:100%;border-radius:4px}
-  .score-bar-val{font-family:'DM Mono',monospace;font-size:11px;width:64px;text-align:right;flex-shrink:0;color:#0f172a}
+  .score-bar-val{font-family:'DM Mono',monospace;font-size:11px;width:64px;text-align:right;flex-shrink:0;color:var(--text)}
   .score-bar-pts{font-family:'DM Mono',monospace;font-size:10px;width:48px;text-align:right;flex-shrink:0}
   .tech-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)}
-  .tech-card{background:#fff;padding:18px 20px}
-  .tech-title{font-family:'DM Mono',monospace;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+  .tech-card{background:var(--card);padding:18px 20px}
+  .tech-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
   .rsi-track{height:8px;background:var(--border);border-radius:4px;position:relative;margin-bottom:10px}
   .rsi-zones{position:absolute;inset:0;border-radius:4px;background:linear-gradient(90deg,#dc2626 0%,#d97706 20%,#059669 35%,#059669 65%,#d97706 80%,#dc2626 100%);opacity:0.3}
-  .rsi-marker{position:absolute;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.2);z-index:1}
-  .rsi-big{font-family:'DM Mono',monospace;font-size:26px;font-weight:700;color:#0f172a}
-  .macd-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9}
+  .rsi-marker{position:absolute;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;border:2px solid var(--card);box-shadow:0 2px 6px rgba(0,0,0,0.2);z-index:1}
+  .rsi-big{font-family:'DM Mono',monospace;font-size:26px;font-weight:700;color:var(--text)}
+  .macd-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
   .macd-row:last-child{border-bottom:none}
-  .macd-key{font-family:'DM Mono',monospace;font-size:10px;color:#64748b}
-  .macd-val{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:#0f172a}
-  .bull-badge{background:rgba(5,150,105,0.08);color:#059669;border:1px solid rgba(5,150,105,0.2);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
-  .bear-badge{background:rgba(220,38,38,0.07);color:#dc2626;border:1px solid rgba(220,38,38,0.15);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+  .macd-key{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+  .macd-val{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:var(--text)}
+  .bull-badge{background:rgba(5,150,105,0.08);color:var(--accent2);border:1px solid rgba(5,150,105,0.2);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+  .bear-badge{background:rgba(220,38,38,0.07);color:var(--accent3);border:1px solid rgba(220,38,38,0.15);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
   .earnings-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
-  .earnings-card{background:#fff;padding:16px 20px}
-  .earnings-lbl{font-family:'DM Mono',monospace;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-  .earnings-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:700;margin-bottom:3px;color:#0f172a}
-  .earnings-sub{font-family:'DM Mono',monospace;font-size:10px;color:#64748b}
-  .news-item{display:flex;gap:14px;padding:14px 20px;border-bottom:1px solid #f1f5f9;cursor:pointer;transition:background 0.15s;text-decoration:none;color:inherit}
+  .earnings-card{background:var(--card);padding:16px 20px}
+  .earnings-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+  .earnings-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:700;margin-bottom:3px;color:var(--text)}
+  .earnings-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+  .news-item{display:flex;gap:14px;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;text-decoration:none;color:inherit}
   .news-item:last-child{border-bottom:none}
-  .news-item:hover{background:#f8faff}
+  .news-item:hover{background:var(--surface)}
   .news-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);margin-top:5px;flex-shrink:0}
-  .news-title{font-size:13px;font-weight:600;margin-bottom:4px;line-height:1.4;color:#0f172a}
-  .news-meta{font-family:'DM Mono',monospace;font-size:10px;color:#64748b;display:flex;gap:10px}
-  .news-src{color:#0052ff}
-  .news-loading{padding:24px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:#64748b}
+  .news-title{font-size:13px;font-weight:600;margin-bottom:4px;line-height:1.4;color:var(--text)}
+  .news-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);display:flex;gap:10px}
+  .news-src{color:var(--accent)}
+  .news-loading{padding:24px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
   .ext-price{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-top:3px;display:inline-block}
   .ext-price.pre{color:#7c3aed;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.15)}
   .ext-price.after{color:#ea580c;background:rgba(234,88,12,0.08);border:1px solid rgba(234,88,12,0.15)}
   .ema-badges{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px}
   .ema-dot{font-family:'DM Mono',monospace;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
-  .ema-dot.above{color:#059669;background:rgba(5,150,105,0.08)}
-  .ema-dot.below{color:#dc2626;background:rgba(220,38,38,0.08)}
-  .econ-event{display:grid;grid-template-columns:90px 18px 1fr 80px 80px 80px;gap:0;align-items:center;padding:10px 20px;border-bottom:1px solid #f1f5f9;transition:background 0.15s}
-  .econ-event:hover{background:#f8faff}
+  .ema-dot.above{color:var(--accent2);background:rgba(5,150,105,0.08)}
+  .ema-dot.below{color:var(--accent3);background:rgba(220,38,38,0.08)}
+  .econ-event{display:grid;grid-template-columns:90px 18px 1fr 80px 80px 80px;gap:0;align-items:center;padding:10px 20px;border-bottom:1px solid var(--border);transition:background 0.15s}
+  .econ-event:hover{background:var(--surface)}
   .econ-event:last-child{border-bottom:none}
-  .econ-date{font-family:'DM Mono',monospace;font-size:10px;color:#64748b}
+  .econ-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
   .econ-impact{width:8px;height:8px;border-radius:50%;margin:0 8px}
-  .econ-name{font-size:13px;font-weight:600;color:#0f172a}
-  .econ-val{font-family:'DM Mono',monospace;font-size:11px;text-align:right;color:#0f172a}
-  .econ-prev{font-family:'DM Mono',monospace;font-size:11px;color:#64748b;text-align:right}
-  .econ-est{font-family:'DM Mono',monospace;font-size:11px;color:#d97706;text-align:right}
-  .econ-header{display:grid;grid-template-columns:90px 18px 1fr 80px 80px 80px;gap:0;padding:8px 20px;background:#f8faff;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:1px}
-  .today-marker{background:rgba(0,82,255,0.04);border-left:2px solid var(--accent)}
+  .econ-name{font-size:13px;font-weight:600;color:var(--text)}
+  .econ-val{font-family:'DM Mono',monospace;font-size:11px;text-align:right;color:var(--text)}
+  .econ-prev{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-align:right}
+  .econ-est{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent4);text-align:right}
+  .econ-header{display:grid;grid-template-columns:90px 18px 1fr 80px 80px 80px;gap:0;padding:8px 20px;background:var(--surface);border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .today-marker{background:var(--tag-bg);border-left:2px solid var(--accent)}
   .adx-badge{font-family:'DM Mono',monospace;font-size:10px;font-weight:700}
-  .adx-strong{color:#059669}.adx-weak{color:#64748b}.adx-mid{color:#d97706}
+  .adx-strong{color:var(--accent2)}.adx-weak{color:var(--muted)}.adx-mid{color:var(--accent4)}
   @media(max-width:1000px){.stats-bar{grid-template-columns:repeat(3,1fr)}.hide-mobile{display:none}.watchlist-input{width:100%}}
 
   /* ── MOBILE ── */
@@ -290,16 +281,16 @@
       <div class="logo-icon">⚡</div>
       <div>
         <h1>Algo<span>Screen</span> Pro</h1>
-        <div style="font-size:11px;color:#64748b;font-family:'DM Mono',monospace">Swing Trader Dashboard</div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Swing Trader Dashboard</div>
       </div>
     </div>
     <div class="header-right">
       <span class="speed-badge">⚡ FINNHUB POWERED</span>
       <!-- Dark mode toggle -->
-      <button id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode" style="background:none;border:1px solid #dde5f0;border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0">🌙</button>
-      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#64748b;text-align:right">
+      <button id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode" style="background:none;border:1px solid var(--border);border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0">🌙</button>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-align:right">
         <div id="marketStatus" style="display:flex;align-items:center;gap:6px"><div class="status-dot"></div><span id="marketStatusText">CHECKING...</span></div>
-        <div id="marketCountdown" style="color:#d97706;font-size:12px;font-weight:700;margin-top:2px"></div>
+        <div id="marketCountdown" style="color:var(--accent4);font-size:12px;font-weight:700;margin-top:2px"></div>
       </div>
     </div>
   </header>
@@ -360,7 +351,7 @@
       <tbody id="tableBody">
         <tr class="loading-row">
           <td colspan="14">
-            <div style="text-align:center;color:#64748b;font-family:'DM Mono',monospace;font-size:13px">
+            <div style="text-align:center;color:var(--muted);font-family:'DM Mono',monospace;font-size:13px">
               Enter tickers above and click ⚡ Run Scan to begin
             </div>
           </td>
@@ -378,20 +369,20 @@
         <div class="table-title">📅 Economic Calendar</div>
         <div style="display:flex;align-items:center;gap:12px">
           <div style="display:flex;gap:10px;font-family:'DM Mono',monospace;font-size:10px">
-            <span style="color:#dc2626">● High</span>
-            <span style="color:#d97706">● Medium</span>
-            <span style="color:#64748b">● Low</span>
+            <span style="color:var(--accent3)">● High</span>
+            <span style="color:var(--accent4)">● Medium</span>
+            <span style="color:var(--muted)">● Low</span>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <button class="btn btn-outline" onclick="shiftWeek(-1)" style="padding:6px 12px;font-size:12px">← Prev</button>
-            <div id="weekLabel" style="font-family:'DM Mono',monospace;font-size:11px;color:#0052ff;min-width:140px;text-align:center"></div>
+            <div id="weekLabel" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);min-width:140px;text-align:center"></div>
             <button class="btn btn-outline" onclick="shiftWeek(1)" style="padding:6px 12px;font-size:12px">Next →</button>
             <button class="btn btn-outline" onclick="goToCurrentWeek()" style="padding:6px 12px;font-size:11px">Today</button>
           </div>
         </div>
       </div>
       <div id="econCalendar" style="min-height:100px">
-        <div style="padding:20px;font-family:'DM Mono',monospace;font-size:11px;color:#64748b;display:flex;align-items:center;gap:10px">
+        <div style="padding:20px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:10px">
           <div class="loader" style="width:16px;height:16px;border-width:2px"></div> Loading economic events...
         </div>
       </div>
@@ -407,15 +398,15 @@
 </div>
 
 <!-- Mobile bottom nav -->
-<div id="mobileNav" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#ffffff;border-top:1px solid var(--border);z-index:500;padding:0">
+<div id="mobileNav" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:500;padding:0">
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;height:56px">
-    <button onclick="mobileSwitchTab('screener',this)" id="mobileTab-screener" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#0052ff;font-family:'DM Mono',monospace;font-size:9px;padding:0">
+    <button onclick="mobileSwitchTab('screener',this)" id="mobileTab-screener" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--accent);font-family:'DM Mono',monospace;font-size:9px;padding:0">
       <span style="font-size:18px">📊</span><span>SCREENER</span>
     </button>
-    <button onclick="mobileSwitchTab('calendar',this)" id="mobileTab-calendar" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#64748b;font-family:'DM Mono',monospace;font-size:9px;padding:0">
+    <button onclick="mobileSwitchTab('calendar',this)" id="mobileTab-calendar" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;padding:0">
       <span style="font-size:18px">📅</span><span>CALENDAR</span>
     </button>
-    <button onclick="mobileSwitchTab('scan',this)" id="mobileTab-scan" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#64748b;font-family:'DM Mono',monospace;font-size:9px;padding:0">
+    <button onclick="mobileSwitchTab('scan',this)" id="mobileTab-scan" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;padding:0">
       <span style="font-size:18px">🔍</span><span>SCAN</span>
     </button>
   </div>
@@ -508,15 +499,15 @@ window.addEventListener('resize', setupMobileNav);
     <!-- 52W Range bar -->
     <div class="range-row">
       <div class="range-lbl">52W Low</div>
-      <div class="range-price" id="mLow52" style="color:#dc2626">--</div>
+      <div class="range-price" id="mLow52" style="color:var(--accent3)">--</div>
       <div style="flex:1;display:flex;flex-direction:column;gap:3px;margin:0 12px">
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#64748b;text-align:center" id="m52wPct">52-Week Range</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-align:center" id="m52wPct">52-Week Range</div>
         <div class="range-track">
           <div class="range-gradient"></div>
           <div class="range-dot" id="rangeDot" style="left:50%"></div>
         </div>
       </div>
-      <div class="range-price" id="mHigh52" style="color:#059669">--</div>
+      <div class="range-price" id="mHigh52" style="color:var(--accent2)">--</div>
       <div class="range-lbl">52W High</div>
     </div>
 
@@ -524,7 +515,7 @@ window.addEventListener('resize', setupMobileNav);
     <div class="tv-container" id="tvContainer">
       <div class="tv-loading" id="tvLoading">
         <div class="loader"></div>
-        <div style="font-family:'DM Mono',monospace;font-size:12px;color:#64748b">Loading chart...</div>
+        <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">Loading chart...</div>
       </div>
     </div>
 
@@ -546,7 +537,7 @@ window.addEventListener('resize', setupMobileNav);
     <div class="tech-grid">
       <div class="tech-card">
         <div class="tech-title">RSI (14-period)</div>
-        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:#64748b;margin-bottom:4px">
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:4px">
           <span>Oversold &lt;30</span><span>Neutral</span><span>Overbought &gt;70</span>
         </div>
         <div class="rsi-track">
@@ -568,7 +559,7 @@ window.addEventListener('resize', setupMobileNav);
         <div class="macd-row"><span class="macd-key">EMA 20</span><span class="macd-val" id="techEMA20">--</span></div>
         <div class="macd-row"><span class="macd-key">EMA 50</span><span class="macd-val" id="techEMA50">--</span></div>
         <div class="macd-row"><span class="macd-key">EMA 200</span><span class="macd-val" id="techEMA200">--</span></div>
-        <div style="margin-top:10px;font-family:'DM Mono',monospace;font-size:10px;color:#64748b" id="emaTrend">--</div>
+        <div style="margin-top:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)" id="emaTrend">--</div>
       </div>
       <div class="tech-card">
         <div class="tech-title">Bollinger Bands</div>
@@ -584,7 +575,7 @@ window.addEventListener('resize', setupMobileNav);
         <div style="margin-top:10px;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
           <div id="adxBar" style="height:100%;border-radius:3px;background:var(--accent);width:0%;transition:width 0.8s"></div>
         </div>
-        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:#64748b;margin-top:3px"><span>Weak &lt;20</span><span>Moderate</span><span>Strong &gt;25</span></div>
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px"><span>Weak &lt;20</span><span>Moderate</span><span>Strong &gt;25</span></div>
       </div>
       <div class="tech-card">
         <div class="tech-title">Stochastic</div>
@@ -599,7 +590,7 @@ window.addEventListener('resize', setupMobileNav);
     <div class="earnings-strip">
       <div class="earnings-card">
         <div class="earnings-lbl">Next Earnings Date</div>
-        <div class="earnings-val" id="earnDate" style="color:#d97706">--</div>
+        <div class="earnings-val" id="earnDate" style="color:var(--accent4)">--</div>
         <div class="earnings-sub" id="earnCountdown">--</div>
       </div>
       <div class="earnings-card">
@@ -617,7 +608,7 @@ window.addEventListener('resize', setupMobileNav);
     <!-- Analyst Targets -->
     <div class="detail-section-header">🎯 Analyst Price Targets</div>
     <div id="analystSection">
-      <div style="padding:20px;color:#64748b;font-family:'DM Mono',monospace;font-size:11px;display:flex;align-items:center;gap:8px">
+      <div style="padding:20px;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;display:flex;align-items:center;gap:8px">
         <div class="loader" style="width:14px;height:14px;border-width:2px"></div> Loading analyst data...
       </div>
     </div>
@@ -1099,7 +1090,7 @@ function renderTable() {
   else if (currentFilter==='top') data=data.sort((a,b)=>b.score-a.score).slice(0,5);
   else if (currentFilter==='weak') data=data.filter(d=>d.signal.cls==='weak');
   data.sort((a,b)=>{ let av=a[sortField],bv=b[sortField]; if(sortField==='ticker') return sortDir*av.localeCompare(bv); return sortDir*((av??-999)-(bv??-999)); });
-  if (!data.length&&allResults.length>0) { document.getElementById('tableBody').innerHTML=`<tr class="loading-row"><td colspan="14"><div style="color:#64748b;font-family:'DM Mono',monospace;font-size:13px">No stocks match this filter</div></td></tr>`; return; }
+  if (!data.length&&allResults.length>0) { document.getElementById('tableBody').innerHTML=`<tr class="loading-row"><td colspan="14"><div style="color:var(--muted);font-family:'DM Mono',monospace;font-size:13px">No stocks match this filter</div></td></tr>`; return; }
 
   document.getElementById('tableBody').innerHTML=data.map((d,i)=>{
     const sc=getScoreClass(d.score), cc=d.change>=0?'up':'down';
@@ -1136,14 +1127,14 @@ function renderTable() {
       <td><div class="price">$${d.price.toFixed(2)}</div>${extLabel?`<div class="ext-price ${d.extSession}">${extLabel}</div>`:''}</td>
       <td><span class="change ${cc}">${d.change>=0?'+':''}${d.change.toFixed(2)}%</span></td>
       <td><span style="${mono};color:${rsiColor};font-weight:700">${d.rsi!=null?d.rsi.toFixed(1):'--'}</span></td>
-      <td><div class="ema-badges">${emaBadges||'<span style="color:#64748b;font-size:10px">--</span>'}</div></td>
+      <td><div class="ema-badges">${emaBadges||'<span style="color:var(--muted);font-size:10px">--</span>'}</div></td>
       <td><span class="${adxClass}" style="${mono};font-weight:700">${d.adx!=null?d.adx.toFixed(0):'--'}<span style="font-size:9px">${adxDesc}</span></span></td>
-      <td style="${mono};color:#0f172a">${fmtVol(d.volume)}</td>
-      <td style="${mono};color:#64748b">${mcLabel}</td>
-      <td style="${mono};color:#64748b">${peLabel}</td>
+      <td style="${mono};color:var(--text)">${fmtVol(d.volume)}</td>
+      <td style="${mono};color:var(--muted)">${mcLabel}</td>
+      <td style="${mono};color:var(--muted)">${peLabel}</td>
       <td style="${mono};color:${epsColor}">${epsLabel}</td>
       <td style="${mono};color:${egColor}">${egLabel}</td>
-      <td style="font-size:11px;color:#64748b;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sector}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sector}</td>
       <td class="score-cell"><div class="score-bar-wrap"><span class="score-num ${sc}">${d.score}</span><div class="score-bar"><div class="score-fill ${sc}" style="width:${d.score}%"></div></div></div></td>
       <td><span class="signal ${d.signal.cls}">${d.signal.label}</span></td>
     </tr>`;
@@ -1155,10 +1146,10 @@ function buildTVUrl(ticker, interval) {
   const params = new URLSearchParams({
     symbol: ticker,
     interval: interval,
-    theme: 'dark',
+    theme: document.body.classList.contains('dark') ? 'dark' : 'light',
     style: '1',
     locale: 'en',
-    toolbar_bg: '#0d1117',
+    toolbar_bg: document.body.classList.contains('dark') ? '#0d1117' : '#ffffff',
     enable_publishing: '0',
     hide_top_toolbar: '0',
     hide_legend: '0',
@@ -1210,10 +1201,10 @@ function openChart(ticker) {
   sigEl.textContent = s.signal.label;
   sigEl.className = '';
   sigEl.style.cssText = `font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;${
-    s.signal.cls==='breakout' ? 'background:rgba(0,255,136,0.1);color:#059669;border:1px solid rgba(0,255,136,0.2)' :
-    s.signal.cls==='momentum' ? 'background:rgba(0,82,255,0.1);color:#0052ff;border:1px solid rgba(0,82,255,0.2)' :
-    s.signal.cls==='watch'    ? 'background:rgba(255,214,10,0.1);color:#d97706;border:1px solid rgba(255,214,10,0.2)' :
-    'background:rgba(255,77,109,0.1);color:#dc2626;border:1px solid rgba(255,77,109,0.2)'}`;
+    s.signal.cls==='breakout' ? 'background:var(--green-bg);color:var(--accent2);border:1px solid rgba(5,150,105,0.25)' :
+    s.signal.cls==='momentum' ? 'background:rgba(0,82,255,0.1);color:var(--accent);border:1px solid rgba(0,82,255,0.2)' :
+    s.signal.cls==='watch'    ? 'background:rgba(255,214,10,0.1);color:var(--accent4);border:1px solid rgba(217,119,6,0.25)' :
+    'background:var(--red-bg);color:var(--accent3);border:1px solid rgba(220,38,38,0.25)'}`;
 
   // Stats strip
   const fmtV = v => !v?'--':v>=1e12?(v/1e12).toFixed(2)+'T':v>=1e9?(v/1e9).toFixed(2)+'B':v>=1e6?(v/1e6).toFixed(2)+'M':(v/1e3).toFixed(0)+'K';
@@ -1287,7 +1278,7 @@ function openChart(ticker) {
       <div class="score-bar-val" style="color:${c}">${b.val}</div>
       <div class="score-bar-pts" style="color:${c}">${ptsStr}</div>
     </div>`;
-  }).join('') + `<div style="margin-top:6px;padding-top:10px;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;color:#64748b">
+  }).join('') + `<div style="margin-top:6px;padding-top:10px;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">
     RSI ${rsiPts??0} + MACD ${macdPts??0} + Chg ${changePts} + 52W ${w52Pts??0} + P/E ${pePts??0} + Rev ${revPts} + EMA ${emaPts} + ADX ${adxPts??0} + BB ${bbPts??0} + 50 base = <span style="color:${scoreColor}">${s.score}/100</span>
   </div>`;
 
@@ -1382,7 +1373,7 @@ function openChart(ticker) {
 
   // News
   document.getElementById('newsContainer').innerHTML = '<div class="news-loading"><div class="loader" style="width:20px;height:20px;border-width:2px"></div><div style="margin-top:8px">Loading news...</div></div>';
-  document.getElementById('analystSection').innerHTML = '<div style="padding:20px;color:#64748b;font-family:\'DM Mono\',monospace;font-size:11px;display:flex;align-items:center;gap:8px"><div class="loader" style="width:14px;height:14px;border-width:2px"></div> Loading analyst data...</div>';
+  document.getElementById('analystSection').innerHTML = '<div style="padding:20px;color:var(--muted);font-family:\'DM Mono\',monospace;font-size:11px;display:flex;align-items:center;gap:8px"><div class="loader" style="width:14px;height:14px;border-width:2px"></div> Loading analyst data...</div>';
   fetchNews(s.ticker);
   fetchAndRenderAnalyst(s.ticker, s.price);
 
@@ -1421,17 +1412,17 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
     const total = (a.strongBuy||0) + (a.buy||0) + (a.hold||0) + (a.sell||0) + (a.strongSell||0);
 
     if (!total) {
-      el.innerHTML = '<div style="padding:16px 20px;color:#64748b;font-family:\'DM Mono\',monospace;font-size:11px">No analyst coverage data available</div>';
+      el.innerHTML = '<div style="padding:16px 20px;color:var(--muted);font-family:\'DM Mono\',monospace;font-size:11px">No analyst coverage data available</div>';
       return;
     }
 
     const pct = v => total ? Math.round(((v||0)/total)*100) : 0;
     const rows = [
-      {label:'Strong Buy',  val:a.strongBuy,  color:'#00ff88'},
-      {label:'Buy',         val:a.buy,         color:'#00e5ff'},
-      {label:'Hold',        val:a.hold,        color:'#ffd60a'},
-      {label:'Sell',        val:a.sell,        color:'#ff6b6b'},
-      {label:'Strong Sell', val:a.strongSell,  color:'#ff4d6d'},
+      {label:'Strong Buy',  val:a.strongBuy,  color:'var(--accent2)'},
+      {label:'Buy',         val:a.buy,         color:'var(--accent)'},
+      {label:'Hold',        val:a.hold,        color:'var(--accent4)'},
+      {label:'Sell',        val:a.sell,        color:'var(--accent3)'},
+      {label:'Strong Sell', val:a.strongSell,  color:'var(--accent3)'},
     ];
     const bullish   = (a.strongBuy||0) + (a.buy||0);
     const bearish   = (a.sell||0) + (a.strongSell||0);
@@ -1449,19 +1440,19 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
     // Firm ratings
     const ratingColor = r => {
       const v = (r||'').toLowerCase();
-      if (v.includes('strong buy')||v.includes('outperform')||v.includes('overweight')||v.includes('buy')) return '#00ff88';
-      if (v.includes('sell')||v.includes('underweight')||v.includes('underperform')) return '#ff4d6d';
-      return '#ffd60a';
+      if (v.includes('strong buy')||v.includes('outperform')||v.includes('overweight')||v.includes('buy')) return 'var(--accent2)';
+      if (v.includes('sell')||v.includes('underweight')||v.includes('underperform')) return 'var(--accent3)';
+      return 'var(--accent4)';
     };
     const firmRows = (a.firmRatings||[]).map(r => {
       const actionType = (r.action||'').toLowerCase();
-      const badge = actionType.includes('upgrade')   ? '<span style="color:#00ff88;font-size:9px;font-weight:700">▲ UP</span>'
-                  : actionType.includes('downgrade') ? '<span style="color:#ff4d6d;font-size:9px;font-weight:700">▼ DOWN</span>'
-                  : actionType.includes('init')      ? '<span style="color:#0052ff;font-size:9px;font-weight:700">★ INIT</span>'
-                  : '<span style="color:#ffd60a;font-size:9px">— REIT</span>';
-      const pt = r.target ? `<span style="color:#059669;font-weight:700">${r.target.startsWith('$')?r.target:'$'+r.target}</span>` : '<span style="color:#64748b">--</span>';
-      return `<div style="display:grid;grid-template-columns:80px 1fr 160px 70px 55px;align-items:center;padding:9px 20px;border-bottom:1px solid #f1f5f9" onmouseover="this.style.background='rgba(0,82,255,0.03)'" onmouseout="this.style.background=''">
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#64748b">${r.date||''}</div>
+      const badge = actionType.includes('upgrade')   ? '<span style="color:var(--accent2);font-size:9px;font-weight:700">▲ UP</span>'
+                  : actionType.includes('downgrade') ? '<span style="color:var(--accent3);font-size:9px;font-weight:700">▼ DOWN</span>'
+                  : actionType.includes('init')      ? '<span style="color:var(--accent);font-size:9px;font-weight:700">★ INIT</span>'
+                  : '<span style="color:var(--accent4);font-size:9px">— REIT</span>';
+      const pt = r.target ? `<span style="color:var(--accent2);font-weight:700">${r.target.startsWith('$')?r.target:'$'+r.target}</span>` : '<span style="color:var(--muted)">--</span>';
+      return `<div style="display:grid;grid-template-columns:80px 1fr 160px 70px 55px;align-items:center;padding:9px 20px;border-bottom:1px solid var(--border)" onmouseover="this.style.background='rgba(0,82,255,0.03)'" onmouseout="this.style.background=''">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">${r.date||''}</div>
         <div style="font-size:12px;font-weight:700">${r.firm||'--'}</div>
         <div style="font-family:'DM Mono',monospace;font-size:10px;color:${ratingColor(r.rating)}">${r.rating||'--'}</div>
         <div style="font-family:'DM Mono',monospace;font-size:11px;text-align:right">${pt}</div>
@@ -1474,18 +1465,18 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
       const t = (h.strongBuy||0)+(h.buy||0)+(h.hold||0)+(h.sell||0)+(h.strongSell||0);
       const b = (h.strongBuy||0)+(h.buy||0);
       const bear = (h.sell||0)+(h.strongSell||0);
-      const sent = b/t >= 0.6 ? {label:'BULLISH',color:'#00ff88'} : bear/t >= 0.4 ? {label:'BEARISH',color:'#ff4d6d'} : {label:'NEUTRAL',color:'#ffd60a'};
-      return `<div style="display:grid;grid-template-columns:90px 60px 1fr 60px 60px 60px;align-items:center;gap:8px;padding:8px 20px;border-bottom:1px solid #f1f5f9">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#64748b">${h.period||''}</div>
+      const sent = b/t >= 0.6 ? {label:'BULLISH',color:'var(--accent2)'} : bear/t >= 0.4 ? {label:'BEARISH',color:'var(--accent3)'} : {label:'NEUTRAL',color:'var(--accent4)'};
+      return `<div style="display:grid;grid-template-columns:90px 60px 1fr 60px 60px 60px;align-items:center;gap:8px;padding:8px 20px;border-bottom:1px solid var(--border)">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">${h.period||''}</div>
         <div style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:${sent.color}">${sent.label}</div>
-        <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;display:flex">
-          <div style="width:${t?Math.round(b/t*100):0}%;background:#00ff88"></div>
-          <div style="width:${t?Math.round((h.hold||0)/t*100):0}%;background:#ffd60a"></div>
-          <div style="width:${t?Math.round(bear/t*100):0}%;background:#ff4d6d"></div>
+        <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;display:flex">
+          <div style="width:${t?Math.round(b/t*100):0}%;background:var(--accent2)"></div>
+          <div style="width:${t?Math.round((h.hold||0)/t*100):0}%;background:var(--accent4)"></div>
+          <div style="width:${t?Math.round(bear/t*100):0}%;background:var(--accent3)"></div>
         </div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#00ff88;text-align:right">${b} buy</div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ffd60a;text-align:right">${h.hold||0} hold</div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#ff4d6d;text-align:right">${bear} sell</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);text-align:right">${b} buy</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent4);text-align:right">${h.hold||0} hold</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent3);text-align:right">${bear} sell</div>
       </div>`;
     }).join('');
 
@@ -1495,12 +1486,12 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
           <div>
             <div style="font-family:'DM Mono',monospace;font-size:24px;font-weight:700;color:${sentiment.color}">${sentiment.label}</div>
-            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#64748b;margin-top:2px">${total} analyst ratings${a.period?' · '+a.period:''}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px">${total} analyst ratings${a.period?' · '+a.period:''}</div>
           </div>
           <div style="display:flex;gap:20px">
-            <div style="text-align:center"><div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:#00ff88">${bullish}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:#64748b">BUY</div></div>
-            <div style="text-align:center"><div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:#ffd60a">${a.hold||0}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:#64748b">HOLD</div></div>
-            <div style="text-align:center"><div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:#ff4d6d">${bearish}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:#64748b">SELL</div></div>
+            <div style="text-align:center"><div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--accent2)">${bullish}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">BUY</div></div>
+            <div style="text-align:center"><div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--accent4)">${a.hold||0}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">HOLD</div></div>
+            <div style="text-align:center"><div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--accent3)">${bearish}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">SELL</div></div>
           </div>
         </div>
 
@@ -1513,8 +1504,8 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
         <div style="display:flex;flex-direction:column;gap:8px">
           ${rows.map(r=>`
             <div style="display:grid;grid-template-columns:100px 1fr 36px;align-items:center;gap:10px">
-              <div style="font-family:'DM Mono',monospace;font-size:10px;color:#64748b">${r.label}</div>
-              <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
+              <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">${r.label}</div>
+              <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">
                 <div style="height:100%;width:${pct(r.val)}%;background:${r.color};border-radius:3px"></div>
               </div>
               <div style="font-family:'DM Mono',monospace;font-size:11px;color:${r.color};font-weight:700;text-align:right">${r.val||0}</div>
@@ -1525,30 +1516,30 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
       ${hasPT ? `
       <!-- Avg Price Target -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-top:1px solid var(--border)">
-        <div style="padding:20px;background:#ffffff">
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:#64748b;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Avg Analyst Price Target</div>
+        <div style="padding:20px;background:var(--card)">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Avg Analyst Price Target</div>
           <div style="display:flex;align-items:baseline;gap:10px">
             <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:700">$${a.avgTarget.toFixed(2)}</div>
             ${upside!=null?`<div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:${upsideColor}">${upside>=0?'+':''}${upside.toFixed(1)}%</div>`:''}
           </div>
-          <div style="font-family:'DM Mono',monospace;font-size:10px;color:#64748b;margin-top:4px">${a.numAnalysts?a.numAnalysts+' analysts':'Yahoo Finance'}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px">${a.numAnalysts?a.numAnalysts+' analysts':'Yahoo Finance'}</div>
           ${rangePos!=null?`
           <div style="margin-top:14px">
-            <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:#64748b;margin-bottom:6px">
+            <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:6px">
               <span>Low $${a.targetLow.toFixed(2)}</span><span>High $${a.targetHigh.toFixed(2)}</span>
             </div>
-            <div style="position:relative;height:6px;background:rgba(255,255,255,0.06);border-radius:3px">
+            <div style="position:relative;height:6px;background:var(--border);border-radius:3px">
               <div style="position:absolute;left:0;top:0;height:100%;width:${rangePos}%;background:linear-gradient(90deg,var(--accent3),var(--accent4),var(--accent2));border-radius:3px"></div>
-              <div style="position:absolute;top:-4px;left:calc(${rangePos}% - 6px);width:14px;height:14px;background:white;border-radius:50%;border:2px solid var(--bg)"></div>
+              <div style="position:absolute;top:-4px;left:calc(${rangePos}% - 6px);width:14px;height:14px;background:var(--card);border-radius:50%;border:2px solid var(--accent)"></div>
             </div>
-            <div style="font-family:'DM Mono',monospace;font-size:9px;color:#64748b;margin-top:8px;text-align:center">Current $${currentPrice.toFixed(2)}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:8px;text-align:center">Current $${currentPrice.toFixed(2)}</div>
           </div>` : ''}
         </div>
-        <div style="padding:20px;background:#ffffff;display:flex;align-items:center;justify-content:center">
+        <div style="padding:20px;background:var(--card);display:flex;align-items:center;justify-content:center">
           <div style="text-align:center">
-            <div style="font-family:'DM Mono',monospace;font-size:11px;color:#64748b;margin-bottom:6px">Analyst Consensus</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:6px">Analyst Consensus</div>
             <div style="font-family:'DM Mono',monospace;font-size:30px;font-weight:700;color:${upsideColor}">${upside>=0?'↑':'↓'} ${Math.abs(upside).toFixed(1)}%</div>
-            <div style="font-family:'DM Mono',monospace;font-size:11px;color:#64748b;margin-top:6px">${upside>=0?'Upside':'Downside'} from current</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px">${upside>=0?'Upside':'Downside'} from current</div>
           </div>
         </div>
       </div>` : ''}
@@ -1556,12 +1547,12 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
       ${firmRows ? `
       <!-- Individual Firm Ratings -->
       <div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#f8faff;border-top:1px solid var(--border);cursor:pointer;user-select:none" onclick="const b=this.nextElementSibling;b.style.display=b.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=b.style.display==='none'?'▼ Show':'▲ Hide'">
-          <div style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700">📋 Individual Firm Ratings <span style="color:#64748b;font-weight:400">(${a.firmRatings.length})</span></div>
-          <span class="arr" style="font-family:'DM Mono',monospace;font-size:10px;color:#0052ff">▲ Hide</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--surface);border-top:1px solid var(--border);cursor:pointer;user-select:none" onclick="const b=this.nextElementSibling;b.style.display=b.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=b.style.display==='none'?'▼ Show':'▲ Hide'">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700">📋 Individual Firm Ratings <span style="color:var(--muted);font-weight:400">(${a.firmRatings.length})</span></div>
+          <span class="arr" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent)">▲ Hide</span>
         </div>
         <div>
-          <div style="display:grid;grid-template-columns:80px 1fr 160px 70px 55px;padding:6px 20px;background:#f8faff;font-family:'DM Mono',monospace;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border)">
+          <div style="display:grid;grid-template-columns:80px 1fr 160px 70px 55px;padding:6px 20px;background:var(--surface);font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border)">
             <span>Date</span><span>Firm</span><span>Rating</span><span style="text-align:right">Target</span><span style="text-align:right">Action</span>
           </div>
           ${firmRows}
@@ -1570,7 +1561,7 @@ async function fetchAndRenderAnalyst(ticker, currentPrice) {
     `;
   } catch(e) {
     console.error('Analyst error:', e);
-    document.getElementById('analystSection').innerHTML = '<div style="padding:16px 20px;color:#64748b;font-family:\'DM Mono\',monospace;font-size:11px">Analyst data unavailable</div>';
+    document.getElementById('analystSection').innerHTML = '<div style="padding:16px 20px;color:var(--muted);font-family:\'DM Mono\',monospace;font-size:11px">Analyst data unavailable</div>';
   }
 }
 
@@ -1579,7 +1570,7 @@ async function fetchNews(ticker) {
     const to = new Date().toISOString().slice(0,10);
     const from = new Date(Date.now()-30*24*60*60*1000).toISOString().slice(0,10);
     const d = await finnhubFetch('company-news', {symbol: ticker, from, to});
-    if (!d || !d.length) { document.getElementById('newsContainer').innerHTML='<div class="news-loading" style="color:#64748b">No recent news found</div>'; return; }
+    if (!d || !d.length) { document.getElementById('newsContainer').innerHTML='<div class="news-loading" style="color:var(--muted)">No recent news found</div>'; return; }
     const items = d.slice(0,6);
     document.getElementById('newsContainer').innerHTML = items.map(n => {
       const t = new Date(n.datetime*1000);
@@ -1593,7 +1584,7 @@ async function fetchNews(ticker) {
       </a>`;
     }).join('');
   } catch(e) {
-    document.getElementById('newsContainer').innerHTML='<div class="news-loading" style="color:#64748b">News unavailable</div>';
+    document.getElementById('newsContainer').innerHTML='<div class="news-loading" style="color:var(--muted)">News unavailable</div>';
   }
 }
 
@@ -1676,21 +1667,21 @@ function renderWeek() {
     const isPast  = d < today;
     const dayName = d.toLocaleDateString('en-US',{weekday:'long'});
     const dateFmt = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    const dayColor = isToday ? '#0052ff' : isPast ? '#94a3b8' : '#0f172a';
-    const dayBg    = isToday ? 'rgba(0,82,255,0.05)' : '#f8faff';
+    const dayColor = isToday ? 'var(--accent)' : isPast ? 'var(--muted)' : 'var(--text)';
+    const dayBg    = isToday ? 'var(--tag-bg)' : 'var(--surface)';
     const dayBorderL = isToday ? '3px solid var(--accent)' : '3px solid transparent';
 
     const eventsHtml = events.length === 0
-      ? '<div style="padding:10px 20px;font-family:\'DM Mono\',monospace;font-size:11px;color:#94a3b8">No scheduled events</div>'
+      ? '<div style="padding:10px 20px;font-family:\'DM Mono\',monospace;font-size:11px;color:var(--muted)">No scheduled events</div>'
       : events.map(e => {
           const ic = impactColor(e.impact);
           const glow = ic !== 'var(--border)' ? 'box-shadow:0 0 6px ' + ic : '';
-          const rowBg = e.impact==='high' && !isPast ? 'rgba(220,38,38,0.03)' : '';
-          return '<div style="display:grid;grid-template-columns:80px 14px 1fr 20px;align-items:center;padding:10px 20px;border-bottom:1px solid #f1f5f9;background:' + rowBg + ';cursor:pointer" onmouseover="this.style.background=\'rgba(0,82,255,0.06)\'" onmouseout="this.style.background=\'' + rowBg + '\'" onclick="openEconEvent(\'' + e.event.replace(/'/g,"\\'") + '\')">'
-            + '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:#64748b">' + (e.time||'') + '</div>'
+          const rowBg = e.impact==='high' && !isPast ? 'var(--red-bg)' : '';
+          return '<div style="display:grid;grid-template-columns:80px 14px 1fr 20px;align-items:center;padding:10px 20px;border-bottom:1px solid var(--border);background:' + rowBg + ';cursor:pointer" onmouseover="this.style.background=\'rgba(0,82,255,0.06)\'" onmouseout="this.style.background=\'' + rowBg + '\'" onclick="openEconEvent(\'' + e.event.replace(/'/g,"\\'") + '\')">'
+            + '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted)">' + (e.time||'') + '</div>'
             + '<div style="width:8px;height:8px;border-radius:50%;background:' + ic + ';flex-shrink:0;' + glow + '"></div>'
             + '<div style="padding-left:10px;font-size:13px;font-weight:700;color:' + (isPast?'var(--muted)':'var(--text)') + '">' + e.event + '</div>'
-            + '<div style="font-family:\'DM Mono\',monospace;font-size:11px;color:#64748b">›</div>'
+            + '<div style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--muted)">›</div>'
             + '</div>';
         }).join('');
 
@@ -1698,9 +1689,9 @@ function renderWeek() {
       + '<div style="padding:10px 20px;background:' + dayBg + ';border-left:' + dayBorderL + ';display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">'
       + '<div style="font-family:\'DM Mono\',monospace;font-size:11px;font-weight:700;color:' + dayColor + '">'
       + dayName + ' <span style="font-weight:400;margin-left:6px">' + dateFmt + '</span>'
-      + (isToday ? '<span style="margin-left:8px;font-size:9px;color:#0052ff;background:rgba(0,82,255,0.1);padding:2px 6px;border-radius:3px;border:1px solid rgba(0,82,255,0.2)">TODAY</span>' : '')
+      + (isToday ? '<span style="margin-left:8px;font-size:9px;color:var(--accent);background:rgba(0,82,255,0.1);padding:2px 6px;border-radius:3px;border:1px solid rgba(0,82,255,0.2)">TODAY</span>' : '')
       + '</div>'
-      + '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:#64748b">' + events.length + ' event' + (events.length!==1?'s':'') + '</div>'
+      + '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted)">' + events.length + ' event' + (events.length!==1?'s':'') + '</div>'
       + '</div>'
       + eventsHtml
       + '</div>';
@@ -1868,7 +1859,7 @@ function openEconEvent(eventName) {
     const ev = econEvents.find(e => e.event === eventName);
     const impact = ev?.impact || 'medium';
     const impactLabel = impact === 'high' ? '🔴 High Impact' : impact === 'medium' ? '🟡 Medium Impact' : '⚫ Low Impact';
-    const impactCol = impact === 'high' ? '#ff4d6d' : impact === 'medium' ? '#ffd60a' : 'var(--muted)';
+    const impactCol = impact === 'high' ? 'var(--accent3)' : impact === 'medium' ? 'var(--accent4)' : 'var(--muted)';
     document.getElementById('econModalImpact').innerHTML = `<span style="color:${impactCol}">${impactLabel}</span>`;
     document.getElementById('econModalWhat').textContent = info.what;
     document.getElementById('econModalWhy').textContent = info.why;
@@ -1938,7 +1929,7 @@ function checkMarketStatus() {
     // Pre-market
     statusText.textContent = 'PRE-MARKET';
     countdown.textContent = `Market opens in ${fmt(marketOpen - secsNow)}`;
-    dot.style.background='#a78bfa'; dot.style.boxShadow='0 0 8px #a78bfa';
+    dot.style.background='#a78bfa'; dot.style.boxShadow='0 0 6px #a78bfa';
   } else if (secsNow >= marketOpen && secsNow < marketClose) {
     // Market open — count down to close
     statusText.textContent = 'MARKET OPEN';
@@ -1948,7 +1939,7 @@ function checkMarketStatus() {
     // After-hours
     statusText.textContent = 'AFTER-HOURS';
     countdown.textContent = `Extended hours end in ${fmt(afterClose - secsNow)}`;
-    dot.style.background='#fb923c'; dot.style.boxShadow='0 0 8px #fb923c';
+    dot.style.background='#f97316'; dot.style.boxShadow='0 0 6px #f97316';
   } else {
     // Closed — count to tomorrow 9:30am (or Monday if Friday)
     const isFriday = wd===5;
@@ -1965,45 +1956,45 @@ setInterval(checkMarketStatus, 1000);
 
 <!-- Econ Event Info Modal -->
 <div id="econEventModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,0.65);z-index:9999;overflow-y:auto;backdrop-filter:blur(4px)" onclick="if(event.target===this)closeEconModal()">
-  <div style="max-width:620px;margin:60px auto;background:#ffffff;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+  <div style="max-width:620px;margin:60px auto;background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden">
     <!-- Header -->
-    <div style="padding:20px 24px;background:#f8faff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+    <div style="padding:20px 24px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
       <div>
         <div id="econModalTitle" style="font-family:'DM Mono',monospace;font-size:16px;font-weight:700"></div>
         <div id="econModalImpact" style="font-family:'DM Mono',monospace;font-size:10px;margin-top:4px"></div>
       </div>
-      <button onclick="closeEconModal()" style="background:none;border:none;color:#64748b;font-size:22px;cursor:pointer;padding:4px 8px;line-height:1">×</button>
+      <button onclick="closeEconModal()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px 8px;line-height:1">×</button>
     </div>
     <!-- Content -->
     <div style="padding:24px;display:flex;flex-direction:column;gap:20px">
       <div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">What is it?</div>
-        <div id="econModalWhat" style="font-size:13px;line-height:1.7;color:#0f172a"></div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">What is it?</div>
+        <div id="econModalWhat" style="font-size:13px;line-height:1.7;color:var(--text)"></div>
       </div>
       <div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Why does it matter?</div>
-        <div id="econModalWhy" style="font-size:13px;line-height:1.7;color:#0f172a"></div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Why does it matter?</div>
+        <div id="econModalWhy" style="font-size:13px;line-height:1.7;color:var(--text)"></div>
       </div>
       <div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">What happens to markets?</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">What happens to markets?</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-          <div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:6px;padding:14px">
-            <div style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#00ff88;margin-bottom:8px">✅ BEATS FORECAST</div>
-            <div id="econModalAbove" style="font-size:12px;line-height:1.6;color:#0f172a"></div>
+          <div style="background:var(--green-bg);border:1px solid rgba(5,150,105,0.25);border-radius:6px;padding:14px">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent2);margin-bottom:8px">✅ BEATS FORECAST</div>
+            <div id="econModalAbove" style="font-size:12px;line-height:1.6;color:var(--text)"></div>
           </div>
-          <div style="background:rgba(255,214,10,0.06);border:1px solid rgba(255,214,10,0.2);border-radius:6px;padding:14px">
-            <div style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#ffd60a;margin-bottom:8px">➡️ IN LINE</div>
-            <div id="econModalMeet" style="font-size:12px;line-height:1.6;color:#0f172a"></div>
+          <div style="background:var(--yellow-bg);border:1px solid rgba(217,119,6,0.25);border-radius:6px;padding:14px">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent4);margin-bottom:8px">➡️ IN LINE</div>
+            <div id="econModalMeet" style="font-size:12px;line-height:1.6;color:var(--text)"></div>
           </div>
-          <div style="background:rgba(255,77,109,0.06);border:1px solid rgba(255,77,109,0.2);border-radius:6px;padding:14px">
-            <div style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:#ff4d6d;margin-bottom:8px">❌ MISSES FORECAST</div>
-            <div id="econModalBelow" style="font-size:12px;line-height:1.6;color:#0f172a"></div>
+          <div style="background:var(--red-bg);border:1px solid rgba(220,38,38,0.25);border-radius:6px;padding:14px">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent3);margin-bottom:8px">❌ MISSES FORECAST</div>
+            <div id="econModalBelow" style="font-size:12px;line-height:1.6;color:var(--text)"></div>
           </div>
         </div>
       </div>
-      <div id="econModalTip" style="background:rgba(0,82,255,0.05);border:1px solid rgba(0,82,255,0.15);border-radius:6px;padding:14px">
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:#0052ff;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">💡 Swing Trader Tip</div>
-        <div id="econModalTipText" style="font-size:12px;line-height:1.6;color:#0f172a"></div>
+      <div id="econModalTip" style="background:var(--tag-bg);border:1px solid rgba(0,82,255,0.15);border-radius:6px;padding:14px">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">💡 Swing Trader Tip</div>
+        <div id="econModalTipText" style="font-size:12px;line-height:1.6;color:var(--text)"></div>
       </div>
     </div>
   </div>
@@ -2013,6 +2004,10 @@ function toggleTheme() {
   const isDark = document.body.classList.toggle('dark');
   document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
   localStorage.setItem('algoscreen-theme', isDark ? 'dark' : 'light');
+  // Reload TradingView chart with correct theme
+  if (currentTicker) {
+    setTimeout(() => loadTVChart(currentTicker, currentInterval), 100);
+  }
 }
 // Apply saved theme on load
 (function() {
