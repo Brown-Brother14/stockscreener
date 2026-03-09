@@ -309,6 +309,52 @@
 
 <!-- DETAIL MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+
+<!-- Econ Event Info Modal -->
+<div id="econEventModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;overflow-y:auto;backdrop-filter:blur(4px)" onclick="if(event.target===this)closeEconModal()">
+  <div style="max-width:620px;margin:60px auto;background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+    <!-- Header -->
+    <div style="padding:20px 24px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div id="econModalTitle" style="font-family:'Space Mono',monospace;font-size:16px;font-weight:700"></div>
+        <div id="econModalImpact" style="font-family:'Space Mono',monospace;font-size:10px;margin-top:4px"></div>
+      </div>
+      <button onclick="closeEconModal()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px 8px;line-height:1">×</button>
+    </div>
+    <!-- Content -->
+    <div style="padding:24px;display:flex;flex-direction:column;gap:20px">
+      <div>
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">What is it?</div>
+        <div id="econModalWhat" style="font-size:13px;line-height:1.7;color:var(--text)"></div>
+      </div>
+      <div>
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Why does it matter?</div>
+        <div id="econModalWhy" style="font-size:13px;line-height:1.7;color:var(--text)"></div>
+      </div>
+      <div>
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">What happens to markets?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:6px;padding:14px">
+            <div style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:#00ff88;margin-bottom:8px">✅ BEATS FORECAST</div>
+            <div id="econModalAbove" style="font-size:12px;line-height:1.6;color:var(--text)"></div>
+          </div>
+          <div style="background:rgba(255,214,10,0.06);border:1px solid rgba(255,214,10,0.2);border-radius:6px;padding:14px">
+            <div style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:#ffd60a;margin-bottom:8px">➡️ IN LINE</div>
+            <div id="econModalMeet" style="font-size:12px;line-height:1.6;color:var(--text)"></div>
+          </div>
+          <div style="background:rgba(255,77,109,0.06);border:1px solid rgba(255,77,109,0.2);border-radius:6px;padding:14px">
+            <div style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:#ff4d6d;margin-bottom:8px">❌ MISSES FORECAST</div>
+            <div id="econModalBelow" style="font-size:12px;line-height:1.6;color:var(--text)"></div>
+          </div>
+        </div>
+      </div>
+      <div id="econModalTip" style="background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.15);border-radius:6px;padding:14px">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">💡 Swing Trader Tip</div>
+        <div id="econModalTipText" style="font-size:12px;line-height:1.6;color:var(--text)"></div>
+      </div>
+    </div>
+  </div>
+</div>
   <div class="modal">
 
     <!-- Sticky header -->
@@ -1523,10 +1569,11 @@ function renderWeek() {
           const ic = impactColor(e.impact);
           const glow = ic !== 'var(--border)' ? 'box-shadow:0 0 6px ' + ic : '';
           const rowBg = e.impact==='high' && !isPast ? 'rgba(255,77,109,0.02)' : '';
-          return '<div style="display:grid;grid-template-columns:80px 14px 1fr;align-items:center;padding:10px 20px;border-bottom:1px solid rgba(30,42,53,0.5);background:' + rowBg + '" onmouseover="this.style.background=\'rgba(0,229,255,0.04)\'" onmouseout="this.style.background=\'' + rowBg + '\'">'
+          return '<div style="display:grid;grid-template-columns:80px 14px 1fr 20px;align-items:center;padding:10px 20px;border-bottom:1px solid rgba(30,42,53,0.5);background:' + rowBg + ';cursor:pointer" onmouseover="this.style.background=\'rgba(0,229,255,0.06)\'" onmouseout="this.style.background=\'' + rowBg + '\'" onclick="openEconEvent(\'' + e.event.replace(/'/g,"\\'") + '\')">'
             + '<div style="font-family:\'Space Mono\',monospace;font-size:10px;color:var(--muted)">' + (e.time||'') + '</div>'
             + '<div style="width:8px;height:8px;border-radius:50%;background:' + ic + ';flex-shrink:0;' + glow + '"></div>'
             + '<div style="padding-left:10px;font-size:13px;font-weight:700;color:' + (isPast?'var(--muted)':'var(--text)') + '">' + e.event + '</div>'
+            + '<div style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--muted)">›</div>'
             + '</div>';
         }).join('');
 
@@ -1543,6 +1590,184 @@ function renderWeek() {
   }).join('<div style="height:1px;background:var(--border)"></div>');
 
   document.getElementById('econCalendar').innerHTML = html;
+}
+
+const ECON_INFO = {
+  'FOMC Rate Decision': {
+    what: 'The Federal Open Market Committee votes on the federal funds rate — the interest rate banks charge each other to lend money overnight. This is the most powerful economic lever the Fed controls.',
+    why: 'Interest rates affect everything: borrowing costs, mortgage rates, corporate profits, currency strength, and how attractive stocks are vs bonds. It\'s the single most watched event in global markets.',
+    above: 'Rate hike or hawkish surprise → Stocks typically sell off (especially growth/tech). Dollar strengthens. Bond yields rise.',
+    meet: 'Decision as expected → Markets usually flat or slight relief rally. Focus shifts to the press conference wording.',
+    below: 'Rate cut or dovish surprise → Stocks typically rally hard, especially growth and tech. Dollar weakens. Bond yields fall.',
+    tip: 'Avoid opening new swing trades 1–2 days before FOMC. The move can go either way violently. Wait for the dust to settle — the real trend often establishes itself 1–2 days after the decision.',
+  },
+  'CPI': {
+    what: 'Consumer Price Index — measures the average change in prices paid by consumers for goods and services like food, housing, clothing, transport and healthcare. It\'s the most widely used measure of inflation.',
+    why: 'The Fed uses CPI to decide whether to raise, cut or hold interest rates. Hot inflation = rate hikes = bad for stocks. Cooling inflation = rate cuts = good for stocks.',
+    above: 'Higher than expected inflation → Stocks sell off, especially tech and growth. Dollar rises. Fed may hike rates or stay higher for longer.',
+    meet: 'In line with forecasts → Markets typically stable, slight relief. Traders look at month-over-month breakdown for clues.',
+    below: 'Lower than expected inflation → Stocks rally, especially rate-sensitive sectors (tech, real estate). Bond yields fall. Rate cut expectations increase.',
+    tip: 'CPI is released at 8:30am ET. The initial spike is often reversed within minutes — don\'t chase the open. Watch where the market settles 30–60 mins after for the real direction.',
+  },
+  'PPI': {
+    what: 'Producer Price Index — measures inflation from the perspective of sellers/manufacturers. It tracks the prices businesses receive for their goods before they reach consumers.',
+    why: 'PPI is a leading indicator of consumer inflation — if businesses are paying more, they often pass those costs on. The Fed watches it closely alongside CPI.',
+    above: 'Higher producer prices → Suggests CPI will follow. Stocks often dip mildly. More pressure on Fed to keep rates high.',
+    meet: 'In line → Minimal market reaction. Confirms existing inflation trend.',
+    below: 'Lower producer prices → Positive sign for future CPI. Stocks tend to react positively, especially if CPI was also soft recently.',
+    tip: 'PPI alone rarely moves markets dramatically. It has more impact when it confirms or contradicts a recent CPI print. Watch the "core" reading (strips out food and energy) — that\'s what the Fed focuses on.',
+  },
+  'Nonfarm Payrolls': {
+    what: 'NFP — the monthly count of jobs added or lost in the US economy, excluding farm workers, government, and non-profit employees. Released the first Friday of each month.',
+    why: 'Jobs data tells the Fed whether the economy is running hot or cooling. Strong jobs = Fed keeps rates high. Weak jobs = Fed may cut rates sooner.',
+    above: 'More jobs than expected → Paradoxically often bad for stocks in the short term — it means the economy is strong and the Fed won\'t cut rates soon. Dollar rises.',
+    meet: 'In line → Markets usually stable. Focus shifts to average hourly earnings and unemployment rate within the same report.',
+    below: 'Fewer jobs than expected → Often triggers a rally if traders believe it speeds up rate cuts. But a very weak number signals recession risk — stocks can drop sharply.',
+    tip: 'The "good news is bad news" effect is real with NFP. Also check the revisions to prior months — sometimes the headline number looks fine but previous months get revised down, which is bearish.',
+  },
+  'GDP': {
+    what: 'Gross Domestic Product — the total monetary value of all goods and services produced in the US economy in a quarter. It\'s the broadest measure of economic health.',
+    why: 'GDP tells you if the economy is growing or contracting. Two consecutive quarters of negative GDP = recession, which is extremely negative for stocks.',
+    above: 'GDP beats expectations → Economy is healthy. Good for cyclical stocks (industrials, financials, consumer discretionary). Can be bearish if it means Fed keeps rates high.',
+    meet: 'In line → Minimal market reaction. Economy is on track.',
+    below: 'GDP misses → Recession fears rise. Defensive stocks (utilities, healthcare, consumer staples) outperform. Tech and growth can sell off hard.',
+    tip: 'GDP is released 3 times: Advance (first estimate), Preliminary (revision), and Final. The Advance release moves markets the most. GDP is a lagging indicator — by the time it\'s confirmed negative, stocks have usually already fallen.',
+  },
+  'PCE Price Index': {
+    what: 'Personal Consumption Expenditures Price Index — the Fed\'s preferred inflation gauge. Unlike CPI, it adjusts for changes in consumer behaviour (e.g. switching from beef to chicken when beef prices rise).',
+    why: 'The Fed officially targets 2% PCE inflation. This is the number they look at most when deciding on interest rates, even more than CPI.',
+    above: 'Higher than expected PCE → Hawkish pressure on Fed. Stocks typically sell off. Rate cut expectations pushed out.',
+    meet: 'In line → Calm reaction. Markets focus on the trajectory (is it trending down over time?).',
+    below: 'Lower PCE → Strongest signal for future rate cuts. Tech and growth stocks tend to rally most. Bonds rally (yields fall).',
+    tip: 'Core PCE (excludes food and energy) is what the Fed cares about most. A Core PCE print close to 2% is the green light the Fed needs to cut rates — watch for this.',
+  },
+  'Retail Sales': {
+    what: 'Measures the total receipts at stores that sell merchandise to consumers. It covers everything from car dealerships to online retailers and is a key gauge of consumer spending.',
+    why: 'Consumer spending makes up about 70% of the US economy. Strong retail sales = healthy economy = better corporate earnings. Weak retail = consumers pulling back = potential slowdown.',
+    above: 'Better than expected sales → Positive for consumer discretionary stocks (Amazon, Nike, Target). Suggests economy is strong.',
+    meet: 'In line → Markets stable. Look at the "control group" excluding autos, gas and building materials for a cleaner read.',
+    below: 'Weak retail sales → Consumer is struggling. Bearish for retail and discretionary sectors. Can increase recession fears.',
+    tip: 'Retail sales are often noisy and revised heavily. A single weak month isn\'t alarming — watch the 3-month trend. Also check whether weakness is in autos/gas (volatile) vs core retail.',
+  },
+  'ISM Manufacturing': {
+    what: 'ISM Manufacturing PMI — a monthly survey of purchasing managers at US manufacturing companies. A reading above 50 means manufacturing is expanding; below 50 means it\'s contracting.',
+    why: 'Manufacturing is a leading indicator of economic activity. It tells you whether factories are ramping up (bullish) or cutting back (bearish) before the broader economy feels the effects.',
+    above: 'Above 50, or beats forecast → Positive for industrials, materials, and cyclical stocks. Signals economic expansion.',
+    meet: 'In line → Minimal reaction. Markets look at the sub-indexes (new orders, employment, prices paid) for more detail.',
+    below: 'Below 50, or misses forecast → Bearish for cyclicals. If sustained below 50, signals possible recession.',
+    tip: 'The "New Orders" sub-component is the most forward-looking part of this report — it predicts where manufacturing will be in 1–3 months. A rising New Orders number even with a weak headline is actually bullish.',
+  },
+  'ISM Services': {
+    what: 'ISM Services PMI — same concept as manufacturing but covers the services sector (restaurants, healthcare, finance, retail). The US economy is 80% services, making this the more important of the two ISM reports.',
+    why: 'Since services dominate the US economy, this report is a powerful indicator of overall economic health and consumer activity.',
+    above: 'Above 50, or beats → Strong services economy. Positive for the market broadly, especially financials and consumer names.',
+    meet: 'In line → Stable reaction. Dig into the employment and prices paid sub-indexes.',
+    below: 'Below 50, or misses → Services are contracting — a more serious warning sign than weak manufacturing. Broader market selloff likely.',
+    tip: 'Pay attention to the "Prices Paid" sub-component. If services activity is strong but prices paid are rising, that\'s inflationary — and the Fed will notice.',
+  },
+  'JOLTS': {
+    what: 'Job Openings and Labor Turnover Survey — tracks how many job openings exist, how many people quit voluntarily, and how many were hired or laid off. Released monthly with about a 6-week lag.',
+    why: 'The Fed watches the quits rate closely — when lots of people quit it means they\'re confident they can find better jobs (tight labour market = wage inflation). Job openings show how much demand there is for workers.',
+    above: 'More job openings than expected → Tight labour market. Fed less likely to cut rates. Slight bearish pressure on stocks.',
+    meet: 'In line → Minimal market impact. JOLTS rarely moves markets dramatically on its own.',
+    below: 'Fewer openings, lower quits → Labour market cooling. Positive signal for rate cuts — stocks tend to react positively.',
+    tip: 'JOLTS is often overshadowed by NFP but is actually more detailed. Watch the "quits rate" — when it starts falling significantly, workers are losing confidence, which can be an early recession signal.',
+  },
+  'Initial Jobless Claims': {
+    what: 'Weekly count of people filing for unemployment benefits for the first time. Released every Thursday morning. It\'s one of the most timely economic indicators available.',
+    why: 'It\'s a real-time read on the job market. Rising claims = people losing jobs = economy weakening. Falling claims = job market staying strong.',
+    above: 'More claims than expected → Labour market weakening. Mixed for stocks — bad for the economy but may increase rate cut odds.',
+    meet: 'In line → Usually ignored by markets unless there\'s a major trend developing.',
+    below: 'Fewer claims than expected → Strong job market. Slight hawkish signal (Fed keeps rates higher). Generally positive.',
+    tip: 'One week of elevated claims means nothing — it\'s a very noisy series. Only pay attention when there are 3–4 consecutive weeks of significant increases above 250k–270k. That\'s when the Fed starts to worry.',
+  },
+  'Durable Goods Orders': {
+    what: 'Measures new orders placed with US manufacturers for goods expected to last 3+ years — planes, machines, electronics, heavy equipment. A proxy for business investment.',
+    why: 'When businesses are confident about the future, they invest in expensive equipment. Rising durable goods = business optimism. Falling = businesses pulling back on spending.',
+    above: 'Strong orders → Business investment is healthy. Positive for industrials and materials.',
+    meet: 'In line → Mild reaction. Look at "core" durable goods (ex-transportation, ex-defence) for the cleanest signal.',
+    below: 'Weak orders → Businesses are cautious. Bearish for investment-related sectors.',
+    tip: 'This report is extremely volatile due to aircraft orders (Boeing). Always look at "core capital goods orders" which strip out defence and aircraft — that\'s the number that actually tells you about business investment trends.',
+  },
+  'Housing Starts': {
+    what: 'The number of new residential construction projects that began in a given month. Includes single-family homes and apartment buildings.',
+    why: 'Housing is rate-sensitive — high mortgage rates kill demand. Housing starts falling sharply often precedes broader economic weakness since construction drives spending on materials, appliances, and furniture.',
+    above: 'More starts than expected → Homebuilder stocks rally (Lennar, D.R. Horton). Suggests consumers can still afford homes despite rates.',
+    meet: 'In line → Stable. Look at building permits (which lead starts by 1–2 months) for future direction.',
+    below: 'Fewer starts → Housing market struggling. Bearish for homebuilders and related sectors.',
+    tip: 'Housing starts and building permits are leading indicators — they tell you where the economy will be 6–12 months from now. A collapse in housing often foreshadows a broader slowdown by several months.',
+  },
+  'Existing Home Sales': {
+    what: 'Counts the number of previously-owned homes sold in a month. Represents about 90% of all home sales in the US.',
+    why: 'Existing home sales reflect both consumer confidence and the affordability impact of interest rates. Each home sale triggers spending on furniture, appliances, and renovations.',
+    above: 'More sales than expected → Housing market is resilient. Positive for real estate and home improvement stocks.',
+    meet: 'In line → Minimal market reaction.',
+    below: 'Fewer sales → High rates or weak demand. Bearish for housing-related stocks.',
+    tip: 'Don\'t confuse existing home sales with new home sales. Existing home sales are bigger but suffer from "lock-in effect" — homeowners with 3% mortgages won\'t sell when rates are 7%. New home sales are a better gauge of true demand.',
+  },
+  'New Home Sales': {
+    what: 'Counts newly-built homes that were sold in a month. Smaller market than existing homes but much more timely as a signal since builders adjust production quickly.',
+    why: 'New home sales directly impact GDP (construction activity) and reflect real-time buyer demand. Homebuilders offer mortgage rate buydowns and incentives to move inventory.',
+    above: 'Strong new home sales → Builders are selling well. Positive for homebuilder stocks and materials.',
+    meet: 'In line → Stable.',
+    below: 'Weak sales → Builders may cut production. Bearish for homebuilders.',
+    tip: 'New home sales are based on contract signings, not closings — so they\'re more forward-looking than existing home sales. Also watch the "months of supply" number. Above 6 months means oversupply — price cuts coming.',
+  },
+  'Consumer Confidence': {
+    what: 'A monthly survey of 5,000 US households asking how they feel about current economic conditions and their expectations for the next 6 months. Published by the Conference Board.',
+    why: 'Confident consumers spend money. Spending = 70% of the economy. Consumer confidence is a leading indicator of retail spending and overall economic activity.',
+    above: 'Higher confidence than expected → Consumers likely to spend more. Positive for retail, discretionary, and travel stocks.',
+    meet: 'In line → Minimal reaction.',
+    below: 'Lower confidence → Consumers pulling back. Bearish for consumer-facing companies.',
+    tip: 'The "present situation" vs "expectations" split matters. High present situation + low expectations = consumers feel okay now but are worried about the future. That\'s actually a warning sign worth watching.',
+  },
+  'UMich Consumer Sentiment': {
+    what: 'University of Michigan Consumer Sentiment Survey — a monthly survey measuring how consumers feel about their personal finances and the economy. Released in preliminary and final form.',
+    why: 'Similar to Consumer Confidence but focuses more on how people\'s finances are affecting spending decisions. Also includes 1-year and 5-year inflation expectations, which the Fed watches closely.',
+    above: 'Higher sentiment → Consumers feeling positive. Mild positive for stocks.',
+    meet: 'In line → No significant market impact.',
+    below: 'Lower sentiment → Caution flag. If inflation expectations within the report are rising, that\'s additionally bearish for stocks.',
+    tip: 'The 5-year inflation expectations within this report are critical. If they start rising above 3%, it signals the public thinks inflation is becoming entrenched — this can cause the Fed to stay hawkish longer than expected.',
+  },
+};
+
+function openEconEvent(eventName) {
+  // Find best match in knowledge base
+  const key = Object.keys(ECON_INFO).find(k => eventName.includes(k) || k.includes(eventName)) || eventName;
+  const info = ECON_INFO[key];
+
+  document.getElementById('econModalTitle').textContent = eventName;
+
+  if (!info) {
+    document.getElementById('econModalImpact').textContent = '';
+    document.getElementById('econModalWhat').textContent = 'Detailed information for this event is not yet available.';
+    document.getElementById('econModalWhy').textContent = '';
+    document.getElementById('econModalAbove').textContent = '--';
+    document.getElementById('econModalMeet').textContent = '--';
+    document.getElementById('econModalBelow').textContent = '--';
+    document.getElementById('econModalTipText').textContent = 'Check Bloomberg or CNBC for context on this release.';
+  } else {
+    // Find impact from ECON_DATA
+    const ev = econEvents.find(e => e.event === eventName);
+    const impact = ev?.impact || 'medium';
+    const impactLabel = impact === 'high' ? '🔴 High Impact' : impact === 'medium' ? '🟡 Medium Impact' : '⚫ Low Impact';
+    const impactCol = impact === 'high' ? '#ff4d6d' : impact === 'medium' ? '#ffd60a' : 'var(--muted)';
+    document.getElementById('econModalImpact').innerHTML = `<span style="color:${impactCol}">${impactLabel}</span>`;
+    document.getElementById('econModalWhat').textContent = info.what;
+    document.getElementById('econModalWhy').textContent = info.why;
+    document.getElementById('econModalAbove').textContent = info.above;
+    document.getElementById('econModalMeet').textContent = info.meet;
+    document.getElementById('econModalBelow').textContent = info.below;
+    document.getElementById('econModalTipText').textContent = info.tip;
+  }
+
+  document.getElementById('econEventModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEconModal() {
+  document.getElementById('econEventModal').style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 loadEconCalendar();
