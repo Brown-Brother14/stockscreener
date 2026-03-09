@@ -441,7 +441,7 @@
 
       <!-- Row 2: Sector ETF Heatmap -->
       <div style="padding:16px 20px;background:var(--surface);border-bottom:1px solid var(--border)">
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">S&P 500 Sector Performance — 24h Change</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">S&P 500 Sector Performance</div>
         <div id="sectorGrid" style="display:grid;grid-template-columns:repeat(11,1fr);gap:6px">
           <div id="sector-XLK"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
           <div id="sector-XLF"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
@@ -484,6 +484,36 @@
     </div>
   </div>
 
+  <!-- Market News Feed -->
+  <div style="margin-top:24px" id="newsSection">
+    <div class="table-wrapper">
+      <div class="table-header-bar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="table-title">📰 Market Headlines</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);background:var(--tag-bg);border:1px solid rgba(0,82,255,0.15);padding:2px 8px;border-radius:20px">Top stories only</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="btn btn-outline" onclick="loadMarketNews(true)" style="padding:6px 14px;font-size:12px">↻ Refresh</button>
+          <div id="newsLastUpdated" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)"></div>
+        </div>
+      </div>
+      <!-- Category filter tabs -->
+      <div style="display:flex;gap:0;border-bottom:1px solid var(--border);overflow-x:auto" id="newsCategoryBar">
+        <button onclick="filterNews('all',this)"     class="news-cat-btn active-cat" style="padding:10px 18px;border:none;border-bottom:2px solid var(--accent);background:transparent;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);cursor:pointer;white-space:nowrap">ALL</button>
+        <button onclick="filterNews('market',this)"  class="news-cat-btn" style="padding:10px 18px;border:none;border-bottom:2px solid transparent;background:transparent;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;white-space:nowrap">📈 MARKET</button>
+        <button onclick="filterNews('economy',this)" class="news-cat-btn" style="padding:10px 18px;border:none;border-bottom:2px solid transparent;background:transparent;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;white-space:nowrap">🏛️ ECONOMY</button>
+        <button onclick="filterNews('crypto',this)"  class="news-cat-btn" style="padding:10px 18px;border:none;border-bottom:2px solid transparent;background:transparent;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;white-space:nowrap">₿ CRYPTO</button>
+        <button onclick="filterNews('forex',this)"   class="news-cat-btn" style="padding:10px 18px;border:none;border-bottom:2px solid transparent;background:transparent;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;white-space:nowrap">💱 FOREX</button>
+        <button onclick="filterNews('merger',this)"  class="news-cat-btn" style="padding:10px 18px;border:none;border-bottom:2px solid transparent;background:transparent;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;white-space:nowrap">🤝 M&A</button>
+      </div>
+      <div id="marketNewsContainer" style="min-height:120px">
+        <div style="padding:32px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:10px">
+          <div class="loader" style="width:16px;height:16px;border-width:2px"></div> Loading headlines...
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="footer-info">
     <div>⚠ Scores are algorithmic estimates only — not financial advice. Always do your own research.</div>
     <div>Powered by Finnhub.io + TradingView + Twelve Data</div>
@@ -494,18 +524,21 @@
 
 <!-- Mobile bottom nav -->
 <div id="mobileNav" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:500;padding:0">
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;height:56px">
-    <button onclick="mobileSwitchTab('screener',this)" id="mobileTab-screener" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--accent);font-family:'DM Mono',monospace;font-size:9px;padding:0">
-      <span style="font-size:18px">📊</span><span>SCREENER</span>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;height:56px">
+    <button onclick="mobileSwitchTab('screener',this)" id="mobileTab-screener" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--accent);font-family:'DM Mono',monospace;font-size:8px;padding:0">
+      <span style="font-size:16px">📊</span><span>SCREENER</span>
     </button>
-    <button onclick="mobileSwitchTab('calendar',this)" id="mobileTab-calendar" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;padding:0">
-      <span style="font-size:18px">📅</span><span>CALENDAR</span>
+    <button onclick="mobileSwitchTab('news',this)" id="mobileTab-news" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-family:'DM Mono',monospace;font-size:8px;padding:0">
+      <span style="font-size:16px">📰</span><span>NEWS</span>
     </button>
-    <button onclick="mobileSwitchTab('macro',this)" id="mobileTab-macro" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;padding:0">
-      <span style="font-size:18px">🌍</span><span>MACRO</span>
+    <button onclick="mobileSwitchTab('macro',this)" id="mobileTab-macro" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-family:'DM Mono',monospace;font-size:8px;padding:0">
+      <span style="font-size:16px">🌍</span><span>MACRO</span>
     </button>
-    <button onclick="mobileSwitchTab('scan',this)" id="mobileTab-scan" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;padding:0">
-      <span style="font-size:18px">🔍</span><span>SCAN</span>
+    <button onclick="mobileSwitchTab('calendar',this)" id="mobileTab-calendar" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-family:'DM Mono',monospace;font-size:8px;padding:0">
+      <span style="font-size:16px">📅</span><span>CALENDAR</span>
+    </button>
+    <button onclick="mobileSwitchTab('scan',this)" id="mobileTab-scan" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-family:'DM Mono',monospace;font-size:8px;padding:0">
+      <span style="font-size:16px">🔍</span><span>SCAN</span>
     </button>
   </div>
 </div>
@@ -519,12 +552,14 @@ function setupMobileNav() {
     document.getElementById('screenerSection').style.display = 'block';
     document.getElementById('econSection').style.display = 'none';
     document.getElementById('macroSection').style.display = 'none';
+    document.getElementById('newsSection').style.display = 'none';
   } else {
     document.getElementById('mobileNav').style.display = 'none';
     document.getElementById('mobileNavSpacer').style.height = '0';
     document.getElementById('screenerSection').style.display = 'block';
     document.getElementById('econSection').style.display = 'block';
     document.getElementById('macroSection').style.display = 'block';
+    document.getElementById('newsSection').style.display = 'block';
   }
 }
 
@@ -534,6 +569,7 @@ function mobileSwitchTab(tab, btn) {
   document.getElementById('screenerSection').style.display = 'none';
   document.getElementById('econSection').style.display = 'none';
   document.getElementById('macroSection').style.display = 'none';
+  document.getElementById('newsSection').style.display = 'none';
   if (tab === 'screener') {
     document.getElementById('screenerSection').style.display = 'block';
   } else if (tab === 'scan') {
@@ -547,6 +583,10 @@ function mobileSwitchTab(tab, btn) {
     document.getElementById('macroSection').style.display = 'block';
     window.scrollTo({top: 0, behavior: 'smooth'});
     if (!macroLoaded) { macroLoaded = true; loadMacroDashboard(); }
+  } else if (tab === 'news') {
+    document.getElementById('newsSection').style.display = 'block';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    if (!newsLoaded) loadMarketNews();
   }
 }
 
@@ -2215,7 +2255,7 @@ function renderIndexCard(ticker, quote) {
     <div class="mi-price">${isVix ? (quote.c??'--').toFixed(2) : '$'+(quote.c??'--').toFixed(2)}</div>
     <div style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap">
       <div class="mi-change" style="color:${chgColor};background:${chgBg}">${chg>=0?'+':''}${chg.toFixed(2)}%</div>
-      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">24h</div>
+      
     </div>
     ${vixNote}
   `;
@@ -2237,7 +2277,7 @@ function renderSectorTile(ticker, quote) {
     <div class="sector-ticker" style="color:${textColor}">${ticker}</div>
     <div class="sector-name" style="color:${textColor};font-size:8px;opacity:0.8">${meta.emoji} ${meta.name}</div>
     <div class="sector-chg" style="color:${textColor}">${chg>=0?'+':''}${chg.toFixed(2)}%</div>
-    <div style="font-family:'DM Mono',monospace;font-size:8px;color:${textColor};opacity:0.6">$${(quote.c??0).toFixed(2)} · 24h</div>
+    <div style="font-family:'DM Mono',monospace;font-size:8px;color:${textColor};opacity:0.6">$${(quote.c??0).toFixed(2)}</div>
   `;
 }
 
@@ -2250,7 +2290,7 @@ function renderExtraCard(id, quote, name) {
   const chgEl = document.getElementById(`macro-${id}-chg`);
   if (valEl) { valEl.textContent = '$'+(quote.c??0).toFixed(2); valEl.style.color = chgColor; }
   if (chgEl) {
-    chgEl.innerHTML = `<span style="background:${chgBg};color:${chgColor};padding:2px 8px;border-radius:5px;font-family:'DM Mono',monospace;font-size:11px;font-weight:700">${chg>=0?'+':''}${chg.toFixed(2)}%</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-left:5px">24h</span>`;
+    chgEl.innerHTML = `<span style="background:${chgBg};color:${chgColor};padding:2px 8px;border-radius:5px;font-family:'DM Mono',monospace;font-size:11px;font-weight:700">${chg>=0?'+':''}${chg.toFixed(2)}%</span>`;
   }
 }
 
@@ -2311,7 +2351,7 @@ async function loadMacroDashboard() {
       <div class="mi-price">${vq.c.toFixed(2)}</div>
       <div style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap">
         <div class="mi-change" style="color:${chgColor};background:${chgBg}">${vq.dp>=0?'+':''}${vq.dp.toFixed(2)}%</div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">24h</div>
+        
       </div>
       <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px">↑ rising = more fear</div>
     `;
@@ -2371,6 +2411,164 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { threshold: 0.1 });
   observer.observe(macroSection);
+});
+</script>
+
+<script>
+// ── MARKET NEWS ──────────────────────────────────────────────────
+let allNewsItems = [];
+let newsLoaded = false;
+let activeNewsCategory = 'all';
+
+// Keywords that signal a headline is actually important market-moving news
+const HIGH_IMPACT_KEYWORDS = [
+  'fed','federal reserve','rate','inflation','cpi','ppi','gdp','jobs','unemployment',
+  'earnings','revenue','profit','loss','forecast','guidance','outlook','beat','miss',
+  'acquisition','merger','buyout','deal','ipo','sec','investigation','lawsuit','fine',
+  'tariff','trade war','recession','crash','rally','correction','bull','bear',
+  'bankruptcy','default','downgrade','upgrade','analyst','price target',
+  'trump','powell','treasury','jobs report','payroll','retail sales',
+  'china','europe','oil','gold','dollar','bonds','yields','debt',
+  'nvidia','apple','microsoft','amazon','google','meta','tesla','jpmorgan',
+  'layoffs','cuts','hiring','revenue','quarterly','annual','fiscal'
+];
+
+function isHighImpact(headline) {
+  const lower = headline.toLowerCase();
+  return HIGH_IMPACT_KEYWORDS.some(k => lower.includes(k));
+}
+
+function timeAgo(ts) {
+  const diff = Math.floor((Date.now()/1000) - ts);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  return `${Math.floor(diff/86400)}d ago`;
+}
+
+function getCategoryFromArticle(item) {
+  const text = (item.headline + ' ' + item.summary + ' ' + (item.category||'')).toLowerCase();
+  if (/bitcoin|crypto|ethereum|blockchain|coinbase|binance|btc|eth/.test(text)) return 'crypto';
+  if (/dollar|euro|yen|forex|currency|fx |exchange rate|pound sterling/.test(text)) return 'forex';
+  if (/merger|acquisition|buyout|takeover|m&a|deal|acqui/.test(text)) return 'merger';
+  if (/fed|federal reserve|rate|inflation|cpi|gdp|unemployment|treasury|powell|fiscal|monetary|tariff|trade|economy|recession/.test(text)) return 'economy';
+  return 'market';
+}
+
+function getCategoryBadge(cat) {
+  const map = {
+    market:  {label:'MARKET',  color:'var(--accent)',  bg:'var(--tag-bg)'},
+    economy: {label:'ECONOMY', color:'#a78bfa',        bg:'rgba(167,139,250,0.08)'},
+    crypto:  {label:'CRYPTO',  color:'#f59e0b',        bg:'rgba(245,158,11,0.08)'},
+    forex:   {label:'FOREX',   color:'var(--accent4)', bg:'var(--yellow-bg)'},
+    merger:  {label:'M&A',     color:'var(--accent2)', bg:'var(--green-bg)'},
+  };
+  const c = map[cat] || map.market;
+  return `<span style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:${c.color};background:${c.bg};padding:2px 7px;border-radius:20px;white-space:nowrap">${c.label}</span>`;
+}
+
+function renderNews(items) {
+  const container = document.getElementById('marketNewsContainer');
+  if (!items.length) {
+    container.innerHTML = `<div style="padding:32px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">No headlines found for this category.</div>`;
+    return;
+  }
+  container.innerHTML = items.map((item, i) => `
+    <a href="${item.url}" target="_blank" rel="noopener" style="display:block;text-decoration:none;padding:14px 20px;border-bottom:1px solid var(--border);transition:background 0.15s" 
+       onmouseover="this.style.background='var(--row-hover)'" onmouseout="this.style.background='transparent'">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        ${item.image ? `<img src="${item.image}" style="width:64px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0;opacity:0.9" onerror="this.style.display='none'">` : ''}
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+            ${getCategoryBadge(item._cat)}
+            <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">${item.source}</span>
+            <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">· ${timeAgo(item.datetime)}</span>
+          </div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);line-height:1.45;margin-bottom:4px">${item.headline}</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${item.summary || ''}</div>
+        </div>
+        <div style="flex-shrink:0;color:var(--muted);font-size:14px;margin-top:2px">→</div>
+      </div>
+    </a>
+  `).join('');
+}
+
+function filterNews(cat, btn) {
+  activeNewsCategory = cat;
+  document.querySelectorAll('.news-cat-btn').forEach(b => {
+    b.style.color = 'var(--muted)';
+    b.style.borderBottom = '2px solid transparent';
+    b.style.fontWeight = '400';
+  });
+  btn.style.color = 'var(--accent)';
+  btn.style.borderBottom = '2px solid var(--accent)';
+  btn.style.fontWeight = '700';
+
+  const filtered = cat === 'all' ? allNewsItems : allNewsItems.filter(n => n._cat === cat);
+  renderNews(filtered);
+}
+
+async function loadMarketNews(force = false) {
+  if (newsLoaded && !force) return;
+  const container = document.getElementById('marketNewsContainer');
+  container.innerHTML = `<div style="padding:32px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:10px"><div class="loader" style="width:16px;height:16px;border-width:2px"></div> Loading headlines...</div>`;
+
+  try {
+    // Fetch general market news from Finnhub (category: general)
+    const [generalData, forexData, cryptoData, mergerData] = await Promise.all([
+      finnhubFetch('news', {category: 'general', minId: 0}),
+      finnhubFetch('news', {category: 'forex',   minId: 0}),
+      finnhubFetch('news', {category: 'crypto',  minId: 0}),
+      finnhubFetch('news', {category: 'merger',  minId: 0}),
+    ]);
+
+    const combined = [
+      ...(generalData||[]).slice(0,60),
+      ...(forexData||[]).slice(0,20),
+      ...(cryptoData||[]).slice(0,20),
+      ...(mergerData||[]).slice(0,20),
+    ];
+
+    // Deduplicate by id, keep only high-impact headlines
+    const seen = new Set();
+    allNewsItems = combined
+      .filter(item => {
+        if (!item?.headline || !item?.url) return false;
+        if (seen.has(item.id)) return false;
+        seen.add(item.id);
+        return isHighImpact(item.headline);
+      })
+      .map(item => ({ ...item, _cat: getCategoryFromArticle(item) }))
+      .sort((a, b) => b.datetime - a.datetime)  // newest first
+      .slice(0, 30); // max 30 headlines
+
+    if (!allNewsItems.length) {
+      // Fallback: show top 20 regardless of keywords
+      allNewsItems = combined
+        .filter(item => item?.headline && item?.url && !seen.has(item.id))
+        .map(item => ({ ...item, _cat: getCategoryFromArticle(item) }))
+        .sort((a, b) => b.datetime - a.datetime)
+        .slice(0, 20);
+    }
+
+    const filtered = activeNewsCategory === 'all' ? allNewsItems : allNewsItems.filter(n => n._cat === activeNewsCategory);
+    renderNews(filtered);
+    newsLoaded = true;
+    document.getElementById('newsLastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+  } catch(e) {
+    container.innerHTML = `<div style="padding:32px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">Failed to load news. Try refreshing.</div>`;
+  }
+}
+
+// Desktop: lazy-load news when scrolled into view
+document.addEventListener('DOMContentLoaded', () => {
+  const newsSection = document.getElementById('newsSection');
+  if (!newsSection) return;
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !newsLoaded) loadMarketNews();
+  }, { threshold: 0.1 });
+  observer.observe(newsSection);
 });
 </script>
 
