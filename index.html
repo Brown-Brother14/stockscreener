@@ -185,7 +185,90 @@
   .adx-badge{font-family:'Space Mono',monospace;font-size:10px;font-weight:700}
   .adx-strong{color:var(--accent2)}.adx-weak{color:var(--muted)}.adx-mid{color:var(--accent4)}
   @media(max-width:1000px){.stats-bar{grid-template-columns:repeat(3,1fr)}.hide-mobile{display:none}.watchlist-input{width:100%}}
-  @media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr)}.modal-stats-strip{grid-template-columns:repeat(4,1fr)}}
+
+  /* ── MOBILE ── */
+  @media(max-width:768px){
+    /* Base */
+    .container{padding:0 14px}
+
+    /* Header */
+    header{flex-wrap:wrap;gap:10px;padding:14px 0 12px}
+    .logo h1{font-size:20px}
+    .logo-icon{width:40px;height:40px;font-size:20px}
+    .header-right{flex-wrap:wrap;gap:8px;width:100%}
+    .status-text{font-size:10px}
+    #marketCountdown{font-size:10px}
+
+    /* Stats bar */
+    .stats-bar{grid-template-columns:repeat(2,1fr);margin:14px 0}
+    .stat-item{padding:14px 16px}
+    .stat-value{font-size:22px}
+    .stat-label{font-size:10px}
+
+    /* Controls */
+    .controls{gap:8px}
+    .btn{padding:10px 16px;font-size:13px}
+    .watchlist-input{width:100%;font-size:13px}
+    .filter-group{margin-left:0;width:100%}
+    .filter-group .btn{flex:1;text-align:center;padding:8px 6px;font-size:12px}
+
+    /* Table — hide less important columns on small screens */
+    .col-adx{display:none}
+    .col-eps{display:none}
+    .col-epsgrowth{display:none}
+    .col-sector{display:none}
+    thead th:nth-child(6),tbody td:nth-child(6){display:none} /* ADX */
+    thead th:nth-child(10),tbody td:nth-child(10){display:none} /* EPS */
+    thead th:nth-child(11),tbody td:nth-child(11){display:none} /* EPS Growth */
+    thead th:nth-child(12),tbody td:nth-child(12){display:none} /* Sector */
+    td{padding:12px 10px;font-size:13px}
+    .ticker{font-size:14px}
+    .price{font-size:14px}
+    .company-name{display:none}
+
+    /* Modal — full screen */
+    .modal-overlay{padding:0}
+    .modal{border-radius:0;height:100vh;max-width:100%}
+    .modal-ticker{font-size:17px}
+    .modal-name{display:none}
+
+    /* Modal stats strip — 4 per row instead of 8 */
+    .modal-stats-strip{grid-template-columns:repeat(4,1fr)}
+    .modal-stat{padding:10px 12px}
+    .modal-stat-value{font-size:12px}
+    .modal-stat-label{font-size:8px}
+
+    /* Tech grid — 1 column */
+    .tech-grid{grid-template-columns:1fr}
+
+    /* Earnings strip — stack */
+    .earnings-strip{grid-template-columns:1fr}
+
+    /* Section headers */
+    .section-header{padding:12px 16px}
+
+    /* Economic calendar */
+    .econ-event{grid-template-columns:60px 14px 1fr 16px;gap:0;padding:10px 14px}
+    .econ-header{display:none}
+    .econ-val,.econ-prev,.econ-est{display:none}
+
+    /* Algo score breakdown */
+    #scoreBreakdown{padding:14px}
+
+    /* Footer */
+    .footer-info{flex-direction:column;gap:6px;text-align:center}
+
+    /* Econ event popup */
+    #econEventModal > div{margin:0;border-radius:0;min-height:100vh}
+  }
+
+  @media(max-width:480px){
+    .stats-bar{grid-template-columns:repeat(2,1fr)}
+    .modal-stats-strip{grid-template-columns:repeat(2,1fr)}
+    .btn{padding:9px 12px;font-size:12px}
+    /* Price target panel — stack */
+    #analystSection [style*="grid-template-columns:1fr 1fr"]{display:block}
+  }
 </style>
 </head>
 <body>
@@ -235,7 +318,7 @@
     <div class="progress-bar-inner" id="progressFill" style="width:0%"></div>
   </div>
 
-  <div class="table-wrapper">
+  <div class="table-wrapper" id="screenerSection">
     <div class="table-header-bar">
       <div class="table-title">📊 Screener Results</div>
       <div class="last-updated" id="lastUpdated">Not yet scanned</div>
@@ -275,7 +358,7 @@
   </div>
 
   <!-- Economic Calendar -->
-  <div style="margin-top:24px">
+  <div style="margin-top:24px" id="econSection">
     <div class="table-wrapper">
       <div class="table-header-bar">
         <div class="table-title">📅 Economic Calendar</div>
@@ -305,7 +388,73 @@
     <div>⚠ Scores are algorithmic estimates only — not financial advice. Always do your own research.</div>
     <div>Powered by Finnhub.io + TradingView + Twelve Data</div>
   </div>
+  <!-- Mobile bottom padding so content isn't hidden behind nav -->
+  <div style="height:0" id="mobileNavSpacer"></div>
 </div>
+
+<!-- Mobile bottom nav -->
+<div id="mobileNav" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:500;padding:0">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;height:56px">
+    <button onclick="mobileSwitchTab('screener',this)" id="mobileTab-screener" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--accent);font-family:'Space Mono',monospace;font-size:9px;padding:0">
+      <span style="font-size:18px">📊</span><span>SCREENER</span>
+    </button>
+    <button onclick="mobileSwitchTab('calendar',this)" id="mobileTab-calendar" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;padding:0">
+      <span style="font-size:18px">📅</span><span>CALENDAR</span>
+    </button>
+    <button onclick="mobileSwitchTab('scan',this)" id="mobileTab-scan" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;padding:0">
+      <span style="font-size:18px">🔍</span><span>SCAN</span>
+    </button>
+  </div>
+</div>
+
+<script>
+// Mobile nav setup
+function setupMobileNav() {
+  if (window.innerWidth <= 768) {
+    document.getElementById('mobileNav').style.display = 'block';
+    document.getElementById('mobileNavSpacer').style.height = '56px';
+    // Default: show screener, hide calendar
+    document.getElementById('screenerSection').style.display = 'block';
+    document.getElementById('econSection').style.display = 'none';
+  } else {
+    document.getElementById('mobileNav').style.display = 'none';
+    document.getElementById('mobileNavSpacer').style.height = '0';
+    document.getElementById('screenerSection').style.display = 'block';
+    document.getElementById('econSection').style.display = 'block';
+  }
+}
+
+function mobileSwitchTab(tab, btn) {
+  // Update tab styles
+  document.querySelectorAll('#mobileNav button').forEach(b => b.style.color = 'var(--muted)');
+  btn.style.color = 'var(--accent)';
+
+  if (tab === 'screener' || tab === 'scan') {
+    document.getElementById('screenerSection').style.display = 'block';
+    document.getElementById('econSection').style.display = 'none';
+    if (tab === 'scan') {
+      // Scroll to top and focus input
+      window.scrollTo({top: 0, behavior: 'smooth'});
+      document.getElementById('tickerInput')?.focus();
+    }
+  } else if (tab === 'calendar') {
+    document.getElementById('screenerSection').style.display = 'none';
+    document.getElementById('econSection').style.display = 'block';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+}
+
+// Swipe to change calendar week on mobile
+let touchStartX = 0;
+document.getElementById('econCalendar')?.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive:true});
+document.getElementById('econCalendar')?.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 60) shiftWeek(dx < 0 ? 1 : -1);
+}, {passive:true});
+
+setupMobileNav();
+window.addEventListener('resize', setupMobileNav);
+</script>
 
 <!-- DETAIL MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
