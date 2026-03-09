@@ -2420,22 +2420,20 @@ let allNewsItems = [];
 let newsLoaded = false;
 let activeNewsCategory = 'all';
 
-// Keywords that signal a headline is actually important market-moving news
-const HIGH_IMPACT_KEYWORDS = [
-  'fed','federal reserve','rate','inflation','cpi','ppi','gdp','jobs','unemployment',
-  'earnings','revenue','profit','loss','forecast','guidance','outlook','beat','miss',
-  'acquisition','merger','buyout','deal','ipo','sec','investigation','lawsuit','fine',
-  'tariff','trade war','recession','crash','rally','correction','bull','bear',
-  'bankruptcy','default','downgrade','upgrade','analyst','price target',
-  'trump','powell','treasury','jobs report','payroll','retail sales',
-  'china','europe','oil','gold','dollar','bonds','yields','debt',
-  'nvidia','apple','microsoft','amazon','google','meta','tesla','jpmorgan',
-  'layoffs','cuts','hiring','revenue','quarterly','annual','fiscal'
+// Only show news from major, well-known financial news providers
+const TRUSTED_SOURCES = [
+  'reuters','bloomberg','cnbc','wsj','wall street journal','financial times','ft.com',
+  'associated press','ap news','the guardian','bbc','bbc news','fox business',
+  'marketwatch','barron','seeking alpha','fortune','forbes','business insider',
+  'the economist','new york times','washington post','nbc news','abc news',
+  'yahoo finance','msn','investopedia','morningstar','motley fool',
+  'axios','politico','cnn','cnn business','time','newsweek'
 ];
 
-function isHighImpact(headline) {
-  const lower = headline.toLowerCase();
-  return HIGH_IMPACT_KEYWORDS.some(k => lower.includes(k));
+function isTrustedSource(source) {
+  if (!source) return false;
+  const s = source.toLowerCase();
+  return TRUSTED_SOURCES.some(t => s.includes(t));
 }
 
 function timeAgo(ts) {
@@ -2504,7 +2502,9 @@ function filterNews(cat, btn) {
   btn.style.borderBottom = '2px solid var(--accent)';
   btn.style.fontWeight = '700';
 
-  const filtered = cat === 'all' ? allNewsItems : allNewsItems.filter(n => n._cat === cat);
+  const filtered = cat === 'all'
+    ? allNewsItems.slice(0, 6)
+    : allNewsItems.filter(n => n._cat === cat).slice(0, 6);
   renderNews(filtered);
 }
 
@@ -2529,29 +2529,30 @@ async function loadMarketNews(force = false) {
       ...(mergerData||[]).slice(0,20),
     ];
 
-    // Deduplicate by id, keep only high-impact headlines
+    // Deduplicate, trusted sources only, cap 6 per category
     const seen = new Set();
+    const categoryCounts = {market:0, economy:0, crypto:0, forex:0, merger:0};
+    const MAX_PER_CAT = 6;
+
     allNewsItems = combined
       .filter(item => {
         if (!item?.headline || !item?.url) return false;
         if (seen.has(item.id)) return false;
+        if (!isTrustedSource(item.source)) return false;
         seen.add(item.id);
-        return isHighImpact(item.headline);
+        return true;
       })
+      .sort((a, b) => b.datetime - a.datetime)
       .map(item => ({ ...item, _cat: getCategoryFromArticle(item) }))
-      .sort((a, b) => b.datetime - a.datetime)  // newest first
-      .slice(0, 30); // max 30 headlines
+      .filter(item => {
+        if (categoryCounts[item._cat] >= MAX_PER_CAT) return false;
+        categoryCounts[item._cat]++;
+        return true;
+      });
 
-    if (!allNewsItems.length) {
-      // Fallback: show top 20 regardless of keywords
-      allNewsItems = combined
-        .filter(item => item?.headline && item?.url && !seen.has(item.id))
-        .map(item => ({ ...item, _cat: getCategoryFromArticle(item) }))
-        .sort((a, b) => b.datetime - a.datetime)
-        .slice(0, 20);
-    }
-
-    const filtered = activeNewsCategory === 'all' ? allNewsItems : allNewsItems.filter(n => n._cat === activeNewsCategory);
+    const filtered = activeNewsCategory === 'all'
+      ? allNewsItems.slice(0, 6)
+      : allNewsItems.filter(n => n._cat === activeNewsCategory).slice(0, 6);
     renderNews(filtered);
     newsLoaded = true;
     document.getElementById('newsLastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
