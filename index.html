@@ -2420,70 +2420,93 @@ let allNewsItems = [];
 let newsLoaded = false;
 let activeNewsCategory = 'all';
 
-// Only show news from major, well-known financial news providers
-const TRUSTED_SOURCES = [
-  'reuters','bloomberg','cnbc','wsj','wall street journal','financial times','ft.com',
-  'associated press','ap news','the guardian','bbc','bbc news','fox business',
-  'marketwatch','barron','seeking alpha','fortune','forbes','business insider',
-  'the economist','new york times','washington post','nbc news','abc news',
-  'yahoo finance','msn','investopedia','morningstar','motley fool',
-  'axios','politico','cnn','cnn business','time','newsweek'
+// RSS feeds — one entry per feed, with source label and default category
+const RSS_FEEDS = [
+  { url:'https://feeds.bloomberg.com/markets/news.rss',                                    source:'Bloomberg',       cat:'market'  },
+  { url:'https://www.cnbc.com/id/100003114/device/rss/rss.html',                           source:'CNBC',            cat:'market'  },
+  { url:'https://www.cnbc.com/id/20910258/device/rss/rss.html',                            source:'CNBC Markets',    cat:'market'  },
+  { url:'https://www.cnbc.com/id/10000664/device/rss/rss.html',                            source:'CNBC Finance',    cat:'market'  },
+  { url:'https://feeds.a.dj.com/rss/RSSMarketsMain.xml',                                   source:'WSJ',             cat:'market'  },
+  { url:'https://www.ft.com/markets?format=rss',                                           source:'FT',              cat:'market'  },
+  { url:'https://feeds.marketwatch.com/marketwatch/topstories/',                           source:'MarketWatch',     cat:'market'  },
+  { url:'https://www.forbes.com/business/feed/',                                           source:'Forbes',          cat:'market'  },
+  { url:'https://fortune.com/feed/',                                                       source:'Fortune',         cat:'market'  },
+  { url:'https://feeds.bbci.co.uk/news/business/rss.xml',                                 source:'BBC Business',    cat:'economy' },
+  { url:'https://www.theguardian.com/uk/business/rss',                                    source:'The Guardian',    cat:'economy' },
+  { url:'https://rss.nytimes.com/services/xml/rss/nyt/Business.xml',                      source:'NYT',             cat:'economy' },
+  { url:'https://feeds.washingtonpost.com/rss/business',                                  source:'Washington Post', cat:'economy' },
+  { url:'https://feeds.morningstar.com/Morningstar/IBD',                                  source:'Morningstar',     cat:'market'  },
+  { url:'https://www.coindesk.com/arc/outboundfeeds/rss/',                                source:'CoinDesk',        cat:'crypto'  },
 ];
 
-function isTrustedSource(source) {
-  if (!source) return false;
-  const s = source.toLowerCase();
-  return TRUSTED_SOURCES.some(t => s.includes(t));
+// Refine category using keywords — overrides the feed default
+function refineCategory(title, desc) {
+  const text = (title + ' ' + desc).toLowerCase();
+  if (/bitcoin|crypto|ethereum|blockchain|coinbase|binance|btc|eth|defi|nft|web3/.test(text)) return 'crypto';
+  if (/dollar|euro|yen|sterling|forex|currency|exchange rate|fx market|pound/.test(text)) return 'forex';
+  if (/merger|acquisition|buyout|takeover|acqui|deal worth|billion deal|agreed to buy/.test(text)) return 'merger';
+  if (/fed |federal reserve|rate cut|rate hike|inflation|cpi|ppi|gdp|unemployment|payroll|jobs report|powell|treasury|tariff|trade war|recession|monetary policy|fiscal/.test(text)) return 'economy';
+  return null; // keep feed default
 }
 
-function timeAgo(ts) {
-  const diff = Math.floor((Date.now()/1000) - ts);
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const ts = Date.parse(dateStr);
+  if (isNaN(ts)) return '';
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60)    return 'just now';
+  if (diff < 3600)  return `${Math.floor(diff/60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
   return `${Math.floor(diff/86400)}d ago`;
 }
 
-function getCategoryFromArticle(item) {
-  const text = (item.headline + ' ' + item.summary + ' ' + (item.category||'')).toLowerCase();
-  if (/bitcoin|crypto|ethereum|blockchain|coinbase|binance|btc|eth/.test(text)) return 'crypto';
-  if (/dollar|euro|yen|forex|currency|fx |exchange rate|pound sterling/.test(text)) return 'forex';
-  if (/merger|acquisition|buyout|takeover|m&a|deal|acqui/.test(text)) return 'merger';
-  if (/fed|federal reserve|rate|inflation|cpi|gdp|unemployment|treasury|powell|fiscal|monetary|tariff|trade|economy|recession/.test(text)) return 'economy';
-  return 'market';
-}
-
 function getCategoryBadge(cat) {
   const map = {
-    market:  {label:'MARKET',  color:'var(--accent)',  bg:'var(--tag-bg)'},
-    economy: {label:'ECONOMY', color:'#a78bfa',        bg:'rgba(167,139,250,0.08)'},
-    crypto:  {label:'CRYPTO',  color:'#f59e0b',        bg:'rgba(245,158,11,0.08)'},
-    forex:   {label:'FOREX',   color:'var(--accent4)', bg:'var(--yellow-bg)'},
-    merger:  {label:'M&A',     color:'var(--accent2)', bg:'var(--green-bg)'},
+    market:  { label:'MARKET',  color:'var(--accent)',  bg:'var(--tag-bg)' },
+    economy: { label:'ECONOMY', color:'#a78bfa',        bg:'rgba(167,139,250,0.08)' },
+    crypto:  { label:'CRYPTO',  color:'#f59e0b',        bg:'rgba(245,158,11,0.08)' },
+    forex:   { label:'FOREX',   color:'var(--accent4)', bg:'var(--yellow-bg)' },
+    merger:  { label:'M&A',     color:'var(--accent2)', bg:'var(--green-bg)' },
   };
   const c = map[cat] || map.market;
   return `<span style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;color:${c.color};background:${c.bg};padding:2px 7px;border-radius:20px;white-space:nowrap">${c.label}</span>`;
 }
 
+function applyLimits(items) {
+  // Per category: max 6 total, max 2 from same source
+  const catBuckets = { market:{}, economy:{}, crypto:{}, forex:{}, merger:{} };
+  const catCounts  = { market:0,  economy:0,  crypto:0,  forex:0,  merger:0  };
+  const result = [];
+  for (const item of items) {
+    const cat = item._cat;
+    if (catCounts[cat] >= 6) continue;
+    catBuckets[cat][item._source] = (catBuckets[cat][item._source] || 0);
+    if (catBuckets[cat][item._source] >= 2) continue;
+    catBuckets[cat][item._source]++;
+    catCounts[cat]++;
+    result.push(item);
+  }
+  return result;
+}
+
 function renderNews(items) {
   const container = document.getElementById('marketNewsContainer');
   if (!items.length) {
-    container.innerHTML = `<div style="padding:32px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">No headlines found for this category.</div>`;
+    container.innerHTML = `<div style="padding:32px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">No headlines available for this category right now.</div>`;
     return;
   }
-  container.innerHTML = items.map((item, i) => `
-    <a href="${item.url}" target="_blank" rel="noopener" style="display:block;text-decoration:none;padding:14px 20px;border-bottom:1px solid var(--border);transition:background 0.15s" 
+  container.innerHTML = items.map(item => `
+    <a href="${item.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;padding:14px 20px;border-bottom:1px solid var(--border);transition:background 0.15s"
        onmouseover="this.style.background='var(--row-hover)'" onmouseout="this.style.background='transparent'">
       <div style="display:flex;align-items:flex-start;gap:12px">
-        ${item.image ? `<img src="${item.image}" style="width:64px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0;opacity:0.9" onerror="this.style.display='none'">` : ''}
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
             ${getCategoryBadge(item._cat)}
-            <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">${item.source}</span>
-            <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">· ${timeAgo(item.datetime)}</span>
+            <span style="font-family:'DM Mono',monospace;font-size:9px;font-weight:600;color:var(--accent)">${item._source}</span>
+            ${item._ago ? `<span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">· ${item._ago}</span>` : ''}
           </div>
-          <div style="font-size:13px;font-weight:600;color:var(--text);line-height:1.45;margin-bottom:4px">${item.headline}</div>
-          <div style="font-size:11px;color:var(--muted);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${item.summary || ''}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);line-height:1.45;margin-bottom:4px">${item.title}</div>
+          ${item.description ? `<div style="font-size:11px;color:var(--muted);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${item.description}</div>` : ''}
         </div>
         <div style="flex-shrink:0;color:var(--muted);font-size:14px;margin-top:2px">→</div>
       </div>
@@ -2501,61 +2524,66 @@ function filterNews(cat, btn) {
   btn.style.color = 'var(--accent)';
   btn.style.borderBottom = '2px solid var(--accent)';
   btn.style.fontWeight = '700';
-
   const filtered = cat === 'all'
-    ? allNewsItems.slice(0, 6)
-    : allNewsItems.filter(n => n._cat === cat).slice(0, 6);
+    ? allNewsItems.slice(0, 12)
+    : allNewsItems.filter(n => n._cat === cat);
   renderNews(filtered);
 }
 
 async function loadMarketNews(force = false) {
   if (newsLoaded && !force) return;
+  newsLoaded = false;
   const container = document.getElementById('marketNewsContainer');
   container.innerHTML = `<div style="padding:32px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:10px"><div class="loader" style="width:16px;height:16px;border-width:2px"></div> Loading headlines...</div>`;
 
   try {
-    // Fetch general market news from Finnhub (category: general)
-    const [generalData, forexData, cryptoData, mergerData] = await Promise.all([
-      finnhubFetch('news', {category: 'general', minId: 0}),
-      finnhubFetch('news', {category: 'forex',   minId: 0}),
-      finnhubFetch('news', {category: 'crypto',  minId: 0}),
-      finnhubFetch('news', {category: 'merger',  minId: 0}),
-    ]);
+    // Fetch all RSS feeds in parallel via worker
+    const results = await Promise.all(RSS_FEEDS.map(async feed => {
+      try {
+        const res = await fetch(`${PROXY}/rss?url=${encodeURIComponent(feed.url)}`);
+        const data = await res.json();
+        return (data.items || []).map(item => ({
+          ...item,
+          _source: feed.source,
+          _defaultCat: feed.cat,
+        }));
+      } catch(e) { return []; }
+    }));
 
-    const combined = [
-      ...(generalData||[]).slice(0,60),
-      ...(forexData||[]).slice(0,20),
-      ...(cryptoData||[]).slice(0,20),
-      ...(mergerData||[]).slice(0,20),
-    ];
-
-    // Deduplicate, trusted sources only, cap 6 per category
-    const seen = new Set();
-    const categoryCounts = {market:0, economy:0, crypto:0, forex:0, merger:0};
-    const MAX_PER_CAT = 6;
-
-    allNewsItems = combined
-      .filter(item => {
-        if (!item?.headline || !item?.url) return false;
-        if (seen.has(item.id)) return false;
-        if (!isTrustedSource(item.source)) return false;
-        seen.add(item.id);
-        return true;
+    // Flatten, assign categories, sort by date newest first
+    const flat = results.flat()
+      .map(item => {
+        const refined = refineCategory(item.title, item.description || '');
+        return {
+          ...item,
+          _cat: refined || item._defaultCat,
+          _ago: timeAgo(item.pubDate),
+          _ts:  item.pubDate ? Date.parse(item.pubDate) : 0,
+        };
       })
-      .sort((a, b) => b.datetime - a.datetime)
-      .map(item => ({ ...item, _cat: getCategoryFromArticle(item) }))
-      .filter(item => {
-        if (categoryCounts[item._cat] >= MAX_PER_CAT) return false;
-        categoryCounts[item._cat]++;
-        return true;
-      });
+      .filter(item => item.title && item.link)
+      .sort((a, b) => b._ts - a._ts);
+
+    // Deduplicate by title similarity
+    const seen = new Set();
+    const deduped = flat.filter(item => {
+      const key = item.title.toLowerCase().slice(0, 60);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    // Apply 6 max / 2-per-source limits per category
+    allNewsItems = applyLimits(deduped);
 
     const filtered = activeNewsCategory === 'all'
-      ? allNewsItems.slice(0, 6)
-      : allNewsItems.filter(n => n._cat === activeNewsCategory).slice(0, 6);
+      ? allNewsItems.slice(0, 12)
+      : allNewsItems.filter(n => n._cat === activeNewsCategory);
     renderNews(filtered);
+
     newsLoaded = true;
-    document.getElementById('newsLastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('newsLastUpdated').textContent =
+      'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 
   } catch(e) {
     container.innerHTML = `<div style="padding:32px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">Failed to load news. Try refreshing.</div>`;
