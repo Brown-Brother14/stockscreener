@@ -441,7 +441,7 @@
 
       <!-- Row 2: Sector ETF Heatmap -->
       <div style="padding:16px 20px;background:var(--surface);border-bottom:1px solid var(--border)">
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">S&P 500 Sector Performance (Today)</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">S&P 500 Sector Performance — 24h Change</div>
         <div id="sectorGrid" style="display:grid;grid-template-columns:repeat(11,1fr);gap:6px">
           <div id="sector-XLK"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
           <div id="sector-XLF"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div>
@@ -2202,16 +2202,22 @@ function renderIndexCard(ticker, quote) {
   const meta = INDEX_META[ticker];
   const chg = quote.dp ?? 0;
   const isVix = ticker === 'VIX';
+  // VIX: going UP = more fear = BAD for markets = red. Going DOWN = less fear = GOOD = green.
   const chgPositive = isVix ? chg < 0 : chg >= 0;
   const chgColor = chgPositive ? 'var(--accent2)' : 'var(--accent3)';
   const chgBg = chgPositive ? 'var(--green-bg)' : 'var(--red-bg)';
+  const vixNote = isVix ? `<div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px">↑ rising = more fear</div>` : '';
   const el = document.getElementById(`macro-${ticker}`);
   if (!el) return;
   el.innerHTML = `
     <div class="mi-label">${ticker}</div>
     <div class="mi-name">${meta.name}</div>
     <div class="mi-price">${isVix ? (quote.c??'--').toFixed(2) : '$'+(quote.c??'--').toFixed(2)}</div>
-    <div class="mi-change" style="color:${chgColor};background:${chgBg}">${chg>=0?'+':''}${chg.toFixed(2)}%</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap">
+      <div class="mi-change" style="color:${chgColor};background:${chgBg}">${chg>=0?'+':''}${chg.toFixed(2)}%</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">24h</div>
+    </div>
+    ${vixNote}
   `;
 }
 
@@ -2219,7 +2225,6 @@ function renderSectorTile(ticker, quote) {
   const meta = SECTOR_META[ticker];
   const chg = quote.dp ?? 0;
   const isPos = chg >= 0;
-  // Colour intensity based on magnitude
   const intensity = Math.min(Math.abs(chg) / 4, 1);
   const bgColor = isPos
     ? `rgba(5,150,105,${0.08 + intensity*0.35})`
@@ -2232,7 +2237,7 @@ function renderSectorTile(ticker, quote) {
     <div class="sector-ticker" style="color:${textColor}">${ticker}</div>
     <div class="sector-name" style="color:${textColor};font-size:8px;opacity:0.8">${meta.emoji} ${meta.name}</div>
     <div class="sector-chg" style="color:${textColor}">${chg>=0?'+':''}${chg.toFixed(2)}%</div>
-    <div style="font-family:'DM Mono',monospace;font-size:9px;color:${textColor};opacity:0.75">$${(quote.c??0).toFixed(2)}</div>
+    <div style="font-family:'DM Mono',monospace;font-size:8px;color:${textColor};opacity:0.6">$${(quote.c??0).toFixed(2)} · 24h</div>
   `;
 }
 
@@ -2243,18 +2248,9 @@ function renderExtraCard(id, quote, name) {
   const chgBg = isPos ? 'var(--green-bg)' : 'var(--red-bg)';
   const valEl = document.getElementById(`macro-${id}-val`);
   const chgEl = document.getElementById(`macro-${id}-chg`);
-  if (valEl) valEl.textContent = '$'+(quote.c??0).toFixed(2);
-  if (valEl) valEl.style.color = chgColor;
+  if (valEl) { valEl.textContent = '$'+(quote.c??0).toFixed(2); valEl.style.color = chgColor; }
   if (chgEl) {
-    chgEl.textContent = `${chg>=0?'+':''}${chg.toFixed(2)}%`;
-    chgEl.style.color = chgColor;
-    chgEl.style.background = chgBg;
-    chgEl.style.padding = '2px 8px';
-    chgEl.style.borderRadius = '5px';
-    chgEl.style.display = 'inline-block';
-    chgEl.style.fontSize = '11px';
-    chgEl.style.fontFamily = "'DM Mono',monospace";
-    chgEl.style.fontWeight = '700';
+    chgEl.innerHTML = `<span style="background:${chgBg};color:${chgColor};padding:2px 8px;border-radius:5px;font-family:'DM Mono',monospace;font-size:11px;font-weight:700">${chg>=0?'+':''}${chg.toFixed(2)}%</span><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-left:5px">24h</span>`;
   }
 }
 
@@ -2313,7 +2309,11 @@ async function loadMacroDashboard() {
       <div class="mi-label">VIX</div>
       <div class="mi-name">Volatility Index</div>
       <div class="mi-price">${vq.c.toFixed(2)}</div>
-      <div class="mi-change" style="color:${chgColor};background:${chgBg}">${vq.dp>=0?'+':''}${vq.dp.toFixed(2)}%</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap">
+        <div class="mi-change" style="color:${chgColor};background:${chgBg}">${vq.dp>=0?'+':''}${vq.dp.toFixed(2)}%</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">24h</div>
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px">↑ rising = more fear</div>
     `;
   } else {
     const el = document.getElementById('macro-VIX');
