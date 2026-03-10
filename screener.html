@@ -81,6 +81,22 @@
 
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
   .status-text{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+  /* Compact session widget */
+  #sessionWidget{display:flex;flex-direction:column;gap:5px;min-width:160px}
+  #sessTopRow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  #sessFlag{font-size:12px}
+  #sessName{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--text);letter-spacing:0.5px}
+  #sessState{font-family:'DM Mono',monospace;font-size:9px;padding:1px 6px;border-radius:10px;font-weight:700}
+  #sessState{font-family:'DM Mono',monospace;font-size:9px;padding:1px 6px;border-radius:10px;font-weight:700;border:1px solid}
+  #sessState.open{color:var(--accent2);background:rgba(0,230,118,0.1);border-color:rgba(0,230,118,0.2)}
+  #sessState.pre{color:#a78bfa;background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.2)}
+  #sessState.after{color:#f97316;background:rgba(249,115,22,0.1);border-color:rgba(249,115,22,0.2)}
+  #sessState.next{color:var(--muted);background:rgba(255,255,255,0.04);border-color:var(--border)}
+  #sessBar{height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
+  #sessBarFill{height:100%;border-radius:2px;transition:width 1s linear}
+  #sessBottomRow{display:flex;align-items:center;justify-content:space-between}
+  #sessCd{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent4)}
+  #sessLocal{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)}
   .speed-badge{background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.2);color:var(--accent2);font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:6px;font-weight:700}
   .stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:22px 0;box-shadow:0 2px 12px rgba(0,82,255,0.06)}
   .stat-item{background:var(--card);padding:22px 26px;display:flex;flex-direction:column;gap:4px}
@@ -327,44 +343,21 @@
             <!-- Dot at peak -->
             <circle cx="17" cy="6" r="2" fill="white"/>
           </svg>
-        </div> <div> <h1>Algo<span>Screen</span> Pro</h1> <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Swing Trader Dashboard</div> </div> </div> <div class="header-right"> <span class="speed-badge"> FINNHUB POWERED</span>  <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-align:right"> <div id="marketStatus" style="display:flex;align-items:center;gap:6px"><div class="status-dot"></div><span id="marketStatusText">CHECKING...</span></div> <div id="marketCountdown" style="color:var(--accent4);font-size:12px;font-weight:700;margin-top:2px"></div> </div> </div> </header> <div class="stats-bar"> <div class="stat-item"><div class="stat-label">Stocks Scanned</div><div class="stat-value" id="totalScanned">--</div></div> <div class="stat-item"><div class="stat-label">Breakout Signals</div><div class="stat-value green" id="breakoutCount">--</div></div> <div class="stat-item"><div class="stat-label">Bullish MACD</div><div class="stat-value yellow" id="bullishCount">--</div></div> <div class="stat-item"><div class="stat-label">Avg Score</div><div class="stat-value" id="avgScore">--</div></div> <div class="stat-item"><div class="stat-label">Top Pick</div><div class="stat-value green" id="topPick">--</div></div> </div>
-
-<!-- Trading Sessions Bar -->
-<div class="sessions-bar">
-  <div class="session-card">
-    <div class="session-flag">🇦🇺</div>
-    <div class="session-name">Sydney</div>
-    <div class="session-status closed" id="sess-sydney-status">CLOSED</div>
-    <div class="session-countdown" id="sess-sydney-cd">--</div>
-    <div class="session-local" id="sess-sydney-local">--</div>
-  </div>
-  <div class="session-card">
-    <div class="session-flag">🇯🇵</div>
-    <div class="session-name">Tokyo</div>
-    <div class="session-status closed" id="sess-tokyo-status">CLOSED</div>
-    <div class="session-countdown" id="sess-tokyo-cd">--</div>
-    <div class="session-local" id="sess-tokyo-local">--</div>
-  </div>
-  <div class="session-card">
-    <div class="session-flag">🇬🇧</div>
-    <div class="session-name">London</div>
-    <div class="session-status closed" id="sess-london-status">CLOSED</div>
-    <div class="session-countdown" id="sess-london-cd">--</div>
-    <div class="session-local" id="sess-london-local">--</div>
-  </div>
-  <div class="session-card">
-    <div class="session-flag">🇺🇸</div>
-    <div class="session-name">New York</div>
-    <div class="session-status closed" id="sess-ny-status">CLOSED</div>
-    <div class="session-countdown" id="sess-ny-cd">--</div>
-    <div class="session-local" id="sess-ny-local">--</div>
-  </div>
-  <div class="session-card" style="background:rgba(0,0,0,0.3)">
-    <div class="session-flag">🕐</div>
-    <div class="session-name">Your Time</div>
-    <div class="session-status open" id="sess-now-tz" style="font-size:9px">--</div>
-    <div class="session-countdown" id="sess-now-time" style="font-size:14px">--</div>
-    <div class="session-local" id="sess-now-date">--</div>
+        </div> <div> <h1>Algo<span>Screen</span> Pro</h1> <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Swing Trader Dashboard</div> </div> </div> <div class="header-right"> <span class="speed-badge"> FINNHUB POWERED</span>  <div id="sessionWidget">
+    <div id="sessTopRow">
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="status-dot"></div>
+        <span id="sessFlag">🇺🇸</span>
+        <span id="sessName">NEW YORK</span>
+      </div>
+      <span id="sessState" class="next">--</span>
+    </div>
+    <div id="sessBar"><div id="sessBarFill" style="width:0%"></div></div>
+    <div id="sessBottomRow">
+      <span id="sessCd">--</span>
+      <span id="sessLocal">--</span>
+    </div>
+  </div> </div> </header> <div class="stats-bar"> <div class="stat-item"><div class="stat-label">Stocks Scanned</div><div class="stat-value" id="totalScanned">--</div></div> <div class="stat-item"><div class="stat-label">Breakout Signals</div><div class="stat-value green" id="breakoutCount">--</div></div> <div class="stat-item"><div class="stat-label">Bullish MACD</div><div class="stat-value yellow" id="bullishCount">--</div></div> <div class="stat-item"><div class="stat-label">Avg Score</div><div class="stat-value" id="avgScore">--</div></div> <div class="stat-item"><div class="stat-label">Top Pick</div><div class="stat-value green" id="topPick">--</div></div> </div>
   </div>
 </div> <div class="error-box" id="errorBox"></div> <div class="controls"> <input class="watchlist-input" id="tickerInput" type="text"
       placeholder="e.g. AAPL, TSLA, NVDA, MSFT, AMZN, META, GOOGL"
@@ -1689,131 +1682,160 @@ function checkMarketStatus() {
   const now = new Date();
 
   function toET(d) { return new Date(d.toLocaleString('en-US', {timeZone:'America/New_York'})); }
-  function localTime(tz) { return now.toLocaleTimeString('en-GB', {timeZone:tz, hour:'2-digit', minute:'2-digit'}); }
-
+  function localTime(tz) {
+    return now.toLocaleTimeString('en-GB', {timeZone:tz, hour:'2-digit', minute:'2-digit'});
+  }
   function fmt(secs) {
     secs = Math.max(0, Math.round(secs));
-    const h = Math.floor(secs / 3600);
-    const m = Math.floor((secs % 3600) / 60);
-    const s = secs % 60;
-    if (h > 0) return h + 'h ' + m + 'm';
-    return m + 'm ' + s + 's';
+    const h = Math.floor(secs/3600), m = Math.floor((secs%3600)/60), s = secs%60;
+    if (h > 0) return h+'h '+m+'m';
+    return m+'m '+s+'s';
   }
 
-  const et    = toET(now);
-  const etWd  = et.getDay();
-  const etH   = et.getHours() + et.getMinutes()/60 + et.getSeconds()/3600;
-  const isWd  = etWd >= 1 && etWd <= 5;
+  const et   = toET(now);
+  const etWd = et.getDay();
+  const etH  = et.getHours() + et.getMinutes()/60 + et.getSeconds()/3600;
+  const isWd = etWd >= 1 && etWd <= 5;
 
-  // Seconds until a given HH:MM in ET today (wraps to next day if past)
+  // Seconds until HH:MM ET (wraps to next day if past)
   function secsUntil(h, m) {
-    const target = toET(now);
-    target.setHours(h, m, 0, 0);
-    let diff = (target - et) / 1000;
-    if (diff <= 0) diff += 86400;
-    return diff;
+    const t = toET(now); t.setHours(h, m, 0, 0);
+    let d = (t - et)/1000; if (d <= 0) d += 86400; return d;
   }
 
-  // ── Header: NY status ─────────────────────────────────────
-  const dot        = document.querySelector('.status-dot');
-  const statusText = document.getElementById('marketStatusText');
-  const countdown  = document.getElementById('marketCountdown');
-
-  if (!isWd) {
-    const daysToMon = etWd === 0 ? 1 : 2;
-    const etBase = toET(now); etBase.setHours(0,0,0,0);
-    const monOpen = new Date(etBase.getTime() + daysToMon * 86400000);
-    monOpen.setHours(9, 30, 0, 0);
-    const secs = Math.max(0, (monOpen - et) / 1000);
-    statusText.textContent = 'WEEKEND';
-    countdown.textContent  = 'NY opens in ' + fmt(secs);
-    dot.style.background = 'var(--muted)'; dot.style.boxShadow = 'none';
-  } else if (etH >= 4 && etH < 9.5) {
-    statusText.textContent = 'PRE-MARKET';
-    countdown.textContent  = 'NY opens in ' + fmt(secsUntil(9,30));
-    dot.style.background = '#a78bfa'; dot.style.boxShadow = '0 0 6px #a78bfa';
-  } else if (etH >= 9.5 && etH < 16) {
-    statusText.textContent = 'MARKET OPEN';
-    countdown.textContent  = 'Closes in ' + fmt(secsUntil(16,0));
-    dot.style.background = 'var(--accent2)'; dot.style.boxShadow = '0 0 8px var(--accent2)';
-  } else if (etH >= 16 && etH < 20) {
-    statusText.textContent = 'AFTER-HOURS';
-    countdown.textContent  = 'Extended ends in ' + fmt(secsUntil(20,0));
-    dot.style.background = '#f97316'; dot.style.boxShadow = '0 0 6px #f97316';
-  } else {
-    statusText.textContent = 'CLOSED';
-    countdown.textContent  = 'Pre-market in ' + fmt(secsUntil(4,0));
-    dot.style.background = 'var(--accent3)'; dot.style.boxShadow = '0 0 8px var(--accent3)';
-  }
-
-  // ── Sessions bar ──────────────────────────────────────────
-  // All times in ET decimal hours. overnight=true means session spans midnight.
-  const sessions = [
-    { id:'sydney', tz:'Australia/Sydney', openET:22, closeET:7,   overnight:true },
-    { id:'tokyo',  tz:'Asia/Tokyo',       openET:19, closeET:4,   overnight:true },
-    { id:'london', tz:'Europe/London',    openET:3,  closeET:12,  overnight:false },
-    { id:'ny',     tz:'America/New_York', openET:9.5,closeET:16,  overnight:false }
+  // ── Session definitions ────────────────────────────────────
+  // openET/closeET in decimal ET hours; overnight = spans midnight
+  const SESSIONS = [
+    { id:'sydney', flag:'🇦🇺', name:'SYDNEY',   tz:'Australia/Sydney',    openET:22,  closeET:7,   overnight:true,  color:'#60a5fa' },
+    { id:'tokyo',  flag:'🇯🇵', name:'TOKYO',    tz:'Asia/Tokyo',           openET:19,  closeET:4,   overnight:true,  color:'#f472b6' },
+    { id:'london', flag:'🇬🇧', name:'LONDON',   tz:'Europe/London',        openET:3,   closeET:12,  overnight:false, color:'#fb923c' },
+    { id:'ny',     flag:'🇺🇸', name:'NEW YORK', tz:'America/New_York',     openET:9.5, closeET:16,  overnight:false, color:'#00e676' },
   ];
 
-  sessions.forEach(function(sess) {
-    const sEl = document.getElementById('sess-' + sess.id + '-status');
-    const cEl = document.getElementById('sess-' + sess.id + '-cd');
-    const lEl = document.getElementById('sess-' + sess.id + '-local');
-    if (!sEl) return;
-
-    var isOpen = sess.overnight
-      ? (etH >= sess.openET || etH < sess.closeET)
-      : (etH >= sess.openET && etH < sess.closeET);
-
-    var label, cls, cd;
-
-    if (sess.id === 'ny') {
-      if (!isWd) {
-        label='CLOSED'; cls='closed';
-        var dM = etWd===0?1:2;
-        var eB = toET(now); eB.setHours(0,0,0,0);
-        var mO = new Date(eB.getTime()+dM*86400000); mO.setHours(9,30,0,0);
-        cd = 'Opens ' + fmt(Math.max(0,(mO-et)/1000));
-      } else if (etH>=4&&etH<9.5)  { label='PRE';   cls='pre';   cd='Regular in '+fmt(secsUntil(9,30)); }
-      else if (etH>=9.5&&etH<16)   { label='OPEN';  cls='open';  cd='Closes in '+fmt(secsUntil(16,0)); }
-      else if (etH>=16&&etH<20)    { label='AFTER'; cls='after'; cd='Ends in '+fmt(secsUntil(20,0)); }
-      else                          { label='CLOSED';cls='closed';cd='Pre in '+fmt(secsUntil(4,0)); }
-    } else if (isOpen) {
-      label='OPEN'; cls='open';
-      var secsClose;
-      if (sess.overnight && etH >= sess.openET) {
-        secsClose = (24 - etH + sess.closeET) * 3600;
-      } else {
-        secsClose = (sess.closeET - etH) * 3600;
-      }
-      cd = 'Closes in ' + fmt(secsClose);
+  // For each session: is it open? what are open/close secs from now? progress 0-1?
+  function sessInfo(sess) {
+    let isOpen, secsToClose, secsToOpen, progress;
+    if (sess.overnight) {
+      isOpen = etH >= sess.openET || etH < sess.closeET;
     } else {
-      label='CLOSED'; cls='closed';
-      var secsOpen;
-      if (sess.overnight) {
-        secsOpen = (sess.openET - etH) * 3600;
-        if (secsOpen < 0) secsOpen += 86400;
-      } else {
-        secsOpen = etH < sess.openET ? (sess.openET - etH)*3600 : (24 - etH + sess.openET)*3600;
-      }
-      cd = 'Opens in ' + fmt(secsOpen);
+      isOpen = etH >= sess.openET && etH < sess.closeET;
     }
+    if (isOpen) {
+      if (sess.overnight && etH >= sess.openET) {
+        secsToClose = (24 - etH + sess.closeET) * 3600;
+        const totalDur = (24 - sess.openET + sess.closeET) * 3600;
+        progress = ((etH - sess.openET) * 3600) / totalDur;
+      } else {
+        secsToClose = (sess.closeET - etH) * 3600;
+        const totalDur = sess.overnight
+          ? (24 - sess.openET + sess.closeET) * 3600
+          : (sess.closeET - sess.openET) * 3600;
+        const elapsed = sess.overnight
+          ? (24 - sess.openET + etH) * 3600
+          : (etH - sess.openET) * 3600;
+        progress = elapsed / totalDur;
+      }
+      secsToOpen = 0;
+    } else {
+      progress = 0;
+      secsToClose = 0;
+      if (sess.overnight) {
+        secsToOpen = (sess.openET - etH) * 3600;
+        if (secsToOpen < 0) secsToOpen += 86400;
+      } else {
+        secsToOpen = etH < sess.openET
+          ? (sess.openET - etH) * 3600
+          : (24 - etH + sess.openET) * 3600;
+      }
+    }
+    return { isOpen, secsToClose, secsToOpen, progress: Math.min(1, Math.max(0, progress)) };
+  }
 
-    sEl.textContent = label;
-    sEl.className   = 'session-status ' + cls;
-    cEl.textContent = cd;
-    lEl.textContent = localTime(sess.tz);
-  });
+  // ── Determine what to show ────────────────────────────────
+  // Priority: NY (pre/open/after) > London > Tokyo > Sydney > next session
+  const dot = document.querySelector('.status-dot');
 
-  // ── Your Time card ────────────────────────────────────────
-  var tzEl   = document.getElementById('sess-now-tz');
-  var timeEl = document.getElementById('sess-now-time');
-  var dateEl = document.getElementById('sess-now-date');
-  if (tzEl) {
-    var userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    tzEl.textContent   = userTz.split('/').pop().replace(/_/g,' ');
-    timeEl.textContent = now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    dateEl.textContent = now.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  // NY special states first
+  let display = null;
+
+  if (!isWd) {
+    // Weekend
+    const dM = etWd===0?1:2;
+    const eB = toET(now); eB.setHours(0,0,0,0);
+    const mO = new Date(eB.getTime()+dM*86400000); mO.setHours(9,30,0,0);
+    const secs = Math.max(0,(mO-et)/1000);
+    display = { flag:'🇺🇸', name:'NEW YORK', state:'NEXT', cls:'next',
+                cd:'Opens Mon '+fmt(secs), progress:0, color:'var(--muted)',
+                local: localTime('America/New_York') };
+    dot.style.background='var(--muted)'; dot.style.boxShadow='none';
+  } else if (etH>=4 && etH<9.5) {
+    display = { flag:'🇺🇸', name:'NEW YORK', state:'PRE-MARKET', cls:'pre',
+                cd:'Opens in '+fmt(secsUntil(9,30)),
+                progress: (etH-4)/(9.5-4),
+                color:'#a78bfa', local: localTime('America/New_York') };
+    dot.style.background='#a78bfa'; dot.style.boxShadow='0 0 6px #a78bfa';
+  } else if (etH>=9.5 && etH<16) {
+    display = { flag:'🇺🇸', name:'NEW YORK', state:'OPEN', cls:'open',
+                cd:'Closes in '+fmt(secsUntil(16,0)),
+                progress: (etH-9.5)/(16-9.5),
+                color:'#00e676', local: localTime('America/New_York') };
+    dot.style.background='var(--accent2)'; dot.style.boxShadow='0 0 8px var(--accent2)';
+  } else if (etH>=16 && etH<20) {
+    display = { flag:'🇺🇸', name:'NEW YORK', state:'AFTER-HRS', cls:'after',
+                cd:'Ends in '+fmt(secsUntil(20,0)),
+                progress: (etH-16)/(20-16),
+                color:'#f97316', local: localTime('America/New_York') };
+    dot.style.background='#f97316'; dot.style.boxShadow='0 0 6px #f97316';
+  }
+
+  // If no NY state, check other sessions
+  if (!display) {
+    const order = ['london','tokyo','sydney'];
+    for (const id of order) {
+      const sess = SESSIONS.find(s=>s.id===id);
+      const info = sessInfo(sess);
+      if (info.isOpen) {
+        display = { flag:sess.flag, name:sess.name, state:'OPEN', cls:'open',
+                    cd:'Closes in '+fmt(info.secsToClose),
+                    progress: info.progress, color:sess.color,
+                    local: localTime(sess.tz) };
+        dot.style.background=sess.color; dot.style.boxShadow='0 0 6px '+sess.color;
+        break;
+      }
+    }
+  }
+
+  // If still nothing, find next session to open
+  if (!display) {
+    let nearest = null, minSecs = Infinity;
+    for (const sess of SESSIONS) {
+      const info = sessInfo(sess);
+      if (!info.isOpen && info.secsToOpen < minSecs) {
+        minSecs = info.secsToOpen;
+        nearest = sess;
+      }
+    }
+    if (nearest) {
+      display = { flag:nearest.flag, name:nearest.name, state:'NEXT', cls:'next',
+                  cd:'Opens in '+fmt(minSecs), progress:0,
+                  color:'var(--muted)', local: localTime(nearest.tz) };
+    }
+    dot.style.background='var(--accent3)'; dot.style.boxShadow='0 0 6px var(--accent3)';
+  }
+
+  // ── Render ────────────────────────────────────────────────
+  if (display) {
+    document.getElementById('sessFlag').textContent  = display.flag;
+    document.getElementById('sessName').textContent  = display.name;
+    const stateEl = document.getElementById('sessState');
+    stateEl.textContent = display.state;
+    stateEl.id = 'sessState'; stateEl.className = display.cls;
+    // colour the bar fill
+    const fill = document.getElementById('sessBarFill');
+    fill.style.width      = Math.round(display.progress * 100) + '%';
+    fill.style.background = `linear-gradient(90deg, ${display.color}55 0%, ${display.color} 100%)`;
+    document.getElementById('sessCd').textContent    = display.cd;
+    document.getElementById('sessLocal').textContent = display.local;
   }
 }
 checkMarketStatus();
