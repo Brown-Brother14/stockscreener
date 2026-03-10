@@ -4,89 +4,128 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>About — AlgoScreen Pro</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f0f4ff;--surface:#f8faff;--border:#dde5f0;--accent:#0052ff;--accent2:#059669;--accent3:#dc2626;--accent4:#d97706;--text:#0f172a;--muted:#64748b;--card:#ffffff;--shadow:rgba(0,82,255,0.08);--tag-bg:rgba(0,82,255,0.07);--green-bg:rgba(5,150,105,0.08)}
-body.dark{--bg:#080c10;--surface:#0d1117;--border:#1e2a35;--accent:#00e5ff;--accent2:#00ff88;--accent3:#ff4d6d;--accent4:#ffd60a;--text:#e8f0f7;--muted:#5a7a8a;--card:#0f1923;--shadow:rgba(0,0,0,0.4);--tag-bg:rgba(0,229,255,0.08);--green-bg:rgba(0,255,136,0.08)}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;transition:background 0.3s,color 0.3s}
-#siteNav{position:fixed;top:0;left:0;right:0;z-index:1000;background:var(--accent);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:48px;box-shadow:0 2px 12px rgba(0,0,0,0.15)}
-body.dark #siteNav{background:#0a0f1a;border-bottom:1px solid var(--border)}
-.site-nav-logo{display:flex;align-items:center;gap:8px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:900;color:#fff;text-decoration:none;letter-spacing:-0.5px}
-.site-nav-logo span{opacity:0.7}
-.site-nav-links{display:flex;align-items:center;gap:4px}
-.site-nav-link{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);text-decoration:none;padding:6px 14px;border-radius:6px;transition:all 0.15s;letter-spacing:0.5px;text-transform:uppercase}
-.site-nav-link:hover{color:#fff;background:rgba(255,255,255,0.1)}
-.site-nav-link.active{color:#fff;background:rgba(255,255,255,0.15)}
-body.dark .site-nav-link{color:var(--muted)}
-body.dark .site-nav-link.active,body.dark .site-nav-link:hover{color:var(--accent);background:var(--tag-bg)}
-#themeToggle{background:none;border:1px solid rgba(255,255,255,0.3);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
-.page-header{padding:100px 32px 60px;max-width:800px;margin:0 auto}
-.page-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
-.page-title{font-size:clamp(36px,5vw,56px);font-weight:900;letter-spacing:-2px;color:var(--text);margin-bottom:16px}
-.page-sub{font-size:17px;color:var(--muted);line-height:1.65}
-.content{max-width:800px;margin:0 auto;padding:0 32px 80px}
-.section-block{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:20px}
-.section-block h2{font-size:20px;font-weight:800;color:var(--text);margin-bottom:12px;letter-spacing:-0.5px}
-.section-block p{font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:12px}
-.section-block p:last-child{margin-bottom:0}
-.score-table{width:100%;border-collapse:collapse;margin-top:16px}
-.score-table th{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
-.score-table td{font-size:13px;padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+:root{--bg:#000;--surface:#0d0d0d;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#fff;--muted:rgba(255,255,255,0.4);--muted2:rgba(255,255,255,0.65);--green:#00e676;--green-dim:rgba(0,230,118,0.1);--red:#ff4d6d;--card:#111}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+
+/* cursor */
+#cursor{position:fixed;width:8px;height:8px;background:#fff;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.1s}
+#cursor-ring{position:fixed;width:32px;height:32px;border:1px solid rgba(255,255,255,0.25);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,border-color 0.2s}
+
+/* nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(0,0,0,0.8);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#fff;text-decoration:none}
+.nav-links{display:flex;gap:2px}
+.nav-link{font-size:13px;color:var(--muted2);text-decoration:none;padding:6px 14px;border-radius:8px;transition:all 0.2s}
+.nav-link:hover,.nav-link.active{color:#fff;background:rgba(255,255,255,0.06)}
+.nav-cta{background:#fff;color:#000;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:8px 20px;border-radius:10px;text-decoration:none;transition:all 0.2s}
+.nav-cta:hover{background:rgba(255,255,255,0.85)}
+@media(max-width:700px){nav{padding:0 20px}.nav-links{display:none}}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity 0.7s cubic-bezier(0.22,1,0.36,1),transform 0.7s cubic-bezier(0.22,1,0.36,1)}
+.reveal.visible{opacity:1;transform:none}
+.d1{transition-delay:0.1s}.d2{transition-delay:0.2s}.d3{transition-delay:0.3s}.d4{transition-delay:0.4s}
+
+/* page hero */
+.page-hero{padding:140px 40px 80px;max-width:900px;margin:0 auto;position:relative;z-index:1}
+.eyebrow{font-family:'DM Mono',monospace;font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px}
+.page-title{font-family:'Syne',sans-serif;font-size:clamp(40px,6vw,72px);font-weight:800;letter-spacing:-2px;line-height:1.0;margin-bottom:20px}
+.page-sub{font-size:17px;color:var(--muted2);line-height:1.7;max-width:520px}
+@media(max-width:700px){.page-hero{padding:100px 24px 60px}}
+
+/* content */
+.content{max-width:900px;margin:0 auto;padding:0 40px 100px;position:relative;z-index:1}
+@media(max-width:700px){.content{padding:0 24px 80px}}
+.block{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px;margin-bottom:16px;transition:border-color 0.3s}
+.block:hover{border-color:var(--border2)}
+.block h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-bottom:14px}
+.block p{font-size:14px;color:var(--muted2);line-height:1.8;margin-bottom:12px}
+.block p:last-child{margin-bottom:0}
+
+/* score table */
+.score-table{width:100%;border-collapse:collapse;margin-top:20px}
+.score-table th{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
+.score-table td{font-size:13px;padding:12px 14px;border-bottom:1px solid var(--border);color:var(--muted2)}
 .score-table tr:last-child td{border-bottom:none}
-.score-table .pts{font-family:'DM Mono',monospace;font-weight:700;color:var(--accent)}
-.disclaimer{background:rgba(217,119,6,0.06);border:1px solid rgba(217,119,6,0.2);border-radius:12px;padding:20px 24px;margin-top:20px}
-.disclaimer p{font-size:13px;color:var(--accent4);line-height:1.6}
-.data-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.score-table tr:hover td{background:rgba(255,255,255,0.02)}
+.pts{font-family:'DM Mono',monospace;font-weight:700;color:var(--green)}
+
+/* signal badges */
+.sig-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.sig{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:12px;font-family:'DM Mono',monospace;font-size:12px;font-weight:700}
+.sig-breakout{background:rgba(0,230,118,0.1);color:var(--green);border:1px solid rgba(0,230,118,0.2)}
+.sig-momentum{background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.2)}
+.sig-watch{background:rgba(255,214,10,0.08);color:#ffd60a;border:1px solid rgba(255,214,10,0.2)}
+.sig-weak{background:rgba(255,77,109,0.08);color:var(--red);border:1px solid rgba(255,77,109,0.2)}
+
+/* data pills */
+.data-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
 @media(max-width:600px){.data-grid{grid-template-columns:1fr 1fr}}
-.data-pill{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px}
-.data-pill-name{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--accent);margin-bottom:3px}
-.data-pill-desc{font-size:11px;color:var(--muted)}
-footer{padding:32px;text-align:center;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);border-top:1px solid var(--border)}
-@media(max-width:600px){#siteNav{padding:0 16px}.site-nav-link{padding:6px 8px;font-size:9px}}
+.data-pill{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:14px 18px;transition:border-color 0.2s}
+.data-pill:hover{border-color:rgba(0,230,118,0.2)}
+.dp-name{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--green);margin-bottom:4px}
+.dp-desc{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* disclaimer */
+.disclaimer{background:rgba(255,214,10,0.04);border:1px solid rgba(255,214,10,0.15);border-radius:16px;padding:24px 28px;margin-top:16px}
+.disclaimer p{font-size:13px;color:rgba(255,214,10,0.8);line-height:1.65}
+
+/* footer */
+footer{border-top:1px solid var(--border);padding:32px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;z-index:1}
+.footer-logo{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#fff;text-decoration:none;display:flex;align-items:center;gap:7px}
+.footer-copy{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+@media(max-width:700px){footer{padding:24px;flex-direction:column}}
 </style>
 </head>
 <body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
 
-<nav id="siteNav">
-  <a href="index.html" class="site-nav-logo">
-    <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(255,255,255,0.5)"/><rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="15" y="7" width="4" height="18" rx="1" fill="white"/><rect x="21" y="13" width="4" height="12" rx="1" fill="rgba(255,255,255,0.7)"/><polyline points="5,15 11,10 17,6 23,12" stroke="rgba(255,255,255,0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="17" cy="6" r="2" fill="white"/></svg>
-    AlgoScreen <span>Pro</span>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg width="20" height="20" viewBox="0 0 28 28" fill="none"><rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(255,255,255,0.4)"/><rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(255,255,255,0.6)"/><rect x="15" y="7" width="4" height="18" rx="1" fill="white"/><rect x="21" y="13" width="4" height="12" rx="1" fill="rgba(255,255,255,0.6)"/><polyline points="5,15 11,10 17,6 23,12" stroke="#00e676" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="17" cy="6" r="2" fill="#00e676"/></svg>
+    AlgoScreen Pro
   </a>
-  <div class="site-nav-links">
-    <a href="index.html" class="site-nav-link">Home</a>
-    <a href="screener.html" class="site-nav-link">Stock Screener</a>
-    <a href="portfolio.html" class="site-nav-link">Portfolio</a>
-    <a href="about.html" class="site-nav-link active">About</a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="screener.html" class="nav-link">Screener</a>
+    <a href="portfolio.html" class="nav-link">Portfolio</a>
+    <a href="about.html" class="nav-link active">About</a>
   </div>
-  <button id="themeToggle" onclick="toggleTheme()">🌙</button>
+  <a href="screener.html" class="nav-cta">Open App</a>
 </nav>
 
-<div class="page-header">
-  <div class="page-label">About</div>
-  <div class="page-title">How AlgoScreen<br>Pro works</div>
-  <p class="page-sub">A free, no-login swing trader dashboard built to give retail investors access to the same analysis tools professionals use.</p>
+<div class="page-hero">
+  <div class="eyebrow reveal">About</div>
+  <div class="page-title reveal d1">How AlgoScreen<br>Pro works.</div>
+  <p class="page-sub reveal d2">A free swing trader dashboard built to give retail investors access to the same analysis tools professionals use — no login, no paywall.</p>
 </div>
 
 <div class="content">
 
-  <div class="section-block">
+  <div class="block reveal">
     <h2>What is AlgoScreen Pro?</h2>
-    <p>AlgoScreen Pro is a free stock screener and market dashboard built for swing traders — people who hold positions for days to weeks, not hours or years.</p>
-    <p>It combines real-time market data, technical analysis, macro context, and market news into a single interface. No login, no subscription, no ads.</p>
+    <p>AlgoScreen Pro is a free stock screener and market dashboard built specifically for swing traders — people who hold positions for days to weeks, not hours or years.</p>
+    <p>It combines real-time market data, technical analysis, macro context, and curated news into a single interface. No login required. No subscription. No ads.</p>
   </div>
 
-  <div class="section-block">
+  <div class="block reveal d1">
     <h2>How the AlgoScore works</h2>
-    <p>Every stock gets scored from 0–100. The score starts at 50 and points are added or subtracted based on 9 factors. A higher score means more bullish signals are aligned.</p>
+    <p>Every stock is scored from 0–100. The score starts at 50 and points are added or subtracted based on 9 factors. Higher score = more bullish signals aligned.</p>
     <table class="score-table">
       <thead><tr><th>Factor</th><th>Condition</th><th class="pts">Points</th></tr></thead>
       <tbody>
-        <tr><td>RSI</td><td>50–65 (bullish momentum zone)</td><td class="pts">+22</td></tr>
-        <tr><td>RSI</td><td>40–50 (neutral-bullish)</td><td class="pts">+10</td></tr>
-        <tr><td>RSI</td><td>Above 75 (overbought)</td><td class="pts">-15</td></tr>
+        <tr><td>RSI</td><td>50–65 bullish momentum zone</td><td class="pts">+22</td></tr>
+        <tr><td>RSI</td><td>40–50 neutral-bullish</td><td class="pts">+10</td></tr>
+        <tr><td>RSI</td><td>Above 75 overbought</td><td class="pts">−15</td></tr>
         <tr><td>MACD</td><td>Bullish crossover + histogram positive</td><td class="pts">+15</td></tr>
-        <tr><td>MACD</td><td>Bearish crossover + histogram negative</td><td class="pts">-12</td></tr>
+        <tr><td>MACD</td><td>Bearish crossover + histogram negative</td><td class="pts">−12</td></tr>
         <tr><td>Price Change</td><td>Above +3% today</td><td class="pts">+10</td></tr>
         <tr><td>52W Position</td><td>Near 52-week high (above 70%)</td><td class="pts">+8</td></tr>
         <tr><td>P/E Ratio</td><td>Under 15 (value territory)</td><td class="pts">+8</td></tr>
@@ -98,43 +137,54 @@ footer{padding:32px;text-align:center;font-family:'DM Mono',monospace;font-size:
     </table>
   </div>
 
-  <div class="section-block">
+  <div class="block reveal d2">
     <h2>Signal labels</h2>
-    <p>Based on the AlgoScore, each stock is tagged with one of four signals:</p>
-    <table class="score-table">
-      <thead><tr><th>Signal</th><th>Score Range</th><th>Meaning</th></tr></thead>
-      <tbody>
-        <tr><td style="font-weight:700;color:var(--accent2)">Breakout</td><td>78+ with bullish MACD</td><td>Multiple strong signals aligned — highest conviction</td></tr>
-        <tr><td style="font-weight:700;color:var(--accent)">Momentum</td><td>68+</td><td>Good technical setup, worth watching closely</td></tr>
-        <tr><td style="font-weight:700;color:var(--accent4)">Watch</td><td>55+</td><td>Some signals present, not yet confirmed</td></tr>
-        <tr><td style="font-weight:700;color:var(--accent3)">Weak</td><td>Below 55</td><td>Bearish or neutral — avoid or consider short</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="section-block">
-    <h2>Where does the data come from?</h2>
-    <div class="data-grid">
-      <div class="data-pill"><div class="data-pill-name">Finnhub</div><div class="data-pill-desc">Stock quotes, technicals, company profiles, financials</div></div>
-      <div class="data-pill"><div class="data-pill-name">Twelve Data</div><div class="data-pill-desc">Historical price series for indicator calculations</div></div>
-      <div class="data-pill"><div class="data-pill-name">Yahoo Finance</div><div class="data-pill-desc">Analyst price targets, ETF &amp; index quotes</div></div>
-      <div class="data-pill"><div class="data-pill-name">CNN Business</div><div class="data-pill-desc">Fear &amp; Greed Index score</div></div>
-      <div class="data-pill"><div class="data-pill-name">TradingView</div><div class="data-pill-desc">Interactive charts embedded directly</div></div>
-      <div class="data-pill"><div class="data-pill-name">RSS Feeds</div><div class="data-pill-desc">Bloomberg, CNBC, WSJ, FT, BBC and more</div></div>
+    <p>Each stock gets one of four signal labels based on its AlgoScore:</p>
+    <div class="sig-row">
+      <div class="sig sig-breakout">Breakout — 78+ with bullish MACD</div>
+      <div class="sig sig-momentum">Momentum — 68+</div>
+      <div class="sig sig-watch">Watch — 55+</div>
+      <div class="sig sig-weak">Weak — below 55</div>
     </div>
   </div>
 
-  <div class="disclaimer">
-    <p><strong style="color:var(--accent4)">Disclaimer:</strong> AlgoScreen Pro is for informational and educational purposes only. The AlgoScore and all signals are algorithmic estimates based on technical indicators — they are not financial advice. Always do your own research before making any investment decisions. Past performance does not guarantee future results.</p>
+  <div class="block reveal d1">
+    <h2>Where the data comes from</h2>
+    <div class="data-grid">
+      <div class="data-pill"><div class="dp-name">Finnhub</div><div class="dp-desc">Stock quotes, technicals, company profiles, financials</div></div>
+      <div class="data-pill"><div class="dp-name">Twelve Data</div><div class="dp-desc">Historical price series for indicator calculations</div></div>
+      <div class="data-pill"><div class="dp-name">Yahoo Finance</div><div class="dp-desc">Analyst price targets, ETF &amp; index quotes</div></div>
+      <div class="data-pill"><div class="dp-name">CNN Business</div><div class="dp-desc">Fear &amp; Greed Index score</div></div>
+      <div class="data-pill"><div class="dp-name">TradingView</div><div class="dp-desc">Interactive charts embedded directly</div></div>
+      <div class="data-pill"><div class="dp-name">15+ RSS Feeds</div><div class="dp-desc">Bloomberg, CNBC, WSJ, FT, BBC and more</div></div>
+    </div>
+  </div>
+
+  <div class="disclaimer reveal">
+    <p><strong style="color:#ffd60a">Disclaimer —</strong> AlgoScreen Pro is for informational and educational purposes only. The AlgoScore and all signals are algorithmic estimates based on technical indicators — they are not financial advice. Always do your own research before making any investment decisions. Past performance does not guarantee future results.</p>
   </div>
 
 </div>
 
-<footer>AlgoScreen Pro &nbsp;&middot;&nbsp; Built for swing traders &nbsp;&middot;&nbsp; Not financial advice</footer>
+<footer>
+  <a href="index.html" class="footer-logo">
+    <svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(255,255,255,0.4)"/><rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(255,255,255,0.6)"/><rect x="15" y="7" width="4" height="18" rx="1" fill="white"/><polyline points="5,15 11,10 17,6 23,12" stroke="#00e676" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="17" cy="6" r="2" fill="#00e676"/></svg>
+    AlgoScreen Pro
+  </a>
+  <div class="footer-copy">Not financial advice &nbsp;&middot;&nbsp; &copy; 2025 AlgoScreen Pro</div>
+</footer>
 
 <script>
-function toggleTheme(){const d=document.body.classList.toggle('dark');document.getElementById('themeToggle').textContent=d?'☀️':'🌙';localStorage.setItem('algoscreen-theme',d?'dark':'light')}
-(function(){const s=localStorage.getItem('algoscreen-theme');if(s==='dark'){document.body.classList.add('dark');document.getElementById('themeToggle').textContent='☀️'}else{document.getElementById('themeToggle').textContent='🌙'}})();
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px'});
+(function anim(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim)})();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='44px';ring.style.height='44px';ring.style.borderColor='rgba(0,230,118,0.5)'});
+  el.addEventListener('mouseleave',()=>{ring.style.width='32px';ring.style.height='32px';ring.style.borderColor='rgba(255,255,255,0.25)'});
+});
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 </script>
 </body>
 </html>
