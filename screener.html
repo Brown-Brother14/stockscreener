@@ -64,7 +64,21 @@
   .logo h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;color:var(--text)}
   .logo span{color:var(--accent)}
   .header-right{display:flex;align-items:center;gap:14px}
-  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--accent2);box-shadow:0 0 6px var(--accent2);animation:pulse 2s infinite}
+  /* Sessions bar */
+  .sessions-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:0 0 16px}
+  .session-card{background:var(--card);padding:12px 16px;display:flex;flex-direction:column;gap:3px}
+  .session-flag{font-size:14px;margin-bottom:2px}
+  .session-name{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .session-status{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-block;width:fit-content;margin:2px 0}
+  .session-status.open{color:var(--accent2);background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.2)}
+  .session-status.closed{color:var(--muted);background:rgba(255,255,255,0.04);border:1px solid var(--border)}
+  .session-status.pre{color:#a78bfa;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2)}
+  .session-status.after{color:#f97316;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2)}
+  .session-countdown{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--text)}
+  .session-local{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:1px}
+  @media(max-width:800px){.sessions-bar{grid-template-columns:repeat(3,1fr)}.session-card:nth-child(4),.session-card:nth-child(5){display:none}}
+  @media(max-width:500px){.sessions-bar{grid-template-columns:1fr 1fr}.session-card:nth-child(3){display:none}}
+
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
   .status-text{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
   .speed-badge{background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.2);color:var(--accent2);font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:6px;font-weight:700}
@@ -313,7 +327,46 @@
             <!-- Dot at peak -->
             <circle cx="17" cy="6" r="2" fill="white"/>
           </svg>
-        </div> <div> <h1>Algo<span>Screen</span> Pro</h1> <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Swing Trader Dashboard</div> </div> </div> <div class="header-right"> <span class="speed-badge"> FINNHUB POWERED</span>  <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-align:right"> <div id="marketStatus" style="display:flex;align-items:center;gap:6px"><div class="status-dot"></div><span id="marketStatusText">CHECKING...</span></div> <div id="marketCountdown" style="color:var(--accent4);font-size:12px;font-weight:700;margin-top:2px"></div> </div> </div> </header> <div class="stats-bar"> <div class="stat-item"><div class="stat-label">Stocks Scanned</div><div class="stat-value" id="totalScanned">--</div></div> <div class="stat-item"><div class="stat-label">Breakout Signals</div><div class="stat-value green" id="breakoutCount">--</div></div> <div class="stat-item"><div class="stat-label">Bullish MACD</div><div class="stat-value yellow" id="bullishCount">--</div></div> <div class="stat-item"><div class="stat-label">Avg Score</div><div class="stat-value" id="avgScore">--</div></div> <div class="stat-item"><div class="stat-label">Top Pick</div><div class="stat-value green" id="topPick">--</div></div> </div> <div class="error-box" id="errorBox"></div> <div class="controls"> <input class="watchlist-input" id="tickerInput" type="text"
+        </div> <div> <h1>Algo<span>Screen</span> Pro</h1> <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">Swing Trader Dashboard</div> </div> </div> <div class="header-right"> <span class="speed-badge"> FINNHUB POWERED</span>  <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-align:right"> <div id="marketStatus" style="display:flex;align-items:center;gap:6px"><div class="status-dot"></div><span id="marketStatusText">CHECKING...</span></div> <div id="marketCountdown" style="color:var(--accent4);font-size:12px;font-weight:700;margin-top:2px"></div> </div> </div> </header> <div class="stats-bar"> <div class="stat-item"><div class="stat-label">Stocks Scanned</div><div class="stat-value" id="totalScanned">--</div></div> <div class="stat-item"><div class="stat-label">Breakout Signals</div><div class="stat-value green" id="breakoutCount">--</div></div> <div class="stat-item"><div class="stat-label">Bullish MACD</div><div class="stat-value yellow" id="bullishCount">--</div></div> <div class="stat-item"><div class="stat-label">Avg Score</div><div class="stat-value" id="avgScore">--</div></div> <div class="stat-item"><div class="stat-label">Top Pick</div><div class="stat-value green" id="topPick">--</div></div> </div>
+
+<!-- Trading Sessions Bar -->
+<div class="sessions-bar">
+  <div class="session-card">
+    <div class="session-flag">🇦🇺</div>
+    <div class="session-name">Sydney</div>
+    <div class="session-status closed" id="sess-sydney-status">CLOSED</div>
+    <div class="session-countdown" id="sess-sydney-cd">--</div>
+    <div class="session-local" id="sess-sydney-local">--</div>
+  </div>
+  <div class="session-card">
+    <div class="session-flag">🇯🇵</div>
+    <div class="session-name">Tokyo</div>
+    <div class="session-status closed" id="sess-tokyo-status">CLOSED</div>
+    <div class="session-countdown" id="sess-tokyo-cd">--</div>
+    <div class="session-local" id="sess-tokyo-local">--</div>
+  </div>
+  <div class="session-card">
+    <div class="session-flag">🇬🇧</div>
+    <div class="session-name">London</div>
+    <div class="session-status closed" id="sess-london-status">CLOSED</div>
+    <div class="session-countdown" id="sess-london-cd">--</div>
+    <div class="session-local" id="sess-london-local">--</div>
+  </div>
+  <div class="session-card">
+    <div class="session-flag">🇺🇸</div>
+    <div class="session-name">New York</div>
+    <div class="session-status closed" id="sess-ny-status">CLOSED</div>
+    <div class="session-countdown" id="sess-ny-cd">--</div>
+    <div class="session-local" id="sess-ny-local">--</div>
+  </div>
+  <div class="session-card" style="background:rgba(0,0,0,0.3)">
+    <div class="session-flag">🕐</div>
+    <div class="session-name">Your Time</div>
+    <div class="session-status open" id="sess-now-tz" style="font-size:9px">--</div>
+    <div class="session-countdown" id="sess-now-time" style="font-size:14px">--</div>
+    <div class="session-local" id="sess-now-date">--</div>
+  </div>
+</div> <div class="error-box" id="errorBox"></div> <div class="controls"> <input class="watchlist-input" id="tickerInput" type="text"
       placeholder="e.g. AAPL, TSLA, NVDA, MSFT, AMZN, META, GOOGL"
       value=""/> <button class="btn btn-primary" id="scanBtn" onclick="runScan()"> Run Scan</button> <div class="filter-group"> <button class="btn btn-outline active" onclick="filterBy('all',this)">All</button> <button class="btn btn-outline" onclick="filterBy('breakout',this)"> Breakout</button> <button class="btn btn-outline" onclick="filterBy('momentum',this)"> Momentum</button> <button class="btn btn-outline" onclick="filterBy('top',this)"> Top 5</button> <button class="btn btn-outline" onclick="filterBy('weak',this)"> Weak</button> </div> </div>
       <div style="display:flex;align-items:center;gap:8px;padding:0 0 12px 0;flex-wrap:wrap">
@@ -1634,58 +1687,133 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 
 function checkMarketStatus() {
   const now = new Date();
-  const et = new Date(now.toLocaleString('en-US', {timeZone:'America/New_York'}));
-  const h = et.getHours(), m = et.getMinutes(), s = et.getSeconds();
-  const t = h + m/60 + s/3600;
-  const wd = et.getDay();
-  const dot = document.querySelector('.status-dot');
-  const statusText = document.getElementById('marketStatusText');
-  const countdown = document.getElementById('marketCountdown');
 
-  function fmt(totalSecs) {
-    const hh = Math.floor(totalSecs/3600);
-    const mm = Math.floor((totalSecs%3600)/60);
-    const ss = totalSecs%60;
-    return `${hh>0?hh+'h ':''}${mm}m ${ss}s`;
+  function toET(d) { return new Date(d.toLocaleString('en-US', {timeZone:'America/New_York'})); }
+  function localTime(tz) { return now.toLocaleTimeString('en-GB', {timeZone:tz, hour:'2-digit', minute:'2-digit'}); }
+
+  function fmt(secs) {
+    secs = Math.max(0, Math.round(secs));
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    if (h > 0) return h + 'h ' + m + 'm';
+    return m + 'm ' + s + 's';
   }
 
-  const isWeekday = wd>=1 && wd<=5;
-  const secsNow = h*3600 + m*60 + s;
-  const marketOpen  = 9*3600 + 30*60;   // 9:30 AM ET
-  const marketClose = 16*3600;           // 4:00 PM ET
-  const preOpen     = 4*3600;            // 4:00 AM ET
-  const afterClose  = 20*3600;           // 8:00 PM ET
+  const et    = toET(now);
+  const etWd  = et.getDay();
+  const etH   = et.getHours() + et.getMinutes()/60 + et.getSeconds()/3600;
+  const isWd  = etWd >= 1 && etWd <= 5;
 
-  if (!isWeekday) {
-    // Weekend — count to Monday 9:30am
-    const daysToMon = wd===0 ? 1 : 2;
-    const secsToMon = daysToMon*86400 + (marketOpen - secsNow);
-    statusText.textContent = 'MARKET CLOSED';
-    countdown.textContent = `Opens in ${fmt(secsToMon)}`;
-    dot.style.background='var(--accent3)'; dot.style.boxShadow='0 0 8px var(--accent3)';
-  } else if (secsNow >= preOpen && secsNow < marketOpen) {
-    // Pre-market
+  // Seconds until a given HH:MM in ET today (wraps to next day if past)
+  function secsUntil(h, m) {
+    const target = toET(now);
+    target.setHours(h, m, 0, 0);
+    let diff = (target - et) / 1000;
+    if (diff <= 0) diff += 86400;
+    return diff;
+  }
+
+  // ── Header: NY status ─────────────────────────────────────
+  const dot        = document.querySelector('.status-dot');
+  const statusText = document.getElementById('marketStatusText');
+  const countdown  = document.getElementById('marketCountdown');
+
+  if (!isWd) {
+    const daysToMon = etWd === 0 ? 1 : 2;
+    const etBase = toET(now); etBase.setHours(0,0,0,0);
+    const monOpen = new Date(etBase.getTime() + daysToMon * 86400000);
+    monOpen.setHours(9, 30, 0, 0);
+    const secs = Math.max(0, (monOpen - et) / 1000);
+    statusText.textContent = 'WEEKEND';
+    countdown.textContent  = 'NY opens in ' + fmt(secs);
+    dot.style.background = 'var(--muted)'; dot.style.boxShadow = 'none';
+  } else if (etH >= 4 && etH < 9.5) {
     statusText.textContent = 'PRE-MARKET';
-    countdown.textContent = `Market opens in ${fmt(marketOpen - secsNow)}`;
-    dot.style.background='#a78bfa'; dot.style.boxShadow='0 0 6px #a78bfa';
-  } else if (secsNow >= marketOpen && secsNow < marketClose) {
-    // Market open — count down to close
+    countdown.textContent  = 'NY opens in ' + fmt(secsUntil(9,30));
+    dot.style.background = '#a78bfa'; dot.style.boxShadow = '0 0 6px #a78bfa';
+  } else if (etH >= 9.5 && etH < 16) {
     statusText.textContent = 'MARKET OPEN';
-    countdown.textContent = `Closes in ${fmt(marketClose - secsNow)}`;
-    dot.style.background='var(--accent2)'; dot.style.boxShadow='0 0 8px var(--accent2)';
-  } else if (secsNow >= marketClose && secsNow < afterClose) {
-    // After-hours
+    countdown.textContent  = 'Closes in ' + fmt(secsUntil(16,0));
+    dot.style.background = 'var(--accent2)'; dot.style.boxShadow = '0 0 8px var(--accent2)';
+  } else if (etH >= 16 && etH < 20) {
     statusText.textContent = 'AFTER-HOURS';
-    countdown.textContent = `Extended hours end in ${fmt(afterClose - secsNow)}`;
-    dot.style.background='#f97316'; dot.style.boxShadow='0 0 6px #f97316';
+    countdown.textContent  = 'Extended ends in ' + fmt(secsUntil(20,0));
+    dot.style.background = '#f97316'; dot.style.boxShadow = '0 0 6px #f97316';
   } else {
-    // Closed — count to tomorrow 9:30am (or Monday if Friday)
-    const isFriday = wd===5;
-    const daysAhead = isFriday ? 3 : 1;
-    const secsToOpen = daysAhead*86400 + (marketOpen - secsNow);
-    statusText.textContent = 'MARKET CLOSED';
-    countdown.textContent = `Opens in ${fmt(secsToOpen)}`;
-    dot.style.background='var(--accent3)'; dot.style.boxShadow='0 0 8px var(--accent3)';
+    statusText.textContent = 'CLOSED';
+    countdown.textContent  = 'Pre-market in ' + fmt(secsUntil(4,0));
+    dot.style.background = 'var(--accent3)'; dot.style.boxShadow = '0 0 8px var(--accent3)';
+  }
+
+  // ── Sessions bar ──────────────────────────────────────────
+  // All times in ET decimal hours. overnight=true means session spans midnight.
+  const sessions = [
+    { id:'sydney', tz:'Australia/Sydney', openET:22, closeET:7,   overnight:true },
+    { id:'tokyo',  tz:'Asia/Tokyo',       openET:19, closeET:4,   overnight:true },
+    { id:'london', tz:'Europe/London',    openET:3,  closeET:12,  overnight:false },
+    { id:'ny',     tz:'America/New_York', openET:9.5,closeET:16,  overnight:false }
+  ];
+
+  sessions.forEach(function(sess) {
+    const sEl = document.getElementById('sess-' + sess.id + '-status');
+    const cEl = document.getElementById('sess-' + sess.id + '-cd');
+    const lEl = document.getElementById('sess-' + sess.id + '-local');
+    if (!sEl) return;
+
+    var isOpen = sess.overnight
+      ? (etH >= sess.openET || etH < sess.closeET)
+      : (etH >= sess.openET && etH < sess.closeET);
+
+    var label, cls, cd;
+
+    if (sess.id === 'ny') {
+      if (!isWd) {
+        label='CLOSED'; cls='closed';
+        var dM = etWd===0?1:2;
+        var eB = toET(now); eB.setHours(0,0,0,0);
+        var mO = new Date(eB.getTime()+dM*86400000); mO.setHours(9,30,0,0);
+        cd = 'Opens ' + fmt(Math.max(0,(mO-et)/1000));
+      } else if (etH>=4&&etH<9.5)  { label='PRE';   cls='pre';   cd='Regular in '+fmt(secsUntil(9,30)); }
+      else if (etH>=9.5&&etH<16)   { label='OPEN';  cls='open';  cd='Closes in '+fmt(secsUntil(16,0)); }
+      else if (etH>=16&&etH<20)    { label='AFTER'; cls='after'; cd='Ends in '+fmt(secsUntil(20,0)); }
+      else                          { label='CLOSED';cls='closed';cd='Pre in '+fmt(secsUntil(4,0)); }
+    } else if (isOpen) {
+      label='OPEN'; cls='open';
+      var secsClose;
+      if (sess.overnight && etH >= sess.openET) {
+        secsClose = (24 - etH + sess.closeET) * 3600;
+      } else {
+        secsClose = (sess.closeET - etH) * 3600;
+      }
+      cd = 'Closes in ' + fmt(secsClose);
+    } else {
+      label='CLOSED'; cls='closed';
+      var secsOpen;
+      if (sess.overnight) {
+        secsOpen = (sess.openET - etH) * 3600;
+        if (secsOpen < 0) secsOpen += 86400;
+      } else {
+        secsOpen = etH < sess.openET ? (sess.openET - etH)*3600 : (24 - etH + sess.openET)*3600;
+      }
+      cd = 'Opens in ' + fmt(secsOpen);
+    }
+
+    sEl.textContent = label;
+    sEl.className   = 'session-status ' + cls;
+    cEl.textContent = cd;
+    lEl.textContent = localTime(sess.tz);
+  });
+
+  // ── Your Time card ────────────────────────────────────────
+  var tzEl   = document.getElementById('sess-now-tz');
+  var timeEl = document.getElementById('sess-now-time');
+  var dateEl = document.getElementById('sess-now-date');
+  if (tzEl) {
+    var userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    tzEl.textContent   = userTz.split('/').pop().replace(/_/g,' ');
+    timeEl.textContent = now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    dateEl.textContent = now.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
   }
 }
 checkMarketStatus();
