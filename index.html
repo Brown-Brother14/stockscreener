@@ -42,7 +42,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:60px;d
 @media(max-width:700px){nav{padding:0 20px}.nav-links{display:none}}
 
 /* ── Hero ── */
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 24px 60px;text-align:center;position:relative;overflow:visible}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 24px 20px;text-align:center;position:relative;overflow:visible}
 .hero-glow{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(0,230,118,0.08) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-60%);pointer-events:none;animation:glowPulse 4s ease-in-out infinite}
 @keyframes glowPulse{0%,100%{opacity:0.6;transform:translate(-50%,-60%) scale(1)}50%{opacity:1;transform:translate(-50%,-60%) scale(1.08)}}
 .hero-noise{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");opacity:0.4;pointer-events:none}
@@ -61,15 +61,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:60px;d
 
 /* ── Sticky scroll tilt (Aceternity-style) ── */
 .tilt-scene{width:100%;background:var(--bg)}
-.tilt-outer{height:200vh;position:relative;width:100%}
-.tilt-sticky{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;overflow:hidden}
-.tilt-label{text-align:center;margin-bottom:40px;opacity:0;transform:translateY(20px);transition:opacity 0.7s ease,transform 0.7s ease}
+.tilt-label{text-align:center;padding:28px 24px 24px;opacity:0;transform:translateY(20px);transition:opacity 0.7s ease,transform 0.7s ease}
 .tilt-label.show{opacity:1;transform:none}
 .tilt-label p{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
 .tilt-label h2{font-family:'Syne',sans-serif;font-size:clamp(26px,3vw,38px);font-weight:800;letter-spacing:-1px;color:#fff;line-height:1.1}
 .tilt-label h2 span{color:var(--green)}
-.tilt-persp{perspective:1200px;perspective-origin:50% 40%;width:100%;max-width:1040px}
-#scrollTiltCard{width:100%;transform-origin:50% 0%;transform:rotateX(40deg) scale(1.05);opacity:0;will-change:transform;border:2px solid rgba(108,108,108,0.45);border-radius:28px;background:#191919;padding:6px;box-shadow:0 40px 120px rgba(0,0,0,0.8),0 0 #0000004d,0 9px 20px #0000004a,0 37px 37px #00000042;transition:opacity 0.6s ease}
+.tilt-outer{height:130vh;position:relative;width:100%}
+.tilt-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;padding:0 32px;overflow:hidden}
+.tilt-persp{perspective:1200px;perspective-origin:50% 50%;width:100%;max-width:1040px}
+#scrollTiltCard{width:100%;transform-origin:50% 0%;transform:rotateX(28deg) scale(1.04);opacity:0;will-change:transform;border:2px solid rgba(108,108,108,0.45);border-radius:28px;background:#191919;padding:6px;box-shadow:0 40px 120px rgba(0,0,0,0.8),0 0 #0000004d,0 9px 20px #0000004a,0 37px 37px #00000042;transition:opacity 0.6s ease}
 .tilt-inner{background:#0d0d0d;border-radius:22px;overflow:hidden}
 .tilt-glow{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:60%;height:200px;background:radial-gradient(ellipse,rgba(0,230,118,0.12) 0%,transparent 70%);pointer-events:none;filter:blur(30px)}
 
@@ -248,12 +248,13 @@ footer{border-top:1px solid var(--border);padding:40px;display:flex;align-items:
 
 <!-- Sticky scroll tilt — tall outer div keeps card pinned while you scroll through it -->
 <div class="tilt-scene">
+  <!-- Label scrolls away normally ABOVE the sticky pin -->
+  <div class="tilt-label" id="tiltLabel">
+    <p>Live preview</p>
+    <h2>The screener, <span>in action.</span></h2>
+  </div>
   <div class="tilt-outer" id="tiltOuter">
     <div class="tilt-sticky">
-      <div class="tilt-label" id="tiltLabel">
-        <p>Live preview</p>
-        <h2>The screener, <span>in action.</span></h2>
-      </div>
       <div class="tilt-persp">
         <div id="scrollTiltCard">
           <div class="tilt-inner">
@@ -529,32 +530,36 @@ reveals.forEach(el=>observer.observe(el));
 
 // ── Sticky scroll tilt ──────────────────────────────────────
 (function() {
-  const card   = document.getElementById('scrollTiltCard');
-  const outer  = document.getElementById('tiltOuter');
-  const label  = document.getElementById('tiltLabel');
+  const card  = document.getElementById('scrollTiltCard');
+  const outer = document.getElementById('tiltOuter');
+  const label = document.getElementById('tiltLabel');
   if (!card || !outer) return;
 
-  // Fade in card + label when section first hits the screen
-  let shown = false;
-  const fadeObs = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting && !shown) {
-      shown = true;
-      card.style.opacity  = '1';
+  // Fade in label when tilt-scene first scrolls into view
+  const labelObs = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) {
       label.classList.add('show');
-      fadeObs.disconnect();
+      labelObs.disconnect();
+    }
+  }, { threshold: 0.3 });
+  labelObs.observe(label);
+
+  // Fade in card when sticky zone first appears
+  const cardObs = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) {
+      card.style.opacity = '1';
+      cardObs.disconnect();
     }
   }, { threshold: 0.05 });
-  fadeObs.observe(outer);
+  cardObs.observe(outer);
 
-  let cur = 0;   // current interpolated progress
+  let cur = 0;
   let raf = null;
 
   function getProgress() {
-    // outer is 200vh tall. sticky viewport sits at top:0.
-    // scrollY from when outer.top hits viewport-top → when outer.bottom hits viewport-top
+    // outer is 130vh. scrollable range = 130vh - 100vh = 30vh
     const rect      = outer.getBoundingClientRect();
-    const scrollable = outer.offsetHeight - window.innerHeight; // = 100vh
-    // distance scrolled past the point where outer.top === viewport top
+    const scrollable = outer.offsetHeight - window.innerHeight;
     const scrolled  = -rect.top;
     return Math.min(1, Math.max(0, scrolled / scrollable));
   }
@@ -562,15 +567,15 @@ reveals.forEach(el=>observer.observe(el));
   function tick() {
     raf = null;
     const target = getProgress();
-    cur += (target - cur) * 0.08;  // smooth lerp
+    // Ease factor — higher = snappier, lower = smoother
+    cur += (target - cur) * 0.06;
 
-    const rotateX = 40 * (1 - cur);          // 40° → 0°
-    const scale   = 1.05 - (0.05 * cur);     // 1.05 → 1.0
-    const translateY = -60 * cur;            // lift up slightly as it flattens
+    const rotateX = 28 * (1 - cur);       // 28° → 0°
+    const scale   = 1.04 - (0.04 * cur);  // 1.04 → 1.0
 
-    card.style.transform = `rotateX(${rotateX.toFixed(3)}deg) scale(${scale.toFixed(4)}) translateY(${translateY.toFixed(1)}px)`;
+    card.style.transform = `rotateX(${rotateX.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
 
-    if (Math.abs(target - cur) > 0.001) {
+    if (Math.abs(target - cur) > 0.0005) {
       raf = requestAnimationFrame(tick);
     }
   }
@@ -580,7 +585,7 @@ reveals.forEach(el=>observer.observe(el));
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onScroll, { passive: true });
+  window.addEventListener('resize', () => { cur = getProgress(); tick(); }, { passive: true });
   onScroll();
 })();
 
