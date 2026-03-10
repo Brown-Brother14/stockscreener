@@ -42,7 +42,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:60px;d
 @media(max-width:700px){nav{padding:0 20px}.nav-links{display:none}}
 
 /* ── Hero ── */
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 24px 80px;text-align:center;position:relative;overflow:hidden}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 24px 60px;text-align:center;position:relative;overflow:visible}
 .hero-glow{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(0,230,118,0.08) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-60%);pointer-events:none;animation:glowPulse 4s ease-in-out infinite}
 @keyframes glowPulse{0%,100%{opacity:0.6;transform:translate(-50%,-60%) scale(1)}50%{opacity:1;transform:translate(-50%,-60%) scale(1.08)}}
 .hero-noise{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");opacity:0.4;pointer-events:none}
@@ -59,7 +59,21 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:60px;d
 .btn-ghost:hover{color:#fff;border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.04)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── App mockup ── */
+/* ── Sticky scroll tilt (Aceternity-style) ── */
+.tilt-scene{width:100%;background:var(--bg)}
+.tilt-outer{height:200vh;position:relative;width:100%}
+.tilt-sticky{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;overflow:hidden}
+.tilt-label{text-align:center;margin-bottom:40px;opacity:0;transform:translateY(20px);transition:opacity 0.7s ease,transform 0.7s ease}
+.tilt-label.show{opacity:1;transform:none}
+.tilt-label p{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+.tilt-label h2{font-family:'Syne',sans-serif;font-size:clamp(26px,3vw,38px);font-weight:800;letter-spacing:-1px;color:#fff;line-height:1.1}
+.tilt-label h2 span{color:var(--green)}
+.tilt-persp{perspective:1200px;perspective-origin:50% 40%;width:100%;max-width:1040px}
+#scrollTiltCard{width:100%;transform-origin:50% 0%;transform:rotateX(40deg) scale(1.05);opacity:0;will-change:transform;border:2px solid rgba(108,108,108,0.45);border-radius:28px;background:#191919;padding:6px;box-shadow:0 40px 120px rgba(0,0,0,0.8),0 0 #0000004d,0 9px 20px #0000004a,0 37px 37px #00000042;transition:opacity 0.6s ease}
+.tilt-inner{background:#0d0d0d;border-radius:22px;overflow:hidden}
+.tilt-glow{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:60%;height:200px;background:radial-gradient(ellipse,rgba(0,230,118,0.12) 0%,transparent 70%);pointer-events:none;filter:blur(30px)}
+
+/* ── App mockup (inner contents) ── */
 .hero-mockup{position:relative;margin-top:64px;opacity:0;animation:fadeUp 1s 0.7s forwards;width:100%;max-width:1000px}
 .mockup-glow{position:absolute;bottom:-60px;left:50%;transform:translateX(-50%);width:80%;height:160px;background:radial-gradient(ellipse,rgba(0,230,118,0.18) 0%,transparent 70%);pointer-events:none;filter:blur(20px)}
 .mockup-frame{background:var(--surface);border:1px solid var(--border2);border-radius:20px;overflow:hidden;box-shadow:0 0 0 1px var(--border),0 60px 120px rgba(0,0,0,0.8);position:relative}
@@ -230,43 +244,56 @@ footer{border-top:1px solid var(--border);padding:40px;display:flex;align-items:
     <a href="about.html" class="btn-ghost">How it works</a>
   </div>
 
-  <!-- App mockup -->
-  <div class="hero-mockup">
-    <div class="mockup-glow"></div>
-    <div class="mockup-frame">
-      <div class="mockup-bar">
-        <div class="mockup-dot" style="background:#ff5f57"></div>
-        <div class="mockup-dot" style="background:#febc2e"></div>
-        <div class="mockup-dot" style="background:#28c840"></div>
-        <div class="mockup-url">algoscreen.pro/screener</div>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+</section>
+
+<!-- Sticky scroll tilt — tall outer div keeps card pinned while you scroll through it -->
+<div class="tilt-scene">
+  <div class="tilt-outer" id="tiltOuter">
+    <div class="tilt-sticky">
+      <div class="tilt-label" id="tiltLabel">
+        <p>Live preview</p>
+        <h2>The screener, <span>in action.</span></h2>
       </div>
-      <div class="mockup-body">
-        <div class="mock-stat"><div class="mock-stat-label">AlgoScore &bull; NVDA</div><div class="mock-stat-val">84</div><div class="mock-stat-chg up">&#x25B2; Breakout Signal</div></div>
-        <div class="mock-stat"><div class="mock-stat-label">RSI (14)</div><div class="mock-stat-val">62.4</div><div class="mock-stat-chg up">Bullish zone</div></div>
-        <div class="mock-stat"><div class="mock-stat-label">EMA Trend</div><div class="mock-stat-val">&#x2191;&#x2191;&#x2191;</div><div class="mock-stat-chg up">Above 20/50/200</div></div>
-        <div class="mock-stat"><div class="mock-stat-label">ADX</div><div class="mock-stat-val">31.2</div><div class="mock-stat-chg up">Strong trend</div></div>
-        <div class="mock-chart-row">
-          <div class="mock-chart">
-            <div class="mock-chart-label">Scan Results &mdash; Top 20 US Stocks</div>
-            <svg viewBox="0 0 500 100" preserveAspectRatio="none" fill="none">
-              <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00e676" stop-opacity="0.3"/><stop offset="100%" stop-color="#00e676" stop-opacity="0"/></linearGradient></defs>
-              <path d="M0,80 C30,75 60,60 90,55 C120,50 150,62 180,48 C210,34 240,20 270,22 C300,24 330,38 360,30 C390,22 420,10 450,8 C470,7 490,10 500,8" stroke="#00e676" stroke-width="2" fill="none"/>
-              <path d="M0,80 C30,75 60,60 90,55 C120,50 150,62 180,48 C210,34 240,20 270,22 C300,24 330,38 360,30 C390,22 420,10 450,8 C470,7 490,10 500,8 L500,100 L0,100Z" fill="url(#cg)"/>
-            </svg>
-          </div>
-          <div class="mock-table">
-            <div class="mock-row"><span class="mock-ticker">NVDA</span><span class="mock-name">Nvidia</span><span class="mock-price">$875.40</span><span class="mock-badge breakout">Breakout</span></div>
-            <div class="mock-row"><span class="mock-ticker">MSFT</span><span class="mock-name">Microsoft</span><span class="mock-price">$412.20</span><span class="mock-badge momentum">Momentum</span></div>
-            <div class="mock-row"><span class="mock-ticker">AAPL</span><span class="mock-name">Apple</span><span class="mock-price">$189.50</span><span class="mock-badge momentum">Momentum</span></div>
-            <div class="mock-row"><span class="mock-ticker">META</span><span class="mock-name">Meta</span><span class="mock-price">$506.80</span><span class="mock-badge watch">Watch</span></div>
-            <div class="mock-row"><span class="mock-ticker">AMZN</span><span class="mock-name">Amazon</span><span class="mock-price">$181.30</span><span class="mock-badge watch">Watch</span></div>
+      <div class="tilt-persp">
+        <div id="scrollTiltCard">
+          <div class="tilt-inner">
+            <div class="mockup-bar">
+              <div class="mockup-dot" style="background:#ff5f57"></div>
+              <div class="mockup-dot" style="background:#febc2e"></div>
+              <div class="mockup-dot" style="background:#28c840"></div>
+              <div class="mockup-url">algoscreen.pro/screener</div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div class="mockup-body">
+              <div class="mock-stat"><div class="mock-stat-label">AlgoScore &bull; NVDA</div><div class="mock-stat-val">84</div><div class="mock-stat-chg up">&#x25B2; Breakout Signal</div></div>
+              <div class="mock-stat"><div class="mock-stat-label">RSI (14)</div><div class="mock-stat-val">62.4</div><div class="mock-stat-chg up">Bullish zone</div></div>
+              <div class="mock-stat"><div class="mock-stat-label">EMA Trend</div><div class="mock-stat-val">&#x2191;&#x2191;&#x2191;</div><div class="mock-stat-chg up">Above 20/50/200</div></div>
+              <div class="mock-stat"><div class="mock-stat-label">ADX</div><div class="mock-stat-val">31.2</div><div class="mock-stat-chg up">Strong trend</div></div>
+              <div class="mock-chart-row">
+                <div class="mock-chart">
+                  <div class="mock-chart-label">Scan Results &mdash; Top 20 US Stocks</div>
+                  <svg viewBox="0 0 500 100" preserveAspectRatio="none" fill="none">
+                    <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00e676" stop-opacity="0.3"/><stop offset="100%" stop-color="#00e676" stop-opacity="0"/></linearGradient></defs>
+                    <path d="M0,80 C30,75 60,60 90,55 C120,50 150,62 180,48 C210,34 240,20 270,22 C300,24 330,38 360,30 C390,22 420,10 450,8 C470,7 490,10 500,8" stroke="#00e676" stroke-width="2" fill="none"/>
+                    <path d="M0,80 C30,75 60,60 90,55 C120,50 150,62 180,48 C210,34 240,20 270,22 C300,24 330,38 360,30 C390,22 420,10 450,8 C470,7 490,10 500,8 L500,100 L0,100Z" fill="url(#cg)"/>
+                  </svg>
+                </div>
+                <div class="mock-table">
+                  <div class="mock-row"><span class="mock-ticker">NVDA</span><span class="mock-name">Nvidia</span><span class="mock-price">$875.40</span><span class="mock-badge breakout">Breakout</span></div>
+                  <div class="mock-row"><span class="mock-ticker">MSFT</span><span class="mock-name">Microsoft</span><span class="mock-price">$412.20</span><span class="mock-badge momentum">Momentum</span></div>
+                  <div class="mock-row"><span class="mock-ticker">AAPL</span><span class="mock-name">Apple</span><span class="mock-price">$189.50</span><span class="mock-badge momentum">Momentum</span></div>
+                  <div class="mock-row"><span class="mock-ticker">META</span><span class="mock-name">Meta</span><span class="mock-price">$506.80</span><span class="mock-badge watch">Watch</span></div>
+                  <div class="mock-row"><span class="mock-ticker">AMZN</span><span class="mock-name">Amazon</span><span class="mock-price">$181.30</span><span class="mock-badge watch">Watch</span></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      <div class="tilt-glow"></div>
     </div>
   </div>
-</section>
+</div>
 
 <!-- Ticker strip -->
 <div class="ticker-wrap">
@@ -500,8 +527,64 @@ const observer=new IntersectionObserver(entries=>{
 },{threshold:0.12});
 reveals.forEach(el=>observer.observe(el));
 
-// Theme persistence (dark is default on homepage)
-// no toggle on this page — it's always dark
+// ── Sticky scroll tilt ──────────────────────────────────────
+(function() {
+  const card   = document.getElementById('scrollTiltCard');
+  const outer  = document.getElementById('tiltOuter');
+  const label  = document.getElementById('tiltLabel');
+  if (!card || !outer) return;
+
+  // Fade in card + label when section first hits the screen
+  let shown = false;
+  const fadeObs = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && !shown) {
+      shown = true;
+      card.style.opacity  = '1';
+      label.classList.add('show');
+      fadeObs.disconnect();
+    }
+  }, { threshold: 0.05 });
+  fadeObs.observe(outer);
+
+  let cur = 0;   // current interpolated progress
+  let raf = null;
+
+  function getProgress() {
+    // outer is 200vh tall. sticky viewport sits at top:0.
+    // scrollY from when outer.top hits viewport-top → when outer.bottom hits viewport-top
+    const rect      = outer.getBoundingClientRect();
+    const scrollable = outer.offsetHeight - window.innerHeight; // = 100vh
+    // distance scrolled past the point where outer.top === viewport top
+    const scrolled  = -rect.top;
+    return Math.min(1, Math.max(0, scrolled / scrollable));
+  }
+
+  function tick() {
+    raf = null;
+    const target = getProgress();
+    cur += (target - cur) * 0.08;  // smooth lerp
+
+    const rotateX = 40 * (1 - cur);          // 40° → 0°
+    const scale   = 1.05 - (0.05 * cur);     // 1.05 → 1.0
+    const translateY = -60 * cur;            // lift up slightly as it flattens
+
+    card.style.transform = `rotateX(${rotateX.toFixed(3)}deg) scale(${scale.toFixed(4)}) translateY(${translateY.toFixed(1)}px)`;
+
+    if (Math.abs(target - cur) > 0.001) {
+      raf = requestAnimationFrame(tick);
+    }
+  }
+
+  function onScroll() {
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  onScroll();
+})();
+
+
 </script>
 </body>
 </html>
