@@ -138,7 +138,10 @@
   .loader{display:inline-block;width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
   .loading-text{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);margin-top:12px}
-  .footer-info{display:flex;align-items:center;justify-content:space-between;padding:16px 0;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);border-top:1px solid var(--border);margin-top:24px}
+  .preset-pill{background:var(--tag-bg);border:1px solid rgba(0,82,255,0.2);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;cursor:pointer;transition:all 0.15s}
+  .preset-pill:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .preset-pill-sm{background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;padding:3px 10px;border-radius:20px;cursor:pointer;transition:all 0.15s}
+  .preset-pill-sm:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 
   /* MODAL */
   .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:1000;display:none;align-items:center;justify-content:center;padding:12px;backdrop-filter:blur(8px)}
@@ -306,10 +309,58 @@
       value=""/> <button class="btn btn-primary" id="scanBtn" onclick="runScan()"> Run Scan</button> <div class="filter-group"> <button class="btn btn-outline active" onclick="filterBy('all',this)">All</button> <button class="btn btn-outline" onclick="filterBy('breakout',this)"> Breakout</button> <button class="btn btn-outline" onclick="filterBy('momentum',this)"> Momentum</button> <button class="btn btn-outline" onclick="filterBy('top',this)"> Top 5</button> <button class="btn btn-outline" onclick="filterBy('weak',this)"> Weak</button> </div> </div>
       <div style="display:flex;align-items:center;gap:8px;padding:0 0 12px 0;flex-wrap:wrap">
         <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">Quick scan:</span>
-        <button onclick="loadPreset('top20')" style="background:var(--tag-bg);border:1px solid rgba(0,82,255,0.2);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;cursor:pointer;transition:all 0.15s" onmouseover="this.style.background='var(--accent)';this.style.color='#fff'" onmouseout="this.style.background='var(--tag-bg)';this.style.color='var(--accent)'">Top 20 US Stocks</button>
-        <button onclick="loadPreset('bigtech')" style="background:var(--tag-bg);border:1px solid rgba(0,82,255,0.2);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;cursor:pointer;transition:all 0.15s" onmouseover="this.style.background='var(--accent)';this.style.color='#fff'" onmouseout="this.style.background='var(--tag-bg)';this.style.color='var(--accent)'">Big Tech</button>
-        <button onclick="loadPreset('sp500leaders')" style="background:var(--tag-bg);border:1px solid rgba(0,82,255,0.2);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;cursor:pointer;transition:all 0.15s" onmouseover="this.style.background='var(--accent)';this.style.color='#fff'" onmouseout="this.style.background='var(--tag-bg)';this.style.color='var(--accent)'">S&P 500 Leaders</button>
-        <button onclick="loadPreset('highgrowth')" style="background:var(--tag-bg);border:1px solid rgba(0,82,255,0.2);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;cursor:pointer;transition:all 0.15s" onmouseover="this.style.background='var(--accent)';this.style.color='#fff'" onmouseout="this.style.background='var(--tag-bg)';this.style.color='var(--accent)'">High Growth</button>
+        <button onclick="loadPreset('top20')" class="preset-pill">Top 20 US Stocks</button>
+        <button onclick="loadPreset('sp500leaders')" class="preset-pill">S&P 500 Leaders</button>
+        <button onclick="loadPreset('war')" class="preset-pill" style="border-color:rgba(220,38,38,0.3);color:var(--accent3)" onmouseover="this.style.background='var(--accent3)';this.style.color='#fff'" onmouseout="this.style.background='var(--tag-bg)';this.style.color='var(--accent3)'">War &amp; Conflict</button>
+        <button onclick="toggleMorePresets(this)" id="morePresetsBtn" class="preset-pill" style="border-style:dashed">More Scans &#x25BE;</button>
+      </div>
+
+      <!-- Collapsible extra presets -->
+      <div id="morePresetsPanel" style="display:none;padding:12px 0 4px 0;border-top:1px solid var(--border);margin-top:4px">
+        <div style="display:flex;flex-wrap:wrap;gap:20px">
+
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Sectors</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <button onclick="loadPreset('tech')"        class="preset-pill-sm">Technology</button>
+              <button onclick="loadPreset('finance')"     class="preset-pill-sm">Financials</button>
+              <button onclick="loadPreset('healthcare')"  class="preset-pill-sm">Healthcare</button>
+              <button onclick="loadPreset('energy')"      class="preset-pill-sm">Energy</button>
+              <button onclick="loadPreset('consumer')"    class="preset-pill-sm">Consumer</button>
+              <button onclick="loadPreset('industrial')"  class="preset-pill-sm">Industrials</button>
+              <button onclick="loadPreset('realestate')"  class="preset-pill-sm">Real Estate</button>
+              <button onclick="loadPreset('utilities')"   class="preset-pill-sm">Utilities</button>
+              <button onclick="loadPreset('materials')"   class="preset-pill-sm">Materials</button>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Themes</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <button onclick="loadPreset('ai')"          class="preset-pill-sm">AI &amp; Chips</button>
+              <button onclick="loadPreset('ev')"          class="preset-pill-sm">EV &amp; Clean Energy</button>
+              <button onclick="loadPreset('cyber')"       class="preset-pill-sm">Cybersecurity</button>
+              <button onclick="loadPreset('crypto')"      class="preset-pill-sm">Crypto Plays</button>
+              <button onclick="loadPreset('biotech')"     class="preset-pill-sm">Biotech</button>
+              <button onclick="loadPreset('cloud')"       class="preset-pill-sm">Cloud &amp; SaaS</button>
+              <button onclick="loadPreset('dividend')"    class="preset-pill-sm">Dividend Kings</button>
+              <button onclick="loadPreset('smallcap')"    class="preset-pill-sm">Small Cap</button>
+              <button onclick="loadPreset('china')"       class="preset-pill-sm">China ADRs</button>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Macro &amp; Events</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <button onclick="loadPreset('inflation')"   class="preset-pill-sm">Inflation Hedge</button>
+              <button onclick="loadPreset('recession')"   class="preset-pill-sm">Recession Proof</button>
+              <button onclick="loadPreset('rateplay')"    class="preset-pill-sm">Rate Sensitive</button>
+              <button onclick="loadPreset('commodities')" class="preset-pill-sm">Commodities</button>
+              <button onclick="loadPreset('meme')"        class="preset-pill-sm">Meme Stocks</button>
+            </div>
+          </div>
+
+        </div>
       </div> <div class="progress-bar-outer" id="progressBar"> <div class="progress-bar-inner" id="progressFill" style="width:0%"></div> </div> <div class="table-wrapper" id="screenerSection"> <div class="table-header-bar"> <div class="table-title"> Screener Results</div> <div class="last-updated" id="lastUpdated">Not yet scanned</div> </div> <div class="table-scroll"> <table> <thead> <tr> <th onclick="sortBy('ticker')">Ticker ↕</th> <th onclick="sortBy('price')">Price ↕</th> <th onclick="sortBy('change')">Change % ↕</th> <th onclick="sortBy('rsi')">RSI ↕</th> <th>EMA Trend</th> <th onclick="sortBy('adx')">ADX ↕</th> <th onclick="sortBy('volume')">Volume ↕</th> <th onclick="sortBy('marketCap')">Mkt Cap ↕</th> <th onclick="sortBy('pe')">P/E ↕</th> <th onclick="sortBy('eps')">EPS dil TTM ↕</th> <th onclick="sortBy('epsGrowth')">EPS Growth YoY ↕</th> <th>Sector</th> <th onclick="sortBy('score')">Score ↕</th> <th>Signal</th> </tr> </thead> <tbody id="tableBody"> <tr class="loading-row"> <td colspan="14"> <div style="text-align:center;color:var(--muted);font-family:'DM Mono',monospace;font-size:13px"> Enter tickers above and click  Run Scan to begin </div> </td> </tr> </tbody> </table> </div> <div class="click-hint" id="clickHint" style="display:none"> Click any row to open TradingView chart</div> </div> <!-- Economic Calendar --> <div style="margin-top:24px" id="econSection"> <div class="table-wrapper"> <div class="table-header-bar"> <div class="table-title"> Economic Calendar</div> <div style="display:flex;align-items:center;gap:12px"> <div style="display:flex;gap:10px;font-family:'DM Mono',monospace;font-size:10px"> <span style="color:var(--accent3)"> High</span> <span style="color:var(--accent4)"> Medium</span> <span style="color:var(--muted)"> Low</span> </div> <div style="display:flex;align-items:center;gap:8px"> <button class="btn btn-outline" onclick="shiftWeek(-1)" style="padding:6px 12px;font-size:12px">← Prev</button> <div id="weekLabel" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);min-width:140px;text-align:center"></div> <button class="btn btn-outline" onclick="shiftWeek(1)" style="padding:6px 12px;font-size:12px">Next →</button> <button class="btn btn-outline" onclick="goToCurrentWeek()" style="padding:6px 12px;font-size:11px">Today</button> </div> </div> </div> <div id="econCalendar" style="min-height:100px"> <div style="padding:20px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:10px"> <div class="loader" style="width:16px;height:16px;border-width:2px"></div> Loading economic events... </div> </div> </div> </div> <!-- Macro Dashboard --> <div style="margin-top:24px" id="macroSection"> <div class="table-wrapper"> <div class="table-header-bar"> <div class="table-title"> Macro Dashboard</div> <div style="display:flex;align-items:center;gap:10px"> <button class="btn btn-outline" onclick="macroLoaded=false;loadMacroDashboard()" style="padding:6px 14px;font-size:12px">↻ Refresh</button> <div id="macroLastUpdated" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)"></div> </div> </div> <!-- Row 1: Fear & Greed + VIX + Market Indices --> <div id="macroTopRow" style="display:grid;grid-template-columns:220px 1fr;gap:1px;background:var(--border);border-bottom:1px solid var(--border)"> <!-- Fear & Greed Gauge --> <div id="fngCard" style="background:var(--card);padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px"> <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Fear & Greed Index</div> <div style="position:relative;width:160px;height:86px;overflow:hidden"> <!-- Semicircle gauge --> <canvas id="fngCanvas" width="160" height="86"></canvas> </div> <div id="fngValue" style="font-family:'DM Mono',monospace;font-size:32px;font-weight:700">--</div> <div id="fngLabel" style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px">LOADING...</div> <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">Based on VIX + momentum</div> </div> <!-- VIX + Market Indices --> <div id="macroIndices" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)"> <div class="macro-index-card" id="macro-VIX"><div class="mi-loading"></div></div> <div class="macro-index-card" id="macro-SPY"><div class="mi-loading"></div></div> <div class="macro-index-card" id="macro-QQQ"><div class="mi-loading"></div></div> <div class="macro-index-card" id="macro-IWM"><div class="mi-loading"></div></div> </div> </div> <!-- Row 2: Sector ETF Heatmap --> <div style="padding:16px 20px;background:var(--surface);border-bottom:1px solid var(--border)"> <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">S&P 500 Sector Performance</div> <div id="sectorGrid" style="display:grid;grid-template-columns:repeat(11,1fr);gap:6px"> <div id="sector-XLK"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div> <div id="sector-XLF"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div> <div id="sector-XLE"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div> <div id="sector-XLV"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div> <div id="sector-XLI"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div> <div id="sector-XLY"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div> <div id="sector-XLP"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div> <div id="sector-XLU"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div> <div id="sector-XLRE" class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div> <div id="sector-XLB"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div> <div id="sector-XLC"  class="sector-tile" style="background:var(--border);min-height:70px"><div class="mi-loading"></div></div> </div> </div> <!-- Row 3: Market Breadth / Extra stats --> <div id="macroBreadth" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)"> <div style="background:var(--card);padding:16px 20px"> <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">DXY (US Dollar)</div> <div id="macro-DXY-val" style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700">--</div> <div id="macro-DXY-chg" style="font-family:'DM Mono',monospace;font-size:11px;margin-top:4px;color:var(--muted)">--</div> </div> <div style="background:var(--card);padding:16px 20px"> <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Gold (GLD)</div> <div id="macro-GLD-val" style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700">--</div> <div id="macro-GLD-chg" style="font-family:'DM Mono',monospace;font-size:11px;margin-top:4px;color:var(--muted)">--</div> </div> <div style="background:var(--card);padding:16px 20px"> <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Oil (USO)</div> <div id="macro-USO-val" style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700">--</div> <div id="macro-USO-chg" style="font-family:'DM Mono',monospace;font-size:11px;margin-top:4px;color:var(--muted)">--</div> </div> <div style="background:var(--card);padding:16px 20px"> <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Bonds (TLT)</div> <div id="macro-TLT-val" style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700">--</div> <div id="macro-TLT-chg" style="font-family:'DM Mono',monospace;font-size:11px;margin-top:4px;color:var(--muted)">--</div> </div> </div> </div> </div> <!-- Market News Feed --> <div style="margin-top:24px" id="newsSection"> <div class="table-wrapper"> <div class="table-header-bar"> <div style="display:flex;align-items:center;gap:12px"> <div class="table-title"> Market Headlines</div> <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);background:var(--tag-bg);border:1px solid rgba(0,82,255,0.15);padding:2px 8px;border-radius:20px">Top stories only</div> </div> <div style="display:flex;align-items:center;gap:10px"> <button class="btn btn-outline" onclick="loadMarketNews(true)" style="padding:6px 14px;font-size:12px">↻ Refresh</button> <div id="newsLastUpdated" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)"></div> </div> </div> <!-- Category filter tabs --> <div style="display:flex;gap:0;border-bottom:1px solid var(--border);overflow-x:auto" id="newsCategoryBar"> <button onclick="filterNews('all',this)"     class="news-cat-btn active-cat" style="padding:10px 18px;border:none;border-bottom:2px solid var(--accent);background:transparent;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);cursor:pointer;white-space:nowrap">ALL</button> <button onclick="filterNews('market',this)"  class="news-cat-btn" style="padding:10px 18px;border:none;border-bottom:2px solid transparent;background:transparent;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;white-space:nowrap">MARKET</button> <button onclick="filterNews('economy',this)" class="news-cat-btn" style="padding:10px 18px;border:none;border-bottom:2px solid transparent;background:transparent;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;white-space:nowrap">ECONOMY</button> <button onclick="filterNews('crypto',this)"  class="news-cat-btn" style="padding:10px 18px;border:none;border-bottom:2px solid transparent;background:transparent;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;white-space:nowrap">CRYPTO</button> <button onclick="filterNews('forex',this)"   class="news-cat-btn" style="padding:10px 18px;border:none;border-bottom:2px solid transparent;background:transparent;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;white-space:nowrap">FOREX</button> <button onclick="filterNews('merger',this)"  class="news-cat-btn" style="padding:10px 18px;border:none;border-bottom:2px solid transparent;background:transparent;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;white-space:nowrap">M&A</button> </div> <div id="marketNewsContainer" style="min-height:120px"> <div style="padding:32px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:10px"> <div class="loader" style="width:16px;height:16px;border-width:2px"></div> Loading headlines... </div> </div> </div> </div> <div class="footer-info"> <div> Scores are algorithmic estimates only — not financial advice. Always do your own research.</div> <div>Powered by Finnhub.io + TradingView + Twelve Data</div> </div> <!-- Mobile bottom padding so content isn't hidden behind nav --> <div style="height:0" id="mobileNavSpacer"></div>
 </div> <!-- Mobile bottom nav -->
 <div id="mobileNav" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:500;padding:0"> <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;height:56px"> <button onclick="mobileSwitchTab('screener',this)" id="mobileTab-screener" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--accent);font-family:'DM Mono',monospace;font-size:8px;padding:0"> <span style="font-size:16px"></span><span>SCREENER</span> </button> <button onclick="mobileSwitchTab('news',this)" id="mobileTab-news" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-family:'DM Mono',monospace;font-size:8px;padding:0"> <span style="font-size:16px"></span><span>NEWS</span> </button> <button onclick="mobileSwitchTab('macro',this)" id="mobileTab-macro" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-family:'DM Mono',monospace;font-size:8px;padding:0"> <span style="font-size:16px"></span><span>MACRO</span> </button> <button onclick="mobileSwitchTab('calendar',this)" id="mobileTab-calendar" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-family:'DM Mono',monospace;font-size:8px;padding:0"> <span style="font-size:16px"></span><span>CALENDAR</span> </button> <button onclick="mobileSwitchTab('scan',this)" id="mobileTab-scan" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-family:'DM Mono',monospace;font-size:8px;padding:0"> <span style="font-size:16px"></span><span>SCAN</span> </button> </div>
@@ -379,17 +430,53 @@ const PROXY = 'https://broken-butterfly-8148.jai-mistry14.workers.dev';
 let allResults=[], currentFilter='all', sortField='score', sortDir=-1;
 let currentTicker='', currentInterval='W';
 const PRESETS = {
+  // Quick
   top20:       'AAPL,MSFT,NVDA,AMZN,GOOGL,META,TSLA,BRK.B,LLY,AVGO,JPM,V,UNH,XOM,MA,JNJ,PG,COST,HD,MRK',
-  bigtech:     'AAPL,MSFT,NVDA,GOOGL,META,AMZN,TSLA,AMD,ORCL,INTC,QCOM,CRM,ADBE,NOW,SNOW',
   sp500leaders:'SPY,QQQ,AAPL,MSFT,NVDA,AMZN,GOOGL,META,TSLA,JPM,V,MA,UNH,LLY,XOM,COST,PG,HD,JNJ,AVGO',
-  highgrowth:  'NVDA,TSLA,PLTR,COIN,RIVN,SMCI,CRWD,DDOG,NET,MSTR,SQ,RBLX,UBER,LYFT,SHOP',
+  war:         'LMT,RTX,NOC,GD,BA,HII,LDOS,CACI,AXON,KTOS,PLTR,FLIR,TDG,HEI,TransDigm',
+  // Sectors
+  tech:        'AAPL,MSFT,NVDA,AMD,INTC,QCOM,ORCL,CRM,ADBE,NOW,AMAT,LRCX,KLAC,MU,AVGO',
+  finance:     'JPM,BAC,WFC,GS,MS,BLK,AXP,V,MA,C,SCHW,USB,PNC,TFC,COF',
+  healthcare:  'JNJ,UNH,PFE,ABBV,MRK,TMO,ABT,DHR,BMY,AMGN,GILD,CVS,HCA,CI,ISRG',
+  energy:      'XOM,CVX,COP,EOG,SLB,PSX,VLO,MPC,OXY,DVN,HAL,BKR,FANG,PXD,WMB',
+  consumer:    'AMZN,TSLA,MCD,SBUX,NKE,HD,LOW,TGT,COST,DG,DLTR,YUM,CMG,BKNG,MAR',
+  industrial:  'GE,HON,UPS,CAT,DE,RTX,LMT,NOC,BA,MMM,EMR,ETN,PH,ROK,FDX',
+  realestate:  'AMT,PLD,CCI,EQIX,PSA,SPG,O,DLR,WELL,AVB,EQR,ARE,BXP,VTR,IRM',
+  utilities:   'NEE,DUK,SO,D,AEP,EXC,SRE,PCG,ED,ES,FE,ETR,PPL,CNP,AES',
+  materials:   'LIN,APD,SHW,ECL,NEM,FCX,NUE,VMC,MLM,MOS,ALB,CF,IFF,FMC,CE',
+  // Themes
+  ai:          'NVDA,AMD,MSFT,GOOGL,META,TSLA,QCOM,AMAT,LRCX,ASML,ARM,SMCI,PLTR,AI,SOUN',
+  ev:          'TSLA,RIVN,LCID,NIO,LI,XPEV,GM,F,CHPT,BLNK,ENPH,FSLR,PLUG,BE,RUN',
+  cyber:       'CRWD,PANW,FTNT,ZS,S,OKTA,NET,CYBR,TENB,QLYS,RPD,VRNS,SWI,SAIL,MNDT',
+  crypto:      'COIN,MSTR,RIOT,MARA,HUT,CLSK,BTBT,BTDR,CIFR,IREN,CORZ,WGMI,BITO,GBTC,SQ',
+  biotech:     'MRNA,BNTX,REGN,VRTX,ALNY,BIIB,ILMN,SGEN,EXAS,FATE,BEAM,EDIT,NTLA,CRSP,PACIFIC',
+  cloud:       'AMZN,MSFT,GOOGL,CRM,NOW,SNOW,DDOG,NET,MDB,HUBS,ZM,TWLO,VEEV,WDAY,TEAM',
+  dividend:    'JNJ,PG,KO,MCD,MMM,T,VZ,XOM,CVX,IBM,ABBV,MO,PM,O,WPC',
+  smallcap:    'PLTR,RIVN,SOFI,HOOD,AFRM,OPEN,LMND,UWMC,DKNG,PENN,WISH,CLOV,SKLZ,PSFE,BARK',
+  china:       'BABA,JD,PDD,BIDU,NIO,XPEV,LI,TCEHY,NTES,TAL,EDU,RLX,FUTU,UP,BZ',
+  // Macro
+  inflation:   'GLD,SLV,GDX,USO,XLE,XOM,CVX,WPM,NEM,FCX,BHP,RIO,CF,MOS,VALE',
+  recession:   'WMT,COST,DG,DLTR,KO,PG,CL,GIS,K,CPB,JNJ,MRK,PFE,NEE,SO',
+  rateplay:    'JPM,BAC,GS,MS,WFC,C,TFC,USB,SCHW,BLK,TLT,HYG,NLY,AGNC,PFF',
+  commodities: 'GLD,SLV,USO,UNG,CORN,WEAT,SOYB,CPER,JO,BAL,DBA,DBC,GSG,PDBC,COM',
+  meme:        'GME,AMC,BBBY,CLOV,SPCE,WISH,PLTR,TLRY,SNDL,NOK,BB,KOSS,EXPR,NAKD,WKHS',
 };
 
 function loadPreset(name) {
   const tickers = PRESETS[name];
   if (!tickers) return;
   document.getElementById('tickerInput').value = tickers;
+  // Close the panel if open
+  const panel = document.getElementById('morePresetsPanel');
+  if (panel && panel.style.display !== 'none') toggleMorePresets(document.getElementById('morePresetsBtn'));
   runScan();
+}
+
+function toggleMorePresets(btn) {
+  const panel = document.getElementById('morePresetsPanel');
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  btn.innerHTML = isOpen ? 'More Scans &#x25BE;' : 'More Scans &#x25B4;';
 }
 
 const delay = ms => new Promise(r => setTimeout(r, ms));
