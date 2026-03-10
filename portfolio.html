@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Analyser — AlgoScreen Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0f4ff;--surface:#f8faff;--border:#dde5f0;--accent:#0052ff;--accent2:#059669;--text:#0f172a;--muted:#64748b;--card:#ffffff;--tag-bg:rgba(0,82,255,0.07)}
+body.dark{--bg:#080c10;--surface:#0d1117;--border:#1e2a35;--accent:#00e5ff;--accent2:#00ff88;--text:#e8f0f7;--muted:#5a7a8a;--card:#0f1923;--tag-bg:rgba(0,229,255,0.08)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;transition:background 0.3s,color 0.3s}
+#siteNav{position:fixed;top:0;left:0;right:0;z-index:1000;background:var(--accent);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:48px;box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+body.dark #siteNav{background:#0a0f1a;border-bottom:1px solid var(--border)}
+.site-nav-logo{display:flex;align-items:center;gap:8px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:900;color:#fff;text-decoration:none;letter-spacing:-0.5px}
+.site-nav-logo span{opacity:0.7}
+.site-nav-links{display:flex;align-items:center;gap:4px}
+.site-nav-link{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);text-decoration:none;padding:6px 14px;border-radius:6px;transition:all 0.15s;letter-spacing:0.5px;text-transform:uppercase}
+.site-nav-link:hover{color:#fff;background:rgba(255,255,255,0.1)}
+.site-nav-link.active{color:#fff;background:rgba(255,255,255,0.15)}
+body.dark .site-nav-link{color:var(--muted)}
+body.dark .site-nav-link.active,body.dark .site-nav-link:hover{color:var(--accent);background:var(--tag-bg)}
+#themeToggle{background:none;border:1px solid rgba(255,255,255,0.3);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.coming-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 32px;gap:20px}
+.coming-badge{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);background:var(--tag-bg);border:1px solid rgba(0,82,255,0.2);padding:5px 14px;border-radius:20px;letter-spacing:1px;text-transform:uppercase}
+.coming-title{font-size:clamp(36px,5vw,60px);font-weight:900;letter-spacing:-2px;color:var(--text)}
+.coming-sub{font-size:17px;color:var(--muted);max-width:500px;line-height:1.65}
+.features-preview{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:600px;margin-top:16px}
+@media(max-width:500px){.features-preview{grid-template-columns:1fr}}
+.fp-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:left}
+.fp-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.fp-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.btn-back{padding:12px 28px;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;background:var(--accent);color:#fff;text-decoration:none;display:inline-block;margin-top:8px;transition:all 0.2s}
+.btn-back:hover{transform:translateY(-2px)}
+footer{padding:24px;text-align:center;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);border-top:1px solid var(--border)}
+@media(max-width:600px){#siteNav{padding:0 16px}.site-nav-link{padding:6px 8px;font-size:9px}}
+</style>
+</head>
+<body>
+
+<nav id="siteNav">
+  <a href="index.html" class="site-nav-logo">
+    <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(255,255,255,0.5)"/><rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="15" y="7" width="4" height="18" rx="1" fill="white"/><rect x="21" y="13" width="4" height="12" rx="1" fill="rgba(255,255,255,0.7)"/><polyline points="5,15 11,10 17,6 23,12" stroke="rgba(255,255,255,0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="17" cy="6" r="2" fill="white"/></svg>
+    AlgoScreen <span>Pro</span>
+  </a>
+  <div class="site-nav-links">
+    <a href="index.html" class="site-nav-link">Home</a>
+    <a href="screener.html" class="site-nav-link">Stock Screener</a>
+    <a href="portfolio.html" class="site-nav-link active">Portfolio</a>
+    <a href="about.html" class="site-nav-link">About</a>
+  </div>
+  <button id="themeToggle" onclick="toggleTheme()">🌙</button>
+</nav>
+
+<div class="coming-wrap">
+  <div class="coming-badge">In Development</div>
+  <div class="coming-title">Portfolio Analyser</div>
+  <p class="coming-sub">We're building a full portfolio analysis tool. Upload your holdings and get a professional-grade breakdown of your positions.</p>
+
+  <div class="features-preview">
+    <div class="fp-card">
+      <div class="fp-title">Sector Allocation</div>
+      <div class="fp-desc">See exactly how your portfolio is distributed across all 11 market sectors</div>
+    </div>
+    <div class="fp-card">
+      <div class="fp-title">AlgoScore per Holding</div>
+      <div class="fp-desc">Every stock in your portfolio automatically scored and ranked</div>
+    </div>
+    <div class="fp-card">
+      <div class="fp-title">Risk Metrics</div>
+      <div class="fp-desc">Beta, volatility, correlation to S&amp;P 500 and concentration risk</div>
+    </div>
+    <div class="fp-card">
+      <div class="fp-title">Performance vs Market</div>
+      <div class="fp-desc">Compare your portfolio returns against SPY, QQQ and other benchmarks</div>
+    </div>
+  </div>
+
+  <a href="screener.html" class="btn-back">Use the Stock Screener for now &#x2192;</a>
+</div>
+
+<footer>AlgoScreen Pro &nbsp;&middot;&nbsp; Built for swing traders &nbsp;&middot;&nbsp; Not financial advice</footer>
+
+<script>
+function toggleTheme(){const d=document.body.classList.toggle('dark');document.getElementById('themeToggle').textContent=d?'☀️':'🌙';localStorage.setItem('algoscreen-theme',d?'dark':'light')}
+(function(){const s=localStorage.getItem('algoscreen-theme');if(s==='dark'){document.body.classList.add('dark');document.getElementById('themeToggle').textContent='☀️'}else{document.getElementById('themeToggle').textContent='🌙'}})();
+</script>
+</body>
+</html>
