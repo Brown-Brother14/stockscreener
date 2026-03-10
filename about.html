@@ -5,91 +5,109 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>About — AlgoScreen Pro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#000;--surface:#0d0d0d;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#fff;--muted:rgba(255,255,255,0.4);--muted2:rgba(255,255,255,0.65);--green:#00e676;--green-dim:rgba(0,230,118,0.1);--red:#ff4d6d;--card:#111}
+:root{
+  --bg:#000;--surface:#0c0c0c;--border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);
+  --text:#f5f5f7;--muted:rgba(245,245,247,0.38);--muted2:rgba(245,245,247,0.62);
+  --green:#00e676;--green-dim:rgba(0,230,118,0.09);--red:#ff4d6d;
+}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;cursor:none}
 
-/* cursor */
-#cursor{position:fixed;width:8px;height:8px;background:#fff;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.1s}
-#cursor-ring{position:fixed;width:32px;height:32px;border:1px solid rgba(255,255,255,0.25);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,border-color 0.2s}
+#cur{position:fixed;width:5px;height:5px;background:var(--text);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+#cur-r{position:fixed;width:28px;height:28px;border:1px solid rgba(245,245,247,0.2);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width 0.25s,height 0.25s,border-color 0.25s}
 
-/* nav */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(0,0,0,0.8);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--border)}
-.nav-logo{display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#fff;text-decoration:none}
-.nav-links{display:flex;gap:2px}
-.nav-link{font-size:13px;color:var(--muted2);text-decoration:none;padding:6px 14px;border-radius:8px;transition:all 0.2s}
-.nav-link:hover,.nav-link.active{color:#fff;background:rgba(255,255,255,0.06)}
-.nav-cta{background:#fff;color:#000;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:8px 20px;border-radius:10px;text-decoration:none;transition:all 0.2s}
-.nav-cta:hover{background:rgba(255,255,255,0.85)}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;background:rgba(0,0,0,0.72);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text);text-decoration:none}
+.nav-links{display:flex;gap:0}
+.nav-link{font-size:13px;color:var(--muted2);text-decoration:none;padding:6px 13px;border-radius:8px;transition:all 0.2s}
+.nav-link:hover,.nav-link.active{color:var(--text);background:rgba(255,255,255,0.05)}
+.nav-cta{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;background:var(--text);color:#000;padding:7px 18px;border-radius:8px;text-decoration:none;transition:opacity 0.2s}
+.nav-cta:hover{opacity:0.86}
 @media(max-width:700px){nav{padding:0 20px}.nav-links{display:none}}
 
-/* reveal */
-.reveal{opacity:0;transform:translateY(32px);transition:opacity 0.7s cubic-bezier(0.22,1,0.36,1),transform 0.7s cubic-bezier(0.22,1,0.36,1)}
-.reveal.visible{opacity:1;transform:none}
-.d1{transition-delay:0.1s}.d2{transition-delay:0.2s}.d3{transition-delay:0.3s}.d4{transition-delay:0.4s}
+/* Glow */
+[data-glow]{--angle:0;--active:0;--spread:50;position:relative}
+[data-glow]::after{
+  content:'';pointer-events:none;position:absolute;inset:-1px;border-radius:inherit;padding:1px;
+  background:conic-gradient(from calc((var(--angle)-var(--spread))*1deg) at 50% 50%,transparent 0deg,rgba(255,255,255,0.35) calc(var(--spread)*1deg),transparent calc(var(--spread)*2deg));
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:destination-out;
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  mask-composite:exclude;
+  opacity:var(--active);transition:opacity 0.45s ease;z-index:1
+}
 
-/* page hero */
-.page-hero{padding:140px 40px 80px;max-width:900px;margin:0 auto;position:relative;z-index:1}
-.eyebrow{font-family:'DM Mono',monospace;font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px}
-.page-title{font-family:'Syne',sans-serif;font-size:clamp(40px,6vw,72px);font-weight:800;letter-spacing:-2px;line-height:1.0;margin-bottom:20px}
-.page-sub{font-size:17px;color:var(--muted2);line-height:1.7;max-width:520px}
-@media(max-width:700px){.page-hero{padding:100px 24px 60px}}
+/* Reveal */
+.rev{opacity:0;transform:translateY(26px);transition:opacity 0.7s cubic-bezier(0.22,1,0.36,1),transform 0.7s cubic-bezier(0.22,1,0.36,1)}
+.rev.in{opacity:1;transform:none}
+.d1{transition-delay:0.08s}.d2{transition-delay:0.16s}.d3{transition-delay:0.24s}
 
-/* content */
-.content{max-width:900px;margin:0 auto;padding:0 40px 100px;position:relative;z-index:1}
+/* Hero */
+.hero{padding:148px 40px 72px;max-width:900px;margin:0 auto}
+.eye{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:16px}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(40px,6vw,72px);font-weight:800;letter-spacing:-3px;line-height:0.97;margin-bottom:22px;color:var(--text)}
+.hero-sub{font-size:16px;color:var(--muted2);line-height:1.75;max-width:500px}
+@media(max-width:700px){.hero{padding:100px 24px 60px}}
+
+/* Content */
+.content{max-width:900px;margin:0 auto;padding:0 40px 120px}
 @media(max-width:700px){.content{padding:0 24px 80px}}
-.block{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px;margin-bottom:16px;transition:border-color 0.3s}
+
+/* Cards / blocks */
+.block{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px 40px;margin-bottom:12px;transition:border-color 0.3s;overflow:hidden}
 .block:hover{border-color:var(--border2)}
-.block h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-bottom:14px}
-.block p{font-size:14px;color:var(--muted2);line-height:1.8;margin-bottom:12px}
+.block h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.5px;margin-bottom:14px;color:var(--text)}
+.block p{font-size:14px;color:var(--muted2);line-height:1.82;margin-bottom:12px}
 .block p:last-child{margin-bottom:0}
 
-/* score table */
-.score-table{width:100%;border-collapse:collapse;margin-top:20px}
-.score-table th{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
-.score-table td{font-size:13px;padding:12px 14px;border-bottom:1px solid var(--border);color:var(--muted2)}
+/* Score table */
+.score-table{width:100%;border-collapse:collapse;margin-top:24px}
+.score-table th{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.score-table td{font-size:13px;padding:11px 12px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--muted2);line-height:1.4}
 .score-table tr:last-child td{border-bottom:none}
-.score-table tr:hover td{background:rgba(255,255,255,0.02)}
-.pts{font-family:'DM Mono',monospace;font-weight:700;color:var(--green)}
+.score-table tr:hover td{background:rgba(255,255,255,0.015)}
+.score-table td:first-child{font-family:'DM Mono',monospace;font-size:11px;color:var(--text);font-weight:500}
+.pts{font-family:'DM Mono',monospace;font-weight:700;font-size:12px;color:var(--green)}
+.pts.neg{color:var(--red)}
 
-/* signal badges */
-.sig-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-.sig{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:12px;font-family:'DM Mono',monospace;font-size:12px;font-weight:700}
-.sig-breakout{background:rgba(0,230,118,0.1);color:var(--green);border:1px solid rgba(0,230,118,0.2)}
-.sig-momentum{background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.2)}
-.sig-watch{background:rgba(255,214,10,0.08);color:#ffd60a;border:1px solid rgba(255,214,10,0.2)}
-.sig-weak{background:rgba(255,77,109,0.08);color:var(--red);border:1px solid rgba(255,77,109,0.2)}
+/* Signals */
+.sig-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.sig{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.2px}
+.sig-breakout{background:rgba(0,230,118,0.07);color:var(--green);border:1px solid rgba(0,230,118,0.18)}
+.sig-momentum{background:rgba(96,165,250,0.07);color:#60a5fa;border:1px solid rgba(96,165,250,0.18)}
+.sig-watch{background:rgba(251,191,36,0.07);color:#fbbf24;border:1px solid rgba(251,191,36,0.18)}
+.sig-weak{background:rgba(255,77,109,0.07);color:var(--red);border:1px solid rgba(255,77,109,0.18)}
 
-/* data pills */
+/* Data sources grid */
 .data-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
 @media(max-width:600px){.data-grid{grid-template-columns:1fr 1fr}}
-.data-pill{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:14px 18px;transition:border-color 0.2s}
-.data-pill:hover{border-color:rgba(0,230,118,0.2)}
-.dp-name{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--green);margin-bottom:4px}
-.dp-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.dp{background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:14px;padding:18px;transition:border-color 0.25s;overflow:hidden}
+.dp:hover{border-color:var(--border2)}
+.dp-name{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--text);margin-bottom:5px}
+.dp-desc{font-size:12px;color:var(--muted);line-height:1.55}
 
-/* disclaimer */
-.disclaimer{background:rgba(255,214,10,0.04);border:1px solid rgba(255,214,10,0.15);border-radius:16px;padding:24px 28px;margin-top:16px}
-.disclaimer p{font-size:13px;color:rgba(255,214,10,0.8);line-height:1.65}
+/* Disclaimer */
+.disc{background:rgba(251,191,36,0.03);border:1px solid rgba(251,191,36,0.12);border-radius:16px;padding:24px 28px;margin-top:12px}
+.disc p{font-size:13px;color:rgba(251,191,36,0.7);line-height:1.7}
+.disc strong{color:rgba(251,191,36,0.9)}
 
-/* footer */
-footer{border-top:1px solid var(--border);padding:32px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;z-index:1}
-.footer-logo{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#fff;text-decoration:none;display:flex;align-items:center;gap:7px}
-.footer-copy{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+footer{border-top:1px solid var(--border);padding:32px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.f-logo{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px;opacity:0.65;transition:opacity 0.2s}
+.f-logo:hover{opacity:1}
+.f-copy{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
 @media(max-width:700px){footer{padding:24px;flex-direction:column}}
 </style>
 </head>
 <body>
-<div id="cursor"></div>
-<div id="cursor-ring"></div>
+<div id="cur"></div>
+<div id="cur-r"></div>
 
 <nav>
   <a href="index.html" class="nav-logo">
-    <svg width="20" height="20" viewBox="0 0 28 28" fill="none"><rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(255,255,255,0.4)"/><rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(255,255,255,0.6)"/><rect x="15" y="7" width="4" height="18" rx="1" fill="white"/><rect x="21" y="13" width="4" height="12" rx="1" fill="rgba(255,255,255,0.6)"/><polyline points="5,15 11,10 17,6 23,12" stroke="#00e676" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="17" cy="6" r="2" fill="#00e676"/></svg>
+    <svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(245,245,247,0.35)"/><rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(245,245,247,0.6)"/><rect x="15" y="7" width="4" height="18" rx="1" fill="#f5f5f7"/><rect x="21" y="13" width="4" height="12" rx="1" fill="rgba(245,245,247,0.6)"/><polyline points="5,15 11,10 17,6 23,12" stroke="#00e676" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="17" cy="6" r="2" fill="#00e676"/></svg>
     AlgoScreen Pro
   </a>
   <div class="nav-links">
@@ -101,31 +119,31 @@ footer{border-top:1px solid var(--border);padding:32px 40px;display:flex;align-i
   <a href="screener.html" class="nav-cta">Open App</a>
 </nav>
 
-<div class="page-hero">
-  <div class="eyebrow reveal">About</div>
-  <div class="page-title reveal d1">How AlgoScreen<br>Pro works.</div>
-  <p class="page-sub reveal d2">A free swing trader dashboard built to give retail investors access to the same analysis tools professionals use — no login, no paywall.</p>
+<div class="hero">
+  <div class="eye rev">About</div>
+  <h1 class="rev d1">How AlgoScreen<br>Pro works.</h1>
+  <p class="hero-sub rev d2">A free swing trader dashboard built to give retail investors access to professional-grade analysis — no login, no paywall, no limits.</p>
 </div>
 
 <div class="content">
 
-  <div class="block reveal">
+  <div class="block rev" data-glow>
     <h2>What is AlgoScreen Pro?</h2>
     <p>AlgoScreen Pro is a free stock screener and market dashboard built specifically for swing traders — people who hold positions for days to weeks, not hours or years.</p>
     <p>It combines real-time market data, technical analysis, macro context, and curated news into a single interface. No login required. No subscription. No ads.</p>
   </div>
 
-  <div class="block reveal d1">
+  <div class="block rev d1" data-glow>
     <h2>How the AlgoScore works</h2>
     <p>Every stock is scored from 0–100. The score starts at 50 and points are added or subtracted based on 9 factors. Higher score = more bullish signals aligned.</p>
     <table class="score-table">
-      <thead><tr><th>Factor</th><th>Condition</th><th class="pts">Points</th></tr></thead>
+      <thead><tr><th>Factor</th><th>Condition</th><th>Points</th></tr></thead>
       <tbody>
         <tr><td>RSI</td><td>50–65 bullish momentum zone</td><td class="pts">+22</td></tr>
         <tr><td>RSI</td><td>40–50 neutral-bullish</td><td class="pts">+10</td></tr>
-        <tr><td>RSI</td><td>Above 75 overbought</td><td class="pts">−15</td></tr>
+        <tr><td>RSI</td><td>Above 75 overbought</td><td class="pts neg">−15</td></tr>
         <tr><td>MACD</td><td>Bullish crossover + histogram positive</td><td class="pts">+15</td></tr>
-        <tr><td>MACD</td><td>Bearish crossover + histogram negative</td><td class="pts">−12</td></tr>
+        <tr><td>MACD</td><td>Bearish crossover + histogram negative</td><td class="pts neg">−12</td></tr>
         <tr><td>Price Change</td><td>Above +3% today</td><td class="pts">+10</td></tr>
         <tr><td>52W Position</td><td>Near 52-week high (above 70%)</td><td class="pts">+8</td></tr>
         <tr><td>P/E Ratio</td><td>Under 15 (value territory)</td><td class="pts">+8</td></tr>
@@ -137,54 +155,62 @@ footer{border-top:1px solid var(--border);padding:32px 40px;display:flex;align-i
     </table>
   </div>
 
-  <div class="block reveal d2">
+  <div class="block rev d2" data-glow>
     <h2>Signal labels</h2>
     <p>Each stock gets one of four signal labels based on its AlgoScore:</p>
     <div class="sig-row">
-      <div class="sig sig-breakout">Breakout — 78+ with bullish MACD</div>
+      <div class="sig sig-breakout">Breakout — 78+ &amp; bullish MACD</div>
       <div class="sig sig-momentum">Momentum — 68+</div>
       <div class="sig sig-watch">Watch — 55+</div>
       <div class="sig sig-weak">Weak — below 55</div>
     </div>
   </div>
 
-  <div class="block reveal d1">
+  <div class="block rev d1" data-glow>
     <h2>Where the data comes from</h2>
     <div class="data-grid">
-      <div class="data-pill"><div class="dp-name">Finnhub</div><div class="dp-desc">Stock quotes, technicals, company profiles, financials</div></div>
-      <div class="data-pill"><div class="dp-name">Twelve Data</div><div class="dp-desc">Historical price series for indicator calculations</div></div>
-      <div class="data-pill"><div class="dp-name">Yahoo Finance</div><div class="dp-desc">Analyst price targets, ETF &amp; index quotes</div></div>
-      <div class="data-pill"><div class="dp-name">CNN Business</div><div class="dp-desc">Fear &amp; Greed Index score</div></div>
-      <div class="data-pill"><div class="dp-name">TradingView</div><div class="dp-desc">Interactive charts embedded directly</div></div>
-      <div class="data-pill"><div class="dp-name">15+ RSS Feeds</div><div class="dp-desc">Bloomberg, CNBC, WSJ, FT, BBC and more</div></div>
+      <div class="dp" data-glow><div class="dp-name">Finnhub</div><div class="dp-desc">Stock quotes, technicals, company profiles, financials</div></div>
+      <div class="dp" data-glow><div class="dp-name">Twelve Data</div><div class="dp-desc">Historical price series for indicator calculations</div></div>
+      <div class="dp" data-glow><div class="dp-name">Yahoo Finance</div><div class="dp-desc">Analyst price targets, ETF &amp; index quotes</div></div>
+      <div class="dp" data-glow><div class="dp-name">CNN Business</div><div class="dp-desc">Fear &amp; Greed Index score</div></div>
+      <div class="dp" data-glow><div class="dp-name">TradingView</div><div class="dp-desc">Interactive charts embedded directly in-app</div></div>
+      <div class="dp" data-glow><div class="dp-name">15+ RSS Feeds</div><div class="dp-desc">Bloomberg, CNBC, WSJ, FT, BBC and more</div></div>
     </div>
   </div>
 
-  <div class="disclaimer reveal">
-    <p><strong style="color:#ffd60a">Disclaimer —</strong> AlgoScreen Pro is for informational and educational purposes only. The AlgoScore and all signals are algorithmic estimates based on technical indicators — they are not financial advice. Always do your own research before making any investment decisions. Past performance does not guarantee future results.</p>
+  <div class="disc rev">
+    <p><strong>Disclaimer —</strong> AlgoScreen Pro is for informational and educational purposes only. The AlgoScore and all signals are algorithmic estimates based on technical indicators — they are not financial advice. Always do your own research before making any investment decisions. Past performance does not guarantee future results.</p>
   </div>
 
 </div>
 
 <footer>
-  <a href="index.html" class="footer-logo">
-    <svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(255,255,255,0.4)"/><rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(255,255,255,0.6)"/><rect x="15" y="7" width="4" height="18" rx="1" fill="white"/><polyline points="5,15 11,10 17,6 23,12" stroke="#00e676" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="17" cy="6" r="2" fill="#00e676"/></svg>
+  <a href="index.html" class="f-logo">
+    <svg width="16" height="16" viewBox="0 0 28 28" fill="none"><rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(245,245,247,0.4)"/><rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(245,245,247,0.6)"/><rect x="15" y="7" width="4" height="18" rx="1" fill="#f5f5f7"/><polyline points="5,15 11,10 17,6 23,12" stroke="#00e676" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="17" cy="6" r="2" fill="#00e676"/></svg>
     AlgoScreen Pro
   </a>
-  <div class="footer-copy">Not financial advice &nbsp;&middot;&nbsp; &copy; 2025 AlgoScreen Pro</div>
+  <div class="f-copy">Not financial advice &nbsp;·&nbsp; © 2025 AlgoScreen Pro</div>
 </footer>
 
 <script>
-const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+const cur=document.getElementById('cur'),cr=document.getElementById('cur-r');
 let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px'});
-(function anim(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim)})();
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function a(){rx+=(mx-rx)*0.11;ry+=(my-ry)*0.11;cr.style.left=rx+'px';cr.style.top=ry+'px';requestAnimationFrame(a)})();
 document.querySelectorAll('a,button').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{ring.style.width='44px';ring.style.height='44px';ring.style.borderColor='rgba(0,230,118,0.5)'});
-  el.addEventListener('mouseleave',()=>{ring.style.width='32px';ring.style.height='32px';ring.style.borderColor='rgba(255,255,255,0.25)'});
+  el.addEventListener('mouseenter',()=>{cr.style.width='44px';cr.style.height='44px';cr.style.borderColor='rgba(245,245,247,0.38)'});
+  el.addEventListener('mouseleave',()=>{cr.style.width='28px';cr.style.height='28px';cr.style.borderColor='rgba(245,245,247,0.2)'});
 });
-const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:0.1});
-document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+document.querySelectorAll('[data-glow]').forEach(el=>{
+  el.addEventListener('mousemove',e=>{
+    const r=el.getBoundingClientRect();
+    const a=Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2))*(180/Math.PI)+90;
+    el.style.setProperty('--angle',a);el.style.setProperty('--active','1');
+  });
+  el.addEventListener('mouseleave',()=>el.style.setProperty('--active','0'));
+});
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:0.1});
+document.querySelectorAll('.rev').forEach(el=>obs.observe(el));
 </script>
 </body>
 </html>
