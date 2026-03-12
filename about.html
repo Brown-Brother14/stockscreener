@@ -20,9 +20,34 @@ body{
   overflow-x:hidden;cursor:none;
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,.014) 0px,
+      rgba(255,255,255,.014) 1px,
+      transparent 1px,
+      transparent 6px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255,255,255,.009) 0px,
+      rgba(255,255,255,.009) 1px,
+      transparent 1px,
+      transparent 6px
+    ),
+    radial-gradient(ellipse 140% 60% at 20% 50%, rgba(255,255,255,.07) 0%, transparent 50%),
+    radial-gradient(ellipse 140% 60% at 80% 50%, rgba(255,255,255,.04) 0%, transparent 45%),
+    linear-gradient(135deg,
+      rgba(255,255,255,.000) 0%,
+      rgba(255,255,255,.000) 30%,
+      rgba(255,255,255,.07) 45%,
+      rgba(255,255,255,.10) 50%,
+      rgba(255,255,255,.07) 55%,
+      rgba(255,255,255,.000) 70%,
+      rgba(255,255,255,.000) 100%
+    ),
     radial-gradient(ellipse 100% 80% at 50% 100%, #030304 0%, #080809 60%);
-  background-size:300px 300px,100% 100%;
-  background-attachment:fixed;
+  background-size: 300px 300px, auto, auto, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
 }
 #cur{position:fixed;width:5px;height:5px;background:#fff;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
 #cur-r{position:fixed;width:26px;height:26px;border:1px solid rgba(255,255,255,.22);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .22s,height .22s,border-color .22s}
@@ -50,17 +75,44 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:cen
 @media(max-width:700px){.wrap{padding:0 20px}}
 
 /* ── HERO ── */
-.hero{padding-top:130px;padding-bottom:64px;border-bottom:1px solid var(--glass-border)}
-.hero-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);display:block;margin-bottom:20px;opacity:0;animation:fUp .8s .2s ease forwards}
-.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
-@media(max-width:860px){.hero-grid{grid-template-columns:1fr;gap:36px}}
-.hero-h1{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:clamp(36px,4.5vw,62px);font-weight:800;letter-spacing:-2.5px;line-height:.97;background:linear-gradient(180deg,#fff 0%,rgba(255,255,255,.65) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:18px;opacity:0;animation:fUp 1s .35s ease forwards}
-.hero-sub{font-size:15px;color:var(--muted2);line-height:1.75;opacity:0;animation:fUp 1s .5s ease forwards}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;opacity:0;animation:fUp 1s .55s ease forwards}
-.stat-box{padding:18px 20px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);transition:background .2s,border-color .2s}
-.stat-box:hover{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.13)}
-.stat-n{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:28px;font-weight:800;letter-spacing:-1px;color:#fff;line-height:1;margin-bottom:5px}
-.stat-l{font-size:11px;color:rgba(255,255,255,.35);line-height:1.45}
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:160px 48px 100px;text-align:center;
+  border-bottom:1px solid var(--glass-border);
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+  width:800px;height:500px;
+  background:radial-gradient(ellipse,rgba(255,255,255,.04) 0%,transparent 65%);
+  pointer-events:none;
+}
+.hero-eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:1.8px;
+  color:var(--muted);text-transform:uppercase;margin-bottom:28px;
+  display:inline-flex;align-items:center;gap:10px;
+  opacity:0;animation:fUp .8s .1s ease forwards;
+}
+.hero-pulse{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(0,230,118,.7);animation:pulse 2.2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.72)}}
+.hero-h1{
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  font-size:clamp(62px,9vw,112px);font-weight:400;
+  letter-spacing:-.5px;line-height:.93;margin-bottom:26px;
+  background:linear-gradient(180deg,#fff 0%,rgba(255,255,255,.72) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  opacity:0;animation:fUp 1s .3s ease forwards;
+}
+.hero-h1 .dim{
+  background:linear-gradient(180deg,rgba(255,255,255,.32) 0%,rgba(255,255,255,.14) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{font-size:20px;color:var(--muted2);max-width:500px;margin:0 auto 60px;line-height:1.72;opacity:0;animation:fUp 1s .5s ease forwards}
+.hero-stats{display:flex;align-items:center;gap:40px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fUp 1s .65s ease forwards}
+.hero-stat-item{text-align:center}
+.hero-stat-n{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:32px;font-weight:800;letter-spacing:-1.5px;color:#fff;line-height:1;margin-bottom:4px}
+.hero-stat-l{font-size:11px;color:var(--muted);letter-spacing:.3px}
+.hero-stat-div{width:1px;height:36px;background:rgba(255,255,255,.1)}
 
 /* ── SECTIONS ── */
 .section{padding:64px 0;border-bottom:1px solid var(--glass-border)}
@@ -82,18 +134,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:cen
 .feat-desc{font-size:10px;color:rgba(255,255,255,.32);line-height:1.5}
 
 /* ── SCORE ── */
-.score-cols{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-top:32px}
+.score-cols{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-top:32px;align-items:stretch}
 @media(max-width:800px){.score-cols{grid-template-columns:1fr}}
 
-.card{background:rgba(13,14,18,1);border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.4),0 1px 0 rgba(255,255,255,.06) inset}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.11);border-radius:14px;overflow:hidden;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.3),0 1px 0 rgba(255,255,255,.1) inset;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background-image:linear-gradient(135deg,rgba(255,255,255,.06) 0%,rgba(255,255,255,.02) 50%,rgba(255,255,255,.05) 100%)}
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent)}
-.card-head{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.05);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.22)}
+.card-head{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.08);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.38);background:rgba(255,255,255,.03)}
 
 .tbl{width:100%;border-collapse:collapse}
-.tbl thead th{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;color:rgba(255,255,255,.2);text-transform:uppercase;padding:10px 18px;text-align:left;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.015)}
-.tbl tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .1s}
+.tbl thead th{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;color:rgba(255,255,255,.3);text-transform:uppercase;padding:10px 18px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
+.tbl tbody tr{border-bottom:1px solid rgba(255,255,255,.06);transition:background .1s}
 .tbl tbody tr:last-child{border-bottom:none}
-.tbl tbody tr:hover{background:rgba(255,255,255,.025)}
+.tbl tbody tr:hover{background:rgba(255,255,255,.04)}
 .tbl td{padding:10px 18px;font-size:12px;color:rgba(255,255,255,.5);line-height:1.4;vertical-align:middle}
 .tbl td:first-child{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:#fff;white-space:nowrap}
 .tbl td:last-child{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;text-align:right;white-space:nowrap}
@@ -104,16 +156,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:cen
 .scale-ticks{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,.22);margin-bottom:16px}
 
 /* Signals card */
-.signals{padding:16px;display:flex;flex-direction:column;gap:8px}
-.sig{padding:12px 14px;border-radius:9px;border:1px solid transparent}
-.sig-name{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:7px}
-.sig-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.sig-cond{font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,.25);margin-bottom:5px}
-.sig-desc{font-size:11px;color:rgba(255,255,255,.4);line-height:1.5}
-.sig.g{background:rgba(0,230,118,.04);border-color:rgba(0,230,118,.1)}.sig.g .sig-name{color:#00e676}.sig.g .sig-dot{background:#00e676}
-.sig.b{background:rgba(96,165,250,.04);border-color:rgba(96,165,250,.1)}.sig.b .sig-name{color:#60a5fa}.sig.b .sig-dot{background:#60a5fa}
-.sig.a{background:rgba(251,191,36,.03);border-color:rgba(251,191,36,.08)}.sig.a .sig-name{color:#fbbf24}.sig.a .sig-dot{background:#fbbf24}
-.sig.r{background:rgba(255,77,109,.03);border-color:rgba(255,77,109,.08)}.sig.r .sig-name{color:#ff4d6d}.sig.r .sig-dot{background:#ff4d6d}
+.signals{padding:16px;display:flex;flex-direction:column;gap:8px;height:100%}
+.sig{padding:16px 18px;border-radius:10px;border:1px solid transparent;flex:1;display:flex;flex-direction:column;justify-content:center}
+.sig-name{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.sig-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sig-cond{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.32);margin-bottom:6px}
+.sig-desc{font-size:11px;color:rgba(255,255,255,.55);line-height:1.55}
+.sig.g{background:rgba(0,230,118,.1);border-color:rgba(0,230,118,.25)}.sig.g .sig-name{color:#00e676}.sig.g .sig-dot{background:#00e676;box-shadow:0 0 8px rgba(0,230,118,.7)}
+.sig.b{background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.25)}.sig.b .sig-name{color:#60a5fa}.sig.b .sig-dot{background:#60a5fa;box-shadow:0 0 8px rgba(96,165,250,.6)}
+.sig.a{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.22)}.sig.a .sig-name{color:#fbbf24}.sig.a .sig-dot{background:#fbbf24;box-shadow:0 0 8px rgba(251,191,36,.6)}
+.sig.r{background:rgba(255,77,109,.08);border-color:rgba(255,77,109,.22)}.sig.r .sig-name{color:#ff4d6d}.sig.r .sig-dot{background:#ff4d6d;box-shadow:0 0 8px rgba(255,77,109,.6)}
 
 /* ── SOURCES ── */
 .sources-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:32px}
@@ -171,29 +223,28 @@ footer{border-top:1px solid var(--glass-border);padding:24px 0;background:rgba(1
 <!-- ═══ HERO ═══ -->
 <div class="wrap">
   <div class="hero">
-    <span class="hero-eyebrow">About AlgoScreen Pro</span>
-    <div class="hero-grid">
-      <div>
-        <h1 class="hero-h1">How AlgoScreen<br>Pro works.</h1>
-        <p class="hero-sub">A free swing trader dashboard giving retail investors the same tools hedge funds pay thousands for — no login, no paywall, no limits.</p>
+    <div class="hero-eyebrow"><span class="hero-pulse"></span>About AlgoScreen Pro</div>
+    <h1 class="hero-h1">How AlgoScreen<br><span class="dim">Pro works.</span></h1>
+    <p class="hero-sub">A free swing trader dashboard giving retail investors the same tools hedge funds pay thousands for — no login, no paywall, no limits.</p>
+    <div class="hero-stats">
+      <div class="hero-stat-item">
+        <div class="hero-stat-n">9</div>
+        <div class="hero-stat-l">Scoring factors</div>
       </div>
-      <div class="stat-grid">
-        <div class="stat-box">
-          <div class="stat-n">9</div>
-          <div class="stat-l">Scoring factors across technical &amp; fundamentals</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-n">20+</div>
-          <div class="stat-l">Built-in scan presets across sectors &amp; themes</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-n">15</div>
-          <div class="stat-l">Live news sources via real-time RSS feeds</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-n">100%</div>
-          <div class="stat-l">Free forever — no account required to use</div>
-        </div>
+      <div class="hero-stat-div"></div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-n">20+</div>
+        <div class="hero-stat-l">Scan presets</div>
+      </div>
+      <div class="hero-stat-div"></div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-n">15</div>
+        <div class="hero-stat-l">News sources</div>
+      </div>
+      <div class="hero-stat-div"></div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-n">100%</div>
+        <div class="hero-stat-l">Free forever</div>
       </div>
     </div>
   </div>
@@ -275,9 +326,9 @@ footer{border-top:1px solid var(--glass-border);padding:24px 0;background:rgba(1
           </tbody>
         </table>
       </div>
-      <div class="card">
+      <div class="card" style="display:flex;flex-direction:column">
         <div class="card-head">Signal labels</div>
-        <div class="signals">
+        <div class="signals" style="flex:1">
           <div class="sig g">
             <div class="sig-name"><span class="sig-dot"></span>BREAKOUT</div>
             <div class="sig-cond">Score ≥ 78 + bullish MACD crossover</div>
