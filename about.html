@@ -73,36 +73,52 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:cen
 
 /* ── Page Hero ── */
 .page-hero{
-  min-height:60vh;display:flex;flex-direction:column;justify-content:center;
+  display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;
   padding:140px 64px 80px;
   border-bottom:1px solid var(--glass-border);
   position:relative;overflow:hidden;
 }
+@media(max-width:900px){.page-hero{grid-template-columns:1fr;padding:120px 24px 56px;gap:32px}}
 .page-hero::before{
-  content:'';position:absolute;top:0;right:-200px;width:600px;height:600px;
-  background:radial-gradient(ellipse,rgba(0,230,118,.04) 0%,transparent 65%);
+  content:'';position:absolute;top:-80px;right:-100px;width:500px;height:500px;
+  background:radial-gradient(ellipse,rgba(0,230,118,.05) 0%,transparent 65%);
   pointer-events:none;
 }
-@media(max-width:700px){.page-hero{padding:110px 24px 56px}}
 .hero-eyebrow{
-  font-family:'JetBrains Mono', monospace;font-size:11px;font-weight:600;
-  letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);
-  display:block;margin-bottom:20px;
+  font-family:'JetBrains Mono', monospace;font-size:10px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);
+  display:block;margin-bottom:18px;
   opacity:0;animation:fUp .8s .2s ease forwards;
 }
 .hero-h1{
   font-family:'Plus Jakarta Sans', system-ui, sans-serif;
-  font-size:clamp(42px,6vw,80px);font-weight:800;
-  letter-spacing:-3px;line-height:.96;
+  font-size:clamp(38px,5vw,68px);font-weight:800;
+  letter-spacing:-2.5px;line-height:.97;
   background:linear-gradient(180deg,#fff 0%,rgba(255,255,255,.65) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  max-width:760px;margin-bottom:24px;
+  margin-bottom:20px;
   opacity:0;animation:fUp 1s .35s ease forwards;
 }
 .hero-sub{
-  font-size:16px;color:var(--muted2);line-height:1.75;max-width:520px;
+  font-size:15px;color:var(--muted2);line-height:1.75;
   opacity:0;animation:fUp 1s .5s ease forwards;
 }
+.hero-right{
+  opacity:0;animation:fUp 1s .55s ease forwards;
+}
+.hero-stat-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.hero-stat{
+  padding:20px 22px;border-radius:14px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  transition:background .2s;
+}
+.hero-stat:hover{background:rgba(255,255,255,.055)}
+.hero-stat-n{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:32px;font-weight:800;letter-spacing:-1.5px;color:#fff;line-height:1;margin-bottom:6px}
+.hero-stat-l{font-size:12px;color:rgba(255,255,255,.38);line-height:1.4}
+.hero-stat.wide{grid-column:1/-1}
+.hero-stat.wide .hero-stat-n{font-size:24px}
 
 /* ── Page content ── */
 .page-body{padding:80px 64px 120px;max-width:1200px;margin:0 auto}
@@ -117,26 +133,22 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:cen
 /* ── Divider ── */
 .divider{height:1px;background:var(--glass-border);margin:72px 0}
 
-/* ── What is AlgoScreen ── */
-.what-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;margin-top:48px}
-@media(max-width:800px){.what-grid{grid-template-columns:1fr}}
-.what-left{}
-.what-right{display:flex;flex-direction:column;gap:12px}
-.pill{
-  display:flex;align-items:center;gap:12px;
-  padding:14px 18px;border-radius:12px;
+/* ── Feature tiles ── */
+.feat-tile{
+  padding:18px 16px;border-radius:12px;
   background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
   transition:background .2s,border-color .2s;
 }
-.pill:hover{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.12)}
-.pill-icon{
-  width:34px;height:34px;border-radius:9px;flex-shrink:0;
+.feat-tile:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.13)}
+.feat-icon{
+  width:30px;height:30px;border-radius:8px;
   display:flex;align-items:center;justify-content:center;
-  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);
-  color:rgba(255,255,255,.6);
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.5);margin-bottom:12px;
 }
-.pill-text{font-family:'Inter',system-ui,sans-serif;font-size:13px;font-weight:500;color:rgba(255,255,255,.72);line-height:1.45}
-.pill-text b{display:block;font-weight:600;color:#fff;margin-bottom:1px}
+.feat-name{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:12px;font-weight:700;color:#fff;margin-bottom:6px}
+.feat-desc{font-size:11px;color:rgba(255,255,255,.38);line-height:1.5}
+@media(max-width:900px){.feat-tile-grid{grid-template-columns:1fr 1fr!important}}
 
 /* ── AlgoScore section ── */
 .score-section{margin-top:48px}
@@ -288,56 +300,76 @@ footer{border-top:1px solid var(--glass-border);padding:26px 48px;display:flex;a
 
 <!-- HERO -->
 <section class="page-hero">
-  <span class="hero-eyebrow">About AlgoScreen Pro</span>
-  <h1 class="hero-h1">How AlgoScreen<br>Pro works.</h1>
-  <p class="hero-sub">A free swing trader dashboard giving retail investors the same analysis tools hedge funds pay thousands for — no login, no paywall, no limits.</p>
+  <div class="hero-left">
+    <span class="hero-eyebrow">About AlgoScreen Pro</span>
+    <h1 class="hero-h1">How AlgoScreen<br>Pro works.</h1>
+    <p class="hero-sub">A free swing trader dashboard giving retail investors the same tools hedge funds pay thousands for — no login, no paywall, no limits.</p>
+  </div>
+  <div class="hero-right">
+    <div class="hero-stat-grid">
+      <div class="hero-stat">
+        <div class="hero-stat-n">9</div>
+        <div class="hero-stat-l">Scoring factors across technical &amp; fundamentals</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-n">20+</div>
+        <div class="hero-stat-l">Built-in scan presets across sectors &amp; themes</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-n">15</div>
+        <div class="hero-stat-l">Live news sources via real-time RSS feeds</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-n">100%</div>
+        <div class="hero-stat-l">Free forever — no account required to use</div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <div class="page-body">
 
   <!-- WHAT IS IT -->
   <div class="rev">
-    <span class="section-eye">The product</span>
-    <h2 class="section-title">What is AlgoScreen Pro?</h2>
-    <p class="section-body">AlgoScreen Pro is a market screener built for swing traders. It pulls live data from multiple sources, runs a scoring algorithm across 9 technical and fundamental factors, and surfaces the clearest setups on the market — all in one place.</p>
-    <p class="section-body" style="margin-top:12px">No subscriptions. No paywalls. No login required.</p>
-  </div>
-
-  <div class="what-grid rev d1">
-    <div class="what-left">
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div class="pill">
-          <div class="pill-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-          <div class="pill-text"><b>20+ Scan Presets</b>Top 20 US stocks, S&P 500 leaders, defence, energy, tech and more</div>
-        </div>
-        <div class="pill">
-          <div class="pill-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-          <div class="pill-text"><b>AlgoScore 0–100</b>Every stock scored across 9 factors. Higher score = more aligned bullish signals</div>
-        </div>
-        <div class="pill">
-          <div class="pill-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
-          <div class="pill-text"><b>Macro Dashboard</b>Fear & Greed, VIX, sector ETFs, bonds, commodities and DXY live</div>
-        </div>
-        <div class="pill">
-          <div class="pill-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-          <div class="pill-text"><b>Market News</b>Live RSS headlines from Bloomberg, Reuters, CNBC, FT, WSJ and 10 more</div>
-        </div>
-        <div class="pill">
-          <div class="pill-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-          <div class="pill-text"><b>Economic Calendar</b>High-impact events in plain English — CPI, FOMC, NFP, rate decisions</div>
-        </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
+      <div>
+        <span class="section-eye">The product</span>
+        <h2 class="section-title">What is AlgoScreen Pro?</h2>
+        <p class="section-body">AlgoScreen Pro is a market screener built for swing traders. It pulls live data from multiple sources, runs a scoring algorithm across 9 technical and fundamental factors, and surfaces the clearest setups — all in one place.</p>
+        <p style="font-size:14px;color:rgba(255,255,255,.32);margin-top:14px;font-family:'JetBrains Mono',monospace;letter-spacing:.3px">No subscriptions · No login · No paywall</p>
+      </div>
+      <div style="padding-top:4px">
+        <p style="font-size:14px;color:rgba(255,255,255,.5);line-height:1.8">Swing trading is about catching moves over days or weeks. AlgoScreen focuses on setups where multiple signals agree simultaneously — RSI in the bullish zone, EMA trend pointing up, ADX confirming a strong trend.</p>
+        <p style="font-size:14px;color:rgba(255,255,255,.5);line-height:1.8;margin-top:12px">The AlgoScore condenses all of that into a single 0–100 number so you can rank 500 stocks in seconds, not hours.</p>
       </div>
     </div>
-    <div class="what-right">
-      <div class="pill" style="flex-direction:column;align-items:flex-start;gap:16px;padding:22px">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px">Built for swing traders</div>
-        <p style="font-size:13px;color:var(--muted2);line-height:1.7">Swing trading is about catching moves over days or weeks — not scalping ticks. AlgoScreen focuses on setups where multiple timeframes agree: RSI in the bullish zone, EMA trend pointing up, ADX confirming a strong trend, and strong relative volume.</p>
-        <p style="font-size:13px;color:var(--muted2);line-height:1.7">The AlgoScore condenses that into a single number so you can rank 500 stocks in seconds instead of checking each one manually.</p>
-        <div style="display:flex;gap:20px;padding-top:4px">
-          <div><div style="font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:22px;font-weight:800;letter-spacing:-1px;color:#fff">9</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Scoring factors</div></div>
-          <div><div style="font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:22px;font-weight:800;letter-spacing:-1px;color:#fff">20+</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Scan presets</div></div>
-          <div><div style="font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:22px;font-weight:800;letter-spacing:-1px;color:#fff">15</div><div style="font-size:11px;color:var(--muted);margin-top:2px">News sources</div></div>
-        </div>
+
+    <!-- Feature grid — 5 items in a row -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:32px">
+      <div class="feat-tile">
+        <div class="feat-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <div class="feat-name">Scan Presets</div>
+        <div class="feat-desc">20+ ready-made scans across sectors, indices &amp; themes</div>
+      </div>
+      <div class="feat-tile">
+        <div class="feat-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="feat-name">AlgoScore</div>
+        <div class="feat-desc">9-factor 0–100 score for every stock, live</div>
+      </div>
+      <div class="feat-tile">
+        <div class="feat-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+        <div class="feat-name">Macro Dashboard</div>
+        <div class="feat-desc">Fear &amp; Greed, VIX, ETFs, bonds &amp; DXY</div>
+      </div>
+      <div class="feat-tile">
+        <div class="feat-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="feat-name">Market News</div>
+        <div class="feat-desc">15 live RSS sources — Bloomberg, FT, WSJ &amp; more</div>
+      </div>
+      <div class="feat-tile">
+        <div class="feat-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div class="feat-name">Econ Calendar</div>
+        <div class="feat-desc">CPI, FOMC, NFP and rate decisions in plain English</div>
       </div>
     </div>
   </div>
