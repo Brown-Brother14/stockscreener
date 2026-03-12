@@ -73,14 +73,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:cen
 
 /* ── Page Hero ── */
 .page-hero{
-  display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;
-  padding:140px 64px 80px;
   border-bottom:1px solid var(--glass-border);
   position:relative;overflow:hidden;
+  padding:120px 64px 60px;
 }
-@media(max-width:900px){.page-hero{grid-template-columns:1fr;padding:120px 24px 56px;gap:32px}}
+.page-hero-inner{
+  max-width:1200px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;
+}
+@media(max-width:900px){.page-hero{padding:110px 24px 50px}.page-hero-inner{grid-template-columns:1fr;gap:32px}}
 .page-hero::before{
-  content:'';position:absolute;top:-80px;right:-100px;width:500px;height:500px;
+  content:'';position:absolute;top:-80px;right:0;width:500px;height:500px;
   background:radial-gradient(ellipse,rgba(0,230,118,.05) 0%,transparent 65%);
   pointer-events:none;
 }
@@ -300,6 +303,7 @@ footer{border-top:1px solid var(--glass-border);padding:26px 48px;display:flex;a
 
 <!-- HERO -->
 <section class="page-hero">
+  <div class="page-hero-inner">
   <div class="hero-left">
     <span class="hero-eyebrow">About AlgoScreen Pro</span>
     <h1 class="hero-h1">How AlgoScreen<br>Pro works.</h1>
@@ -324,6 +328,7 @@ footer{border-top:1px solid var(--glass-border);padding:26px 48px;display:flex;a
         <div class="hero-stat-l">Free forever — no account required to use</div>
       </div>
     </div>
+  </div>
   </div>
 </section>
 
