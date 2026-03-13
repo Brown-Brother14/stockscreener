@@ -359,6 +359,16 @@ tbody tr{animation:fadeIn .25s ease both}
 #sessBottomRow{display:flex;justify-content:space-between;font-size:9px;color:var(--muted)}
 .next{color:var(--muted)!important}.open{color:var(--green)!important}.pre{color:#a78bfa!important}.after{color:#fb923c!important}
 #marketStatusText{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
+
+/* Smart Money styles */
+.sm-subtab{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:8px 18px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);cursor:pointer;transition:all .15s}
+.sm-subtab:hover{background:rgba(255,255,255,.07);color:var(--text)}
+.sm-subtab.active{background:rgba(0,230,118,.1);border-color:rgba(0,230,118,.3);color:var(--green)}
+.sm-buy{color:var(--green);font-weight:700}.sm-sell{color:var(--red);font-weight:700}.sm-exchange{color:var(--amber);font-weight:700}
+.sm-chamber-house{background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.2);padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.sm-chamber-senate{background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.2);padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.sm-amount{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.6)}
+.ins-buy{color:var(--green)}.ins-sell{color:var(--red)}.ins-award{color:var(--amber)}
 </style>
 </head>
 <body>
@@ -745,6 +755,126 @@ tbody tr{animation:fadeIn .25s ease both}
   </div>
 </div>
 
+<!-- ═══════════════ SMART MONEY TAB ═══════════════ -->
+<div id="tab-smartmoney" class="tab-panel">
+  <div class="wrap">
+    <div class="dash-header">
+      <div class="dash-title">Smart Money</div>
+      <div class="dash-sub">Insider transactions (SEC Form 4) + Congressional trades (STOCK Act disclosures)</div>
+    </div>
+
+    <!-- Sub-tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+      <button class="sm-subtab active" id="sm-tab-congress" onclick="smSwitchTab('congress',this)">🏛 Congress Trades</button>
+      <button class="sm-subtab" id="sm-tab-insider" onclick="smSwitchTab('insider',this)">👔 Insider Transactions</button>
+    </div>
+
+    <!-- CONGRESS PANEL -->
+    <div id="sm-panel-congress">
+      <!-- Stats strip -->
+      <div class="stats-strip" style="margin-bottom:16px">
+        <div class="stats-strip-item"><div class="stats-strip-label">Total Trades</div><div class="stats-strip-val" id="sm-total">—</div></div>
+        <div class="stats-strip-item"><div class="stats-strip-label">Buys</div><div class="stats-strip-val green" id="sm-buys">—</div></div>
+        <div class="stats-strip-item"><div class="stats-strip-label">Sells</div><div class="stats-strip-val" style="color:var(--red)" id="sm-sells">—</div></div>
+        <div class="stats-strip-item"><div class="stats-strip-label">Most Traded</div><div class="stats-strip-val" id="sm-hotticker" style="font-size:14px">—</div></div>
+        <div class="stats-strip-item"><div class="stats-strip-label">Last Updated</div><div class="stats-strip-val" id="sm-updated" style="font-size:11px">—</div></div>
+      </div>
+
+      <!-- Filter bar -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <input id="sm-ticker-filter" class="scan-input" style="max-width:160px" placeholder="Filter by ticker…" oninput="smFilterTable()">
+        <input id="sm-name-filter" class="scan-input" style="max-width:200px" placeholder="Filter by name…" oninput="smFilterTable()">
+        <button class="btn-outline active" id="sm-all-btn" onclick="smSetType('all',this)">All</button>
+        <button class="btn-outline" id="sm-buy-btn" onclick="smSetType('buy',this)">Buys only</button>
+        <button class="btn-outline" id="sm-sell-btn" onclick="smSetType('sell',this)">Sells only</button>
+        <select id="sm-chamber" class="scan-input" style="max-width:130px" onchange="smFilterTable()">
+          <option value="all">All chambers</option>
+          <option value="House">House</option>
+          <option value="Senate">Senate</option>
+        </select>
+        <span id="sm-count-label" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-left:auto"></span>
+      </div>
+
+      <!-- Table -->
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="smSort('chamber')">Chamber</th>
+                <th onclick="smSort('name')">Politician</th>
+                <th onclick="smSort('ticker')">Ticker</th>
+                <th onclick="smSort('type')">Action</th>
+                <th onclick="smSort('amount')">Amount</th>
+                <th onclick="smSort('date')">Trade Date ▼</th>
+                <th onclick="smSort('disclosed')">Disclosed</th>
+                <th>Asset</th>
+              </tr>
+            </thead>
+            <tbody id="sm-tbody">
+              <tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px">
+                <div class="loader" style="width:20px;height:20px;border-width:2px;margin:0 auto 12px"></div>
+                Loading congressional trades…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSIDER PANEL -->
+    <div id="sm-panel-insider" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <input id="ins-ticker-input" class="scan-input" style="max-width:160px" placeholder="Enter ticker (e.g. AAPL)">
+        <button class="btn-scan" onclick="loadInsiderData()">Load</button>
+        <button class="btn-outline active" id="ins-all-btn" onclick="insSetType('all',this)">All</button>
+        <button class="btn-outline" id="ins-buy-btn" onclick="insSetType('buy',this)">Buys</button>
+        <button class="btn-outline" id="ins-sell-btn" onclick="insSetType('sell',this)">Sells</button>
+      </div>
+
+      <!-- Insider sentiment gauge -->
+      <div id="ins-sentiment-box" style="display:none;background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:16px 20px;margin-bottom:14px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Insider Sentiment (MSPR — Monthly Share Purchase Ratio)</div>
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700" id="ins-mspr-val">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px" id="ins-mspr-lbl">—</div>
+          </div>
+          <div style="flex:1;min-width:200px">
+            <div style="height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden;position:relative">
+              <div id="ins-mspr-bar" style="height:100%;border-radius:4px;transition:width .5s,background .5s;width:50%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px"><span>-100 Max Sell</span><span>0</span><span>+100 Max Buy</span></div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)" id="ins-mspr-desc">Range: -100 (all selling) to +100 (all buying). Signal is strongest 30–90 days ahead.</div>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Title</th>
+                <th>Action</th>
+                <th>Shares</th>
+                <th>Price</th>
+                <th>Value</th>
+                <th>Shares After</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="ins-tbody">
+              <tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px">Enter a ticker above and click Load</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════ BOTTOM PILL NAV ═══════════════ -->
 <nav id="bottomNav">
   <button class="tab-btn active" id="btn-home" onclick="switchTab('home')" title="Dashboard">
@@ -761,6 +891,9 @@ tbody tr{animation:fadeIn .25s ease both}
   </button>
   <button class="tab-btn" id="btn-calendar" onclick="switchTab('calendar')" title="Calendar">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+  </button>
+  <button class="tab-btn" id="btn-smartmoney" onclick="switchTab('smartmoney')" title="Smart Money">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
   </button>
 </nav>
 
@@ -882,6 +1015,29 @@ tbody tr{animation:fadeIn .25s ease both}
         <div class="loader" style="width:14px;height:14px;border-width:2px;margin:0"></div> Loading analyst data...
       </div>
     </div>
+
+    <!-- ── INSIDER TRANSACTIONS ── -->
+    <div class="detail-section-header" style="display:flex;align-items:center;justify-content:space-between">
+      <span>Insider Transactions</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--green)">SEC Form 3/4/5</span>
+    </div>
+    <div id="modalInsiderSection" style="padding:4px 20px 12px">
+      <div style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;display:flex;align-items:center;gap:8px;padding:8px 0">
+        <div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…
+      </div>
+    </div>
+
+    <!-- ── CONGRESSIONAL TRADES ── -->
+    <div class="detail-section-header" style="display:flex;align-items:center;justify-content:space-between">
+      <span>Congressional Trades</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#a78bfa">STOCK Act</span>
+    </div>
+    <div id="modalCongressSection" style="padding:4px 20px 12px">
+      <div style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;display:flex;align-items:center;gap:8px;padding:8px 0">
+        <div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…
+      </div>
+    </div>
+
     <div class="detail-section-header">Latest News</div>
     <div id="newsContainer">
       <div class="news-loading"><div class="loader" style="width:20px;height:20px;border-width:2px;display:block;margin:0 auto 8px"></div>Loading news...</div>
@@ -948,6 +1104,9 @@ function switchTab(name) {
   if (name === 'calendar' && !calendarLoaded) {
     calendarLoaded = true;
     loadEconCalendar();
+  }
+  if (name === 'smartmoney' && !smLoaded) {
+    loadCongressTrades();
   }
 }
 
@@ -1700,7 +1859,10 @@ function openChart(ticker){
   fetchEarningsDate(s.ticker);
   document.getElementById('newsContainer').innerHTML='<div class="news-loading"><div class="loader" style="width:20px;height:20px;border-width:2px;display:block;margin:0 auto 8px"></div>Loading news...</div>';
   document.getElementById('analystSection').innerHTML='<div style="padding:20px;color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:11px;display:flex;align-items:center;gap:8px"><div class="loader" style="width:14px;height:14px;border-width:2px;margin:0"></div> Loading analyst data...</div>';
+  document.getElementById('modalInsiderSection').innerHTML='<div style="color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:11px;display:flex;align-items:center;gap:8px;padding:8px 0"><div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…</div>';
+  document.getElementById('modalCongressSection').innerHTML='<div style="color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:11px;display:flex;align-items:center;gap:8px;padding:8px 0"><div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…</div>';
   fetchNews(s.ticker);fetchAndRenderAnalyst(s.ticker,s.price);
+  loadModalInsider(s.ticker);
   loadTVChart(ticker,currentInterval);
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow='hidden';
@@ -2467,6 +2629,279 @@ document.addEventListener('DOMContentLoaded',()=>{
     runBackgroundTopScan();
   }, 1200);
 });
+</script>
+<script>
+// ══════════════════════════════════════════════════════════
+//  SMART MONEY — Congress + Insider Transactions
+// ══════════════════════════════════════════════════════════
+
+let smAllTrades = [];
+let smTypeFilter = 'all';
+let smSortField = 'date';
+let smSortDir = -1;
+let smLoaded = false;
+
+let insAllData = [];
+let insTypeFilter = 'all';
+
+// ── Sub-tab switcher ──
+function smSwitchTab(name, btn) {
+  document.querySelectorAll('.sm-subtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('sm-panel-congress').style.display = name === 'congress' ? '' : 'none';
+  document.getElementById('sm-panel-insider').style.display  = name === 'insider'  ? '' : 'none';
+  if (name === 'congress' && !smLoaded) loadCongressTrades();
+}
+
+// ── Load all congressional trades ──
+async function loadCongressTrades() {
+  smLoaded = true;
+  try {
+    const res  = await fetch(`${PROXY}/smartmoney?limit=200`, { signal: AbortSignal.timeout(20000) });
+    const data = await res.json();
+    smAllTrades = data.trades || [];
+    updateSmStats();
+    smRenderTable();
+    document.getElementById('sm-updated').textContent = 'Just now';
+  } catch(e) {
+    document.getElementById('sm-tbody').innerHTML =
+      `<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--red);font-family:'JetBrains Mono',monospace;font-size:11px">Failed to load: ${e.message}</td></tr>`;
+  }
+}
+
+function updateSmStats() {
+  const buys  = smAllTrades.filter(t => /purchase|buy/i.test(t.type)).length;
+  const sells = smAllTrades.filter(t => /sale|sell/i.test(t.type)).length;
+  // Find most traded ticker
+  const tcount = {};
+  smAllTrades.forEach(t => { if(t.ticker) tcount[t.ticker] = (tcount[t.ticker]||0)+1; });
+  const hot = Object.entries(tcount).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('sm-total').textContent  = smAllTrades.length;
+  document.getElementById('sm-buys').textContent   = buys;
+  document.getElementById('sm-sells').textContent  = sells;
+  document.getElementById('sm-hotticker').textContent = hot ? `${hot[0]} (${hot[1]})` : '—';
+}
+
+function smSetType(type, btn) {
+  smTypeFilter = type;
+  document.querySelectorAll('#sm-all-btn,#sm-buy-btn,#sm-sell-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  smRenderTable();
+}
+
+function smSort(field) {
+  smSortDir = smSortField === field ? smSortDir * -1 : -1;
+  smSortField = field;
+  smRenderTable();
+}
+
+function smFilterTable() { smRenderTable(); }
+
+function smRenderTable() {
+  const tickerF  = (document.getElementById('sm-ticker-filter').value || '').toUpperCase().trim();
+  const nameF    = (document.getElementById('sm-name-filter').value   || '').toLowerCase().trim();
+  const chamberF = document.getElementById('sm-chamber').value;
+
+  let data = smAllTrades.filter(t => {
+    if (tickerF  && !t.ticker?.toUpperCase().includes(tickerF)) return false;
+    if (nameF    && !t.name?.toLowerCase().includes(nameF)) return false;
+    if (chamberF !== 'all' && t.chamber !== chamberF) return false;
+    if (smTypeFilter === 'buy'  && !/purchase|buy/i.test(t.type))  return false;
+    if (smTypeFilter === 'sell' && !/sale|sell/i.test(t.type)) return false;
+    return true;
+  });
+
+  data.sort((a, b) => {
+    const av = a[smSortField] || '', bv = b[smSortField] || '';
+    if (smSortField === 'date' || smSortField === 'disclosed')
+      return smSortDir * (new Date(bv) - new Date(av));
+    return smSortDir * av.localeCompare(bv);
+  });
+
+  document.getElementById('sm-count-label').textContent = `${data.length} trades`;
+
+  if (!data.length) {
+    document.getElementById('sm-tbody').innerHTML =
+      '<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:11px">No trades match filters</td></tr>';
+    return;
+  }
+
+  const isBuy  = t => /purchase|buy/i.test(t.type);
+  const isSell = t => /sale|sell/i.test(t.type);
+
+  document.getElementById('sm-tbody').innerHTML = data.map(t => {
+    const typeCls = isBuy(t) ? 'sm-buy' : isSell(t) ? 'sm-sell' : 'sm-exchange';
+    const typeLabel = isBuy(t) ? '▲ Buy' : isSell(t) ? '▼ Sell' : t.type || '—';
+    const chamberBadge = t.chamber === 'Senate'
+      ? '<span class="sm-chamber-senate">SENATE</span>'
+      : '<span class="sm-chamber-house">HOUSE</span>';
+    const daysLag = t.disclosed && t.date
+      ? Math.round((new Date(t.disclosed) - new Date(t.date)) / 86400000)
+      : null;
+    const lagStr = daysLag != null && daysLag > 0 ? `<span style="color:var(--muted);font-size:9px">(+${daysLag}d lag)</span>` : '';
+    return `<tr onclick="smClickTicker('${t.ticker}')">
+      <td>${chamberBadge}</td>
+      <td style="font-weight:600;font-size:12px">${t.name||'—'}${t.party?` <span style="color:var(--muted);font-size:9px">(${t.party})</span>`:''}</td>
+      <td><span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;cursor:pointer;color:#fff">${t.ticker||'—'}</span></td>
+      <td><span class="${typeCls}">${typeLabel}</span></td>
+      <td class="sm-amount">${t.amount||'—'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${t.date||'—'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${t.disclosed||'—'} ${lagStr}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.asset||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function smClickTicker(ticker) {
+  if (!ticker || ticker === '—') return;
+  // Jump to screener and pre-fill
+  document.getElementById('tickerInput').value = ticker;
+  switchTab('screener');
+  runScan();
+}
+
+// ── Load insider transactions for a specific ticker ──
+async function loadInsiderData() {
+  const ticker = (document.getElementById('ins-ticker-input').value || '').trim().toUpperCase();
+  if (!ticker) return;
+  document.getElementById('ins-tbody').innerHTML =
+    `<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px"><div class="loader" style="width:16px;height:16px;border-width:2px;margin:0 auto 8px"></div>Loading ${ticker}…</td></tr>`;
+
+  try {
+    const [txRes, sentRes] = await Promise.all([
+      fetch(`${PROXY}/insider?symbol=${ticker}`, { signal: AbortSignal.timeout(12000) }),
+      fetch(`${PROXY}/insider-sentiment?symbol=${ticker}`, { signal: AbortSignal.timeout(12000) }),
+    ]);
+    const txData   = txRes.ok   ? await txRes.json()   : { data: [] };
+    const sentData = sentRes.ok ? await sentRes.json() : { data: [] };
+
+    insAllData = txData.data || [];
+    insRenderSentiment(sentData.data || []);
+    insRenderTable();
+  } catch(e) {
+    document.getElementById('ins-tbody').innerHTML =
+      `<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--red);font-family:'JetBrains Mono',monospace;font-size:11px">Failed: ${e.message}</td></tr>`;
+  }
+}
+
+function insRenderSentiment(sentData) {
+  if (!sentData.length) { document.getElementById('ins-sentiment-box').style.display = 'none'; return; }
+  const latest = sentData.at(-1);
+  const mspr = latest?.mspr ?? 0;
+  const box = document.getElementById('ins-sentiment-box');
+  box.style.display = '';
+  const col = mspr > 20 ? 'var(--green)' : mspr < -20 ? 'var(--red)' : 'var(--amber)';
+  const lbl = mspr > 50 ? 'Strong Buy Signal' : mspr > 20 ? 'Mild Buy Bias' : mspr < -50 ? 'Heavy Selling' : mspr < -20 ? 'Mild Sell Bias' : 'Neutral';
+  document.getElementById('ins-mspr-val').textContent = mspr.toFixed(1);
+  document.getElementById('ins-mspr-val').style.color = col;
+  document.getElementById('ins-mspr-lbl').textContent = lbl;
+  document.getElementById('ins-mspr-lbl').style.color = col;
+  const pct = Math.round(((mspr + 100) / 200) * 100);
+  document.getElementById('ins-mspr-bar').style.width = pct + '%';
+  document.getElementById('ins-mspr-bar').style.background = col;
+}
+
+function insSetType(type, btn) {
+  insTypeFilter = type;
+  document.querySelectorAll('#ins-all-btn,#ins-buy-btn,#ins-sell-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  insRenderTable();
+}
+
+function insRenderTable() {
+  const actionMap = { 'P': 'Purchase', 'S': 'Sale', 'A': 'Award', 'M': 'Option Exercise', 'D': 'Disposition', 'G': 'Gift', 'F': 'Tax Withhold' };
+  let data = insAllData;
+  if (insTypeFilter === 'buy')  data = data.filter(t => t.transactionCode === 'P' || /buy|purchase/i.test(t.transactionCode));
+  if (insTypeFilter === 'sell') data = data.filter(t => t.transactionCode === 'S' || /sell|sale/i.test(t.transactionCode));
+
+  if (!data.length) {
+    document.getElementById('ins-tbody').innerHTML =
+      '<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:11px">No transactions</td></tr>';
+    return;
+  }
+
+  document.getElementById('ins-tbody').innerHTML = data.slice(0, 100).map(t => {
+    const code  = t.transactionCode || '';
+    const label = actionMap[code] || code;
+    const isBuy  = code === 'P';
+    const isSell = code === 'S';
+    const isAward = code === 'A' || code === 'M';
+    const cls   = isBuy ? 'ins-buy' : isSell ? 'ins-sell' : isAward ? 'ins-award' : '';
+    const shares = t.share != null ? Number(t.share).toLocaleString() : '—';
+    const price  = t.price != null ? '$' + Number(t.price).toFixed(2) : '—';
+    const value  = (t.share && t.price) ? '$' + (t.share * t.price).toLocaleString(undefined,{maximumFractionDigits:0}) : '—';
+    const after  = t.sharesAfterTransaction != null ? Number(t.sharesAfterTransaction).toLocaleString() : '—';
+    return `<tr>
+      <td style="font-weight:600;font-size:12px">${t.name||'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${t.officerTitle||t.reportingRelationship||'—'}</td>
+      <td><span class="${cls}" style="font-weight:700">${isBuy?'▲ ':isSell?'▼ ':isAward?'★ ':''}${label}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${shares}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${price}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:${isBuy?'var(--green)':isSell?'var(--red)':'inherit'}">${value}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">${after}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${t.transactionDate||t.filingDate||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Load insider data from the stock modal ──────────────────
+async function loadModalInsider(ticker) {
+  const el = document.getElementById('modalInsiderSection');
+  const congressEl = document.getElementById('modalCongressSection');
+  if (!el && !congressEl) return;
+
+  try {
+    const [insRes, conRes] = await Promise.all([
+      fetch(`${PROXY}/insider?symbol=${ticker}`, { signal: AbortSignal.timeout(10000) }),
+      fetch(`${PROXY}/congress?symbol=${ticker}`, { signal: AbortSignal.timeout(10000) }),
+    ]);
+    const insData = insRes.ok ? await insRes.json() : { data: [] };
+    const conData = conRes.ok ? await conRes.json() : { data: [] };
+
+    // Insider section
+    if (el) {
+      const txs = (insData.data || []).slice(0, 8);
+      if (!txs.length) { el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:12px 0">No recent insider transactions</div>'; }
+      else {
+        const actionMap = { 'P':'Purchase','S':'Sale','A':'Award','M':'Option Exer.','D':'Disposition','G':'Gift','F':'Tax Withhold' };
+        el.innerHTML = txs.map(t => {
+          const isBuy = t.transactionCode==='P', isSell = t.transactionCode==='S';
+          const col = isBuy?'var(--green)':isSell?'var(--red)':'var(--amber)';
+          const val = (t.share && t.price) ? '$'+(t.share*t.price).toLocaleString(undefined,{maximumFractionDigits:0}) : '—';
+          return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+            <span style="color:${col};font-weight:700;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:70px">${isBuy?'▲ BUY':isSell?'▼ SELL':'◆ '+(actionMap[t.transactionCode]||t.transactionCode)}</span>
+            <span style="font-size:12px;font-weight:600;flex:1">${t.name||'—'}</span>
+            <span style="font-size:10px;color:var(--muted)">${t.officerTitle||''}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${col}">${val}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">${t.transactionDate||'—'}</span>
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // Congress section
+    if (congressEl) {
+      const trades = (conData.data || []).slice(0, 6);
+      if (!trades.length) { congressEl.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:12px 0">No recent congressional trades</div>'; }
+      else {
+        congressEl.innerHTML = trades.map(t => {
+          const isBuy = /purchase|buy/i.test(t.transactionType||'');
+          const col = isBuy ? 'var(--green)' : 'var(--red)';
+          return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+            <span style="color:${col};font-weight:700;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:60px">${isBuy?'▲ BUY':'▼ SELL'}</span>
+            <span style="font-size:12px;font-weight:600;flex:1">${t.name||'—'}</span>
+            <span style="font-size:10px;color:var(--muted)">${t.chamber||''}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">${t.amount||'—'}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">${t.transactionDate||'—'}</span>
+          </div>`;
+        }).join('');
+      }
+    }
+  } catch(e) {
+    if (el) el.innerHTML = '<div style="color:var(--muted);font-size:11px">Unavailable</div>';
+    if (congressEl) congressEl.innerHTML = '<div style="color:var(--muted);font-size:11px">Unavailable</div>';
+  }
+}
 </script>
 </body>
 </html>
