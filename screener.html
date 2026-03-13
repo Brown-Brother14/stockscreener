@@ -384,7 +384,7 @@ tbody tr{animation:fadeIn .25s ease both}
     <div class="dash-header">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
         <div>
-          <div class="dash-title">Good morning — here's the market</div>
+          <div class="dash-title" id="dashGreeting">Good morning — here's the market</div>
           <div class="dash-sub">Live snapshot · <span id="dashUpdated">Loading...</span></div>
         </div>
         <div id="sessWidget">
@@ -947,10 +947,12 @@ function renderDashNews(items) {
 }
 
 // ── Dashboard top 5 picks ──
-function renderDashTop5() {
+function renderDashTop5(data) {
   const el = document.getElementById('dashTop5');
-  if (!allResults.length) return;
-  const top5 = [...allResults].sort((a,b)=>b.score-a.score).slice(0,5);
+  const source = data || allResults;
+  if (!source.length) return;
+  const top5 = [...source].sort((a,b)=>b.score-a.score).slice(0,5);
+  const isCached = !!data;
   el.innerHTML = top5.map((d,i) => {
     const sc = getScoreClass(d.score);
     return `<div class="top5-row" onclick="openChart('${d.ticker}')">
@@ -959,7 +961,7 @@ function renderDashTop5() {
       <div class="top5-score ${sc}">${d.score}</div>
       <span class="signal ${d.signal.cls}">${d.signal.label}</span>
     </div>`;
-  }).join('');
+  }).join('') + (isCached ? `<div style="padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">Last scan · Refreshing…</div>` : '');
 }
 
 // ── Dashboard today's events ──
@@ -1226,6 +1228,8 @@ async function runScan(){
   document.getElementById('clickHint').style.display='none';
   showLoading(`Scanning ${tickers.length} stocks…`);
   allResults=[];
+  // Show loading state in dashboard top5 immediately
+  document.getElementById('dashTop5').innerHTML=`<div style="padding:24px 18px;display:flex;flex-direction:column;gap:10px">${[1,2,3,4,5].map(n=>`<div style="display:grid;grid-template-columns:24px 1fr auto;gap:12px;align-items:center"><div style="width:16px;height:10px;background:rgba(255,255,255,.06);border-radius:3px"></div><div><div style="width:${50+n*10}px;height:11px;background:rgba(255,255,255,.06);border-radius:3px;margin-bottom:4px"></div><div style="width:80px;height:9px;background:rgba(255,255,255,.04);border-radius:3px"></div></div><div style="width:28px;height:14px;background:rgba(255,255,255,.06);border-radius:3px"></div></div>`).join('')}</div>`;
   let breakouts=0,bullishMACD=0,totalScore=0;
 
   for(let i=0;i<tickers.length;i++){
@@ -1258,6 +1262,7 @@ async function runScan(){
       if(macd?.bullish)bullishMACD++;
       totalScore+=score;
       allResults.push({ticker,name,industry:profile?.industry||'',sector:profile?.sector||'',price:quote.price,change:quote.change,volume,avgVolume,marketCap,score,signal,rsi,macd,pe,eps:financials?.eps||null,epsGrowth:financials?.epsGrowth||null,divYield:financials?.divYield||null,pos52w,high52w,low52w,revenueGrowth,ema20:tech?.ema20||null,ema50:tech?.ema50||null,ema200:tech?.ema200||null,emaAbove20,emaAbove50,emaAbove200,bbUpper:tech?.bbUpper||null,bbMiddle:tech?.bbMiddle||null,bbLower:tech?.bbLower||null,bbPos,adx:tech?.adx||null,stochK:tech?.stochK||null,stochD:tech?.stochD||null,extPrice:ext?.extPrice||null,extSession:ext?.session||null,extTime:ext?.extTime||null});
+      renderDashTop5();
       document.getElementById('totalScanned').textContent=allResults.length;
       document.getElementById('breakoutCount').textContent=breakouts;
       document.getElementById('bullishCount').textContent=bullishMACD;
@@ -1266,7 +1271,7 @@ async function runScan(){
       document.getElementById('topPick').textContent=top?top.ticker:'--';
       renderTable();
     }catch(e){console.warn(`Failed ${ticker}:`,e);}
-    if(i<tickers.length-1)await delay(500);
+
   }
   document.getElementById('progressFill').style.width='100%';
   setTimeout(()=>document.getElementById('progressBar').style.display='none',600);
@@ -1274,7 +1279,16 @@ async function runScan(){
   document.getElementById('lastUpdated').textContent=`Updated ${new Date().toLocaleTimeString()}`;
   document.getElementById('marketStatusText').textContent='DATA LOADED';
   if(!allResults.length)showError('No data returned. Check your tickers and try again.');
-  else{renderTable();document.getElementById('clickHint').style.display='block';renderDashTop5();}
+  else{
+    renderTable();
+    document.getElementById('clickHint').style.display='block';
+    renderDashTop5();
+    // Cache results so they show instantly next page load
+    try{localStorage.setItem('algoscreen_top5',JSON.stringify(allResults.map(r=>({
+      ticker:r.ticker,name:r.name,score:r.score,signal:r.signal,
+      price:r.price,change:r.change
+    }))));}catch(e){}
+  }
 }
 
 function showLoading(msg){document.getElementById('tableBody').innerHTML=`<tr class="loading-row"><td colspan="13"><div class="loader"></div><div id="loadingMsg">${msg}</div></td></tr>`;}
@@ -1699,18 +1713,66 @@ function localTime(tz){try{return new Date().toLocaleTimeString('en-US',{timeZon
 function fmt(secs){const h=Math.floor(secs/3600),m=Math.floor((secs%3600)/60),s=Math.floor(secs%60);return h>0?`${h}h ${m}m`:`${m}m ${s}s`;}
 function secsUntil(h,m){const et=toET(new Date());const t=new Date(et);t.setHours(h,m,0,0);return Math.max(0,(t-et)/1000);}
 
+function secsUntilNextOpen(){
+  // Returns seconds until next 9:30am ET on a weekday
+  const et=toET(new Date());
+  const d=new Date(et);
+  // try today first, then advance days
+  for(let i=0;i<7;i++){
+    const wd=d.getDay();
+    if(wd>=1&&wd<=5){
+      const open=new Date(d);open.setHours(9,30,0,0);
+      if(open>et) return Math.max(0,(open-et)/1000);
+    }
+    d.setDate(d.getDate()+1);d.setHours(0,0,0,0);
+  }
+  return 0;
+}
+
+function updateGreeting(){
+  const el=document.getElementById('dashGreeting');
+  if(!el)return;
+  const h=new Date().getHours();
+  const greet=h>=5&&h<12?'Good morning':h>=12&&h<17?'Good afternoon':'Good evening';
+  el.textContent=greet+' — here\'s the market';
+}
+
 function checkMarketStatus(){
   const now=new Date();const et=toET(now);const etH=et.getHours()+et.getMinutes()/60;const etWd=et.getDay();const isWd=etWd>=1&&etWd<=5;
   const dot=document.querySelector('.status-dot');let display=null;
-  if(!isWd){const dM=etWd===0?1:2;const eB=toET(now);eB.setHours(0,0,0,0);const mO=new Date(eB.getTime()+dM*86400000);mO.setHours(9,30,0,0);const secs=Math.max(0,(mO-et)/1000);display={flag:'🇺🇸',name:'NEW YORK',state:'WEEKEND',cls:'next',cd:'Opens Mon '+fmt(secs),progress:0,color:'var(--muted)',local:localTime('America/New_York')};dot.style.background='var(--muted)';dot.style.boxShadow='none';}
-  else if(etH>=4&&etH<9.5){display={flag:'🇺🇸',name:'NEW YORK',state:'PRE-MARKET',cls:'pre',cd:'Opens in '+fmt(secsUntil(9,30)),progress:(etH-4)/(9.5-4),color:'#a78bfa',local:localTime('America/New_York')};dot.style.background='#a78bfa';dot.style.boxShadow='0 0 6px #a78bfa';}
-  else if(etH>=9.5&&etH<16){display={flag:'🇺🇸',name:'NEW YORK',state:'OPEN',cls:'open',cd:'Closes in '+fmt(secsUntil(16,0)),progress:(etH-9.5)/(16-9.5),color:'var(--green)',local:localTime('America/New_York')};dot.style.background='var(--green)';dot.style.boxShadow='0 0 8px var(--green)';}
-  else if(etH>=16&&etH<20){display={flag:'🇺🇸',name:'NEW YORK',state:'AFTER-HRS',cls:'after',cd:'Ends in '+fmt(secsUntil(20,0)),progress:(etH-16)/(20-16),color:'#f97316',local:localTime('America/New_York')};dot.style.background='#f97316';dot.style.boxShadow='0 0 6px #f97316';}
-  if(!display){dot.style.background='var(--muted)';dot.style.boxShadow='none';display={flag:'🌐',name:'MARKETS',state:'CLOSED',cls:'next',cd:'',progress:0,color:'var(--muted)',local:''};}
-  if(display){document.getElementById('sessFlag').textContent=display.flag;document.getElementById('sessName').textContent=display.name;const stEl=document.getElementById('sessState');stEl.textContent=display.state;stEl.className=display.cls;const fill=document.getElementById('sessBarFill');fill.style.width=Math.round(display.progress*100)+'%';fill.style.background=`linear-gradient(90deg,${display.color}55 0%,${display.color} 100%)`;document.getElementById('sessCd').textContent=display.cd;document.getElementById('sessLocal').textContent=display.local;}
+  if(!isWd){
+    const secs=secsUntilNextOpen();
+    const dayName=etWd===6?'Mon':etWd===0?'Mon':'Mon';
+    display={flag:'🇺🇸',name:'NEW YORK',state:'WEEKEND',cls:'next',cd:'Opens Mon in '+fmt(secs),progress:0,color:'var(--muted)',local:localTime('America/New_York')};
+    dot.style.background='var(--muted)';dot.style.boxShadow='none';
+  } else if(etH>=4&&etH<9.5){
+    display={flag:'🇺🇸',name:'NEW YORK',state:'PRE-MARKET',cls:'pre',cd:'Opens in '+fmt(secsUntil(9,30)),progress:(etH-4)/(9.5-4),color:'#a78bfa',local:localTime('America/New_York')};
+    dot.style.background='#a78bfa';dot.style.boxShadow='0 0 6px #a78bfa';
+  } else if(etH>=9.5&&etH<16){
+    display={flag:'🇺🇸',name:'NEW YORK',state:'OPEN',cls:'open',cd:'Closes in '+fmt(secsUntil(16,0)),progress:(etH-9.5)/(16-9.5),color:'var(--green)',local:localTime('America/New_York')};
+    dot.style.background='var(--green)';dot.style.boxShadow='0 0 8px var(--green)';
+  } else if(etH>=16&&etH<20){
+    display={flag:'🇺🇸',name:'NEW YORK',state:'AFTER-HRS',cls:'after',cd:'Ends in '+fmt(secsUntil(20,0)),progress:(etH-16)/(20-16),color:'#f97316',local:localTime('America/New_York')};
+    dot.style.background='#f97316';dot.style.boxShadow='0 0 6px #f97316';
+  } else {
+    // Overnight closed — show countdown to next open
+    const secs=secsUntilNextOpen();
+    display={flag:'🇺🇸',name:'NEW YORK',state:'CLOSED',cls:'next',cd:'Opens in '+fmt(secs),progress:0,color:'var(--muted)',local:localTime('America/New_York')};
+    dot.style.background='var(--muted)';dot.style.boxShadow='none';
+  }
+  if(display){
+    document.getElementById('sessFlag').textContent=display.flag;
+    document.getElementById('sessName').textContent=display.name;
+    const stEl=document.getElementById('sessState');stEl.textContent=display.state;stEl.className=display.cls;
+    const fill=document.getElementById('sessBarFill');fill.style.width=Math.round(display.progress*100)+'%';fill.style.background=`linear-gradient(90deg,${display.color}55 0%,${display.color} 100%)`;
+    document.getElementById('sessCd').textContent=display.cd;
+    document.getElementById('sessLocal').textContent=display.local;
+  }
 }
 checkMarketStatus();
+updateGreeting();
 setInterval(checkMarketStatus,1000);
+setInterval(updateGreeting,60000);
 
 // ══════════════════════════════════════════
 //  INIT
@@ -1725,6 +1787,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Auto-load calendar
   loadEconCalendar();
   calendarLoaded=true;
+  // Load cached top5 instantly if available
+  try{
+    const cached=localStorage.getItem('algoscreen_top5');
+    if(cached){
+      const parsed=JSON.parse(cached);
+      if(parsed.length) renderDashTop5(parsed);
+    }
+  }catch(e){}
   // Auto-load screener with Top 20 since it's the core feature
   setTimeout(()=>{
     loadPreset('top20');
