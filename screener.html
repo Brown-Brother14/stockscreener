@@ -1327,6 +1327,7 @@ function getSignal(score,macd){
 function getScoreClass(s){return s>=70?'high':s>=50?'mid':'low';}
 
 let allResults=[], currentFilter='all', sortField='score', sortDir=-1;
+let yfWS=null, wsReconnectTimer=null, wsSubscribed=new Set(), _fallbackInterval=null;
 
 function showError(msg){const b=document.getElementById('errorBox');b.style.display='block';b.textContent=msg;}
 
@@ -2083,10 +2084,6 @@ async function runBackgroundTopScan() {
 //  Same stream Yahoo's own site uses.
 //  Prices push instantly on every tick.
 // ══════════════════════════════════════════
-let yfWS = null;
-let wsReconnectTimer = null;
-let wsSubscribed = new Set();
-
 function startLivePrices() {
   connectYFStream();
 }
@@ -2218,7 +2215,6 @@ function decodeYFProto(bytes) {
 }
 
 // ── Fallback: poll every 5s if WebSocket unavailable ─────────
-let _fallbackInterval = null;
 function fallbackPoll() {
   document.getElementById('lastUpdated').textContent = 'Polling every 5s…';
   if (_fallbackInterval) return;
