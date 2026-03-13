@@ -122,19 +122,19 @@ body{
 .card-head{padding:16px 20px;border-bottom:1px solid var(--glass-border);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.38);display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03)}
 .card-head-link{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--green);cursor:pointer;text-decoration:none;border:none;background:none}
 .card-head-link:hover{text-decoration:underline}
-.top5-row{display:grid;grid-template-columns:28px 1fr auto auto;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .12s}
+.top5-row{display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .12s}
 .top5-row:hover{background:rgba(255,255,255,.04)}
 .top5-row:last-child{border-bottom:none}
-.top5-rank{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-align:right}
+.top5-rank{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);min-width:16px;text-align:right;flex-shrink:0}
 .top5-ticker{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;color:#fff}
 .top5-name{font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
-.top5-score{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600}
-.dash-news-item{display:block;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.05);text-decoration:none;transition:background .12s}
+.top5-score{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;flex-shrink:0}.top5-grow{flex:1}
+.dash-news-item{display:block;padding:9px 18px;border-bottom:1px solid rgba(255,255,255,.05);text-decoration:none;transition:background .12s}
 .dash-news-item:hover{background:rgba(255,255,255,.04)}
 .dash-news-item:last-child{border-bottom:none}
-.dash-news-src{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;color:var(--green);margin-bottom:4px}
+.dash-news-src{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;color:var(--green);margin-bottom:2px}
 .dash-news-title{font-size:13px;font-weight:500;color:rgba(255,255,255,.78);line-height:1.4}
-.dash-news-ago{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px}
+.dash-news-ago{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px}
 .today-event-row{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.05)}
 .today-event-row:last-child{border-bottom:none}
 .today-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
@@ -966,10 +966,9 @@ function renderDashTop5(data) {
     const chgStr = d.change!=null ? `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:${chgColor}">${d.change>=0?'+':''}${(+d.change).toFixed(2)}%</span>` : '';
     return `<div class="top5-row" onclick="openChart('${d.ticker}')">
       <div class="top5-rank">${i+1}</div>
-      <div><div class="top5-ticker">${d.ticker}</div><div class="top5-name">${subLabel}</div></div>
+      <div class="top5-grow"><div class="top5-ticker">${d.ticker}</div><div class="top5-name">${subLabel}</div></div>
       ${chgStr}
       <div class="top5-score ${sc}">${d.score}</div>
-      <span class="signal ${d.signal.cls}">${d.signal.label}</span>
     </div>`;
   }).join('')
   + (allWeak ? `<div style="padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">⚠ Broad market weakness — scores suppressed</div>` : '')
