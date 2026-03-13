@@ -362,6 +362,23 @@ tbody tr{animation:fadeIn .25s ease both}
 </style>
 </head>
 <body>
+<!-- ── SETUP BANNER (auto-hides once PROXY URL is set) ───────────────────── -->
+<div id="setupBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#1a1200,#1a0a00);border-bottom:1px solid rgba(251,191,36,.35);padding:11px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#fbbf24;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+  <span style="font-weight:700;font-size:13px">⚠ SETUP REQUIRED</span>
+  <span style="opacity:.85">Deploy <strong>worker.js</strong> to Cloudflare Workers (free), then replace the <code style="background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px">PROXY</code> constant in this file with your worker URL.</span>
+  <a href="https://workers.cloudflare.com" target="_blank" style="color:#fbbf24;font-weight:700;border:1px solid rgba(251,191,36,.4);padding:4px 12px;border-radius:6px;text-decoration:none">Open Cloudflare ↗</a>
+  <button onclick="document.getElementById('setupBanner').style.display='none'" style="margin-left:auto;background:none;border:none;color:rgba(251,191,36,.5);cursor:pointer;font-size:16px">✕</button>
+</div>
+<script>
+  // Show setup banner only when PROXY is still the placeholder
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof PROXY !== 'undefined' && PROXY.includes('YOUR-WORKER-NAME')) {
+      document.getElementById('setupBanner').style.display = 'flex';
+      // Push content below banner
+      document.body.style.paddingTop = '46px';
+    }
+  });
+</script>
 
 <!-- SITE NAV -->
 <nav id="siteNav">
@@ -1068,10 +1085,20 @@ function toggleMorePresets(btn) {
 </script>
 
 <script>
-// ══════════════════════════════════════════
-//  API / DATA LAYER (unchanged)
-// ══════════════════════════════════════════
-const PROXY = 'https://broken-butterfly-8148.jai-mistry14.workers.dev';
+// ══════════════════════════════════════════════════════════════
+//  API / DATA LAYER
+//  ▸ Yahoo Finance  — batch quotes, fundamentals, OHLCV (free)
+//  ▸ Finnhub WS     — real-time trade ticks, by the second
+//  ▸ Alternative.me — Fear & Greed (direct, no proxy)
+// ══════════════════════════════════════════════════════════════
+
+// ── YOUR CLOUDFLARE WORKER URL ──────────────────────────────
+// Deploy worker.js to Cloudflare (free at workers.cloudflare.com)
+// Then paste your worker URL here:
+const PROXY = 'https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev';
+
+// ── Finnhub WebSocket key (free tier, real-time trades) ─────
+const FINNHUB_WS_KEY = 'd6m8fvhr01qi0ajlajn0d6m8fvhr01qi0ajlajng';
 
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
@@ -1380,7 +1407,8 @@ function getSignal(score,macd){
 function getScoreClass(s){return s>=70?'high':s>=50?'mid':'low';}
 
 let allResults=[], currentFilter='all', sortField='score', sortDir=-1;
-let yfWS=null, wsReconnectTimer=null, wsSubscribed=new Set(), _fallbackInterval=null;
+let fhWS=null, fhReconnectTimer=null, fhSubscribed=new Set(), _fallbackInterval=null;
+let _pendingPatches={}, _patchRaf=null;
 
 function showError(msg){const b=document.getElementById('errorBox');b.style.display='block';b.textContent=msg;}
 
@@ -1427,7 +1455,7 @@ async function runScan(){
       if(signal.cls==='breakout')breakouts++;
       if(macd?.bullish)bullishMACD++;
       totalScore+=score;
-      allResults.push({ticker,name,industry:profile?.industry||'',sector:profile?.sector||'',price:quote.price,change:quote.change,volume,avgVolume,marketCap,score,signal,rsi,macd,pe,eps:financials?.eps||null,epsGrowth:financials?.epsGrowth||null,divYield:financials?.divYield||null,pos52w,high52w,low52w,revenueGrowth,ema20:tech?.ema20||null,ema50:tech?.ema50||null,ema200:tech?.ema200||null,emaAbove20,emaAbove50,emaAbove200,bbUpper:tech?.bbUpper||null,bbMiddle:tech?.bbMiddle||null,bbLower:tech?.bbLower||null,bbPos,adx:tech?.adx||null,stochK:tech?.stochK||null,stochD:tech?.stochD||null,extPrice:ext?.extPrice||null,extSession:ext?.session||null,extTime:ext?.extTime||null});
+      allResults.push({ticker,name,industry:profile?.industry||'',sector:profile?.sector||'',price:quote.price,change:quote.change,prevClose:quote.prevClose||null,volume,avgVolume,marketCap,score,signal,rsi,macd,pe,eps:financials?.eps||null,epsGrowth:financials?.epsGrowth||null,divYield:financials?.divYield||null,pos52w,high52w,low52w,revenueGrowth,ema20:tech?.ema20||null,ema50:tech?.ema50||null,ema200:tech?.ema200||null,emaAbove20,emaAbove50,emaAbove200,bbUpper:tech?.bbUpper||null,bbMiddle:tech?.bbMiddle||null,bbLower:tech?.bbLower||null,bbPos,adx:tech?.adx||null,stochK:tech?.stochK||null,stochD:tech?.stochD||null,extPrice:ext?.extPrice||null,extSession:ext?.session||null,extTime:ext?.extTime||null});
       renderDashTop5();
       document.getElementById('totalScanned').textContent=allResults.length;
       document.getElementById('breakoutCount').textContent=breakouts;
@@ -1787,7 +1815,7 @@ async function loadMacroDashboard(){
   ['VIX','SPY','QQQ','IWM'].forEach(t=>{const el=document.getElementById(`macro-${t}`);if(el)el.innerHTML='<div class="mi-loading"></div>';});
   document.getElementById('macroLastUpdated').textContent='Loading...';
   try{
-    const fngRes=await fetch(`${PROXY}/feargreed`);const fngJson=await fngRes.json();const fngData=fngJson?.fear_and_greed;
+    const fngRes=await fetch('https://api.alternative.me/fng/?limit=1&format=json');const fngJson=await fngRes.json();const fngData={score:parseInt(fngJson?.data?.[0]?.value),value_classification:fngJson?.data?.[0]?.value_classification};
     if(fngData?.score!=null){const score=Math.round(fngData.score);const color=getFngColor(score);const label=getFngLabel(score);
     document.getElementById('fngValue').textContent=score;document.getElementById('fngValue').style.color=color;
     document.getElementById('fngLabel').textContent=label;document.getElementById('fngLabel').style.color=color;
@@ -2075,7 +2103,7 @@ async function runBackgroundTopScan() {
         name:       q.longName || q.shortName || ticker,
         sector:     q.sector   || '',
         industry:   q.industry || '',
-        price, change, volume,
+        price, change, prevClose: q.regularMarketPreviousClose ?? null, volume,
         avgVolume:  q.averageVolume     || null,
         marketCap:  q.marketCap ? q.marketCap/1e9 : null,
         rsi, macd, pe,
@@ -2134,153 +2162,127 @@ async function runBackgroundTopScan() {
 }
 
 
-// ══════════════════════════════════════════
-//  LIVE PRICES — Yahoo Finance WebSocket
-//  Same stream Yahoo's own site uses.
-//  Prices push instantly on every tick.
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  LIVE PRICES — Finnhub WebSocket
+//  Official free API. Fires on every real trade tick.
+//  Literally by-the-second during market hours.
+//  Docs: https://finnhub.io/docs/api/websocket-trades
+// ══════════════════════════════════════════════════════════════
+
+let fhWS = null;
+let fhReconnectTimer = null;
+let fhSubscribed = new Set();
+let _fallbackInterval = null;
+// Debounce UI patches so rapid ticks don't thrash the DOM
+let _pendingPatches = {};
+let _patchRaf = null;
+
 function startLivePrices() {
-  connectYFStream();
+  connectFinnhubStream();
 }
 
 function stopLivePrices() {
-  if (yfWS) { yfWS.close(); yfWS = null; }
-  if (wsReconnectTimer) { clearTimeout(wsReconnectTimer); wsReconnectTimer = null; }
+  if (fhWS) { try { fhWS.close(1000, 'stop'); } catch(e){} fhWS = null; }
+  if (fhReconnectTimer) { clearTimeout(fhReconnectTimer); fhReconnectTimer = null; }
+  if (_fallbackInterval)  { clearInterval(_fallbackInterval); _fallbackInterval = null; }
 }
 
-function connectYFStream() {
-  if (yfWS && yfWS.readyState <= 1) return; // already open/connecting
+function connectFinnhubStream() {
+  if (fhWS && fhWS.readyState <= 1) return; // already open/connecting
   try {
-    yfWS = new WebSocket('wss://streamer.finance.yahoo.com');
+    fhWS = new WebSocket(`wss://ws.finnhub.io?token=${FINNHUB_WS_KEY}`);
   } catch(e) { fallbackPoll(); return; }
 
-  yfWS.onopen = () => {
+  fhWS.onopen = () => {
     document.getElementById('lastUpdated').textContent = 'Streaming live…';
-    subscribeYFStream();
+    document.getElementById('marketStatusText').textContent = 'LIVE STREAM';
+    subscribeFinnhubStream();
   };
 
-  // Yahoo sends Protobuf binary messages — decode manually
-  yfWS.onmessage = (evt) => {
+  fhWS.onmessage = (evt) => {
     try {
-      // YF WebSocket sends base64-encoded protobuf
-      const b64 = typeof evt.data === 'string' ? evt.data : null;
-      if (!b64) return;
-      const decoded = decodeYFProto(atob(b64));
-      if (!decoded || !decoded.id || decoded.price == null) return;
+      const msg = JSON.parse(evt.data);
+      // Finnhub sends: { type: 'trade', data: [{ s, p, t, v, c }] }
+      if (msg.type !== 'trade' || !Array.isArray(msg.data)) return;
 
-      const ticker = decoded.id;
-      const r = allResults.find(x => x.ticker === ticker);
-      if (!r) return;
+      for (const trade of msg.data) {
+        const ticker = trade.s;
+        const price  = trade.p;
+        if (!ticker || price == null) continue;
 
-      const prevPrice = r.price;
-      r.price  = decoded.price;
-      if (decoded.changePercent != null) r.change = decoded.changePercent;
+        const r = allResults.find(x => x.ticker === ticker);
+        if (!r) continue;
 
-      patchRowPrice(r, prevPrice);
-      renderDashTop5();
+        // Queue patch — batch DOM updates via rAF
+        if (!_pendingPatches[ticker]) _pendingPatches[ticker] = { r, prevPrice: r.price };
+        r.price = price;
+        // Recalculate % change from prev close
+        if (r.prevClose) r.change = ((price - r.prevClose) / r.prevClose) * 100;
+      }
 
-      // Pulse the status dot
-      const dot = document.querySelector('.status-dot');
-      if (dot) { dot.style.transform='scale(1.6)'; setTimeout(()=>dot.style.transform='',200); }
-      document.getElementById('lastUpdated').textContent =
-        '● Live · ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+      // Flush patches on next animation frame
+      if (!_patchRaf) {
+        _patchRaf = requestAnimationFrame(() => {
+          _patchRaf = null;
+          for (const { r, prevPrice } of Object.values(_pendingPatches)) {
+            patchRowPrice(r, prevPrice);
+          }
+          _pendingPatches = {};
+          renderDashTop5();
+
+          // Pulse status dot
+          const dot = document.querySelector('.status-dot');
+          if (dot) { dot.style.transform='scale(1.6)'; setTimeout(()=>dot.style.transform='',200); }
+          document.getElementById('lastUpdated').textContent =
+            '● Live · ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+        });
+      }
     } catch(e) {}
   };
 
-  yfWS.onerror = () => fallbackPoll();
-  yfWS.onclose = (e) => {
+  fhWS.onerror = () => {};
+  fhWS.onclose = (e) => {
+    fhWS = null;
     if (e.code !== 1000) {
       // Reconnect after 5s on unexpected close
-      wsReconnectTimer = setTimeout(connectYFStream, 5000);
+      fhReconnectTimer = setTimeout(connectFinnhubStream, 5000);
     }
   };
 }
 
-function subscribeYFStream() {
-  if (!yfWS || yfWS.readyState !== 1) return;
-  const tickers = allResults.length
-    ? allResults.map(r => r.ticker)
-    : BROAD_UNIVERSE;
-  // Subscribe in one message
-  yfWS.send(JSON.stringify({ subscribe: tickers }));
-  tickers.forEach(t => wsSubscribed.add(t));
+function subscribeFinnhubStream() {
+  if (!fhWS || fhWS.readyState !== 1) return;
+  const tickers = allResults.length ? allResults.map(r => r.ticker) : BROAD_UNIVERSE;
+  const toAdd = tickers.filter(t => !fhSubscribed.has(t));
+  // Subscribe in batches (Finnhub free tier handles ~50 concurrent symbols well)
+  for (const t of toAdd) {
+    fhWS.send(JSON.stringify({ type: 'subscribe', symbol: t }));
+    fhSubscribed.add(t);
+  }
 }
 
 // Re-subscribe when allResults changes (new scan loaded)
 function resubscribeYFStream() {
-  if (!yfWS || yfWS.readyState !== 1) { connectYFStream(); return; }
-  const newTickers = allResults.map(r => r.ticker).filter(t => !wsSubscribed.has(t));
-  if (newTickers.length) {
-    yfWS.send(JSON.stringify({ subscribe: newTickers }));
-    newTickers.forEach(t => wsSubscribed.add(t));
+  if (!fhWS || fhWS.readyState !== 1) { connectFinnhubStream(); return; }
+  const newTickers = allResults.map(r => r.ticker).filter(t => !fhSubscribed.has(t));
+  for (const t of newTickers) {
+    fhWS.send(JSON.stringify({ type: 'subscribe', symbol: t }));
+    fhSubscribed.add(t);
   }
 }
 
-// ── Decode Yahoo Finance Protobuf ─────────────────────────────
-// YF uses a minimal protobuf schema. Field IDs:
-//   1 = id (string), 2 = price (float), 3 = time (int64),
-//   4 = currency, 5 = exchange, 6 = quoteType, 7 = marketHours,
-//   8 = changePercent (float), 9 = dayVolume (int64),
-//  10 = change (float), 11 = priceHint (int32)
-function decodeYFProto(bytes) {
-  const buf = typeof bytes === 'string'
-    ? Uint8Array.from(bytes, c => c.charCodeAt(0))
-    : new Uint8Array(bytes);
-  let pos = 0;
-  const result = {};
-
-  function readVarint() {
-    let val = 0, shift = 0, b;
-    do { b = buf[pos++]; val |= (b & 0x7f) << shift; shift += 7; } while (b & 0x80);
-    return val;
-  }
-  function readFloat() {
-    const view = new DataView(buf.buffer, buf.byteOffset + pos, 4);
-    pos += 4;
-    return view.getFloat32(0, true);
-  }
-  function readDouble() {
-    const view = new DataView(buf.buffer, buf.byteOffset + pos, 8);
-    pos += 8;
-    return view.getFloat64(0, true);
-  }
-  function readString(len) {
-    const slice = buf.slice(pos, pos + len);
-    pos += len;
-    return new TextDecoder().decode(slice);
-  }
-
-  try {
-    while (pos < buf.length) {
-      const tag   = readVarint();
-      const field = tag >>> 3;
-      const wire  = tag & 0x7;
-      if (wire === 0)      { const v = readVarint(); if (field===3) result.time=v; }
-      else if (wire === 1) { const v = readDouble(); if (field===2) result.price=v; else if(field===8) result.changePercent=v; }
-      else if (wire === 2) { const len = readVarint(); if (field===1) result.id=readString(len); else pos+=len; }
-      else if (wire === 5) { const v = readFloat();
-        if (field===2)  result.price         = v;
-        else if(field===8)  result.changePercent  = v;
-        else if(field===10) result.change        = v;
-      }
-      else break; // unknown wire type, stop
-    }
-  } catch(e) {}
-  return result;
-}
-
-// ── Fallback: poll every 5s if WebSocket unavailable ─────────
+// ── Fallback: REST poll every 5s if WebSocket unavailable ────
 function fallbackPoll() {
   document.getElementById('lastUpdated').textContent = 'Polling every 5s…';
   if (_fallbackInterval) return;
   _fallbackInterval = setInterval(async () => {
     if (!allResults.length) return;
-    const tickers = allResults.map(r=>r.ticker);
-    for (let i=0; i<tickers.length; i+=50) {
-      const quotes = await yfQuote(tickers.slice(i,i+50)).catch(()=>[]);
+    const tickers = allResults.map(r => r.ticker);
+    for (let i = 0; i < tickers.length; i += 50) {
+      const quotes = await yfQuote(tickers.slice(i, i + 50)).catch(() => []);
       for (const q of quotes) {
-        const r = allResults.find(x=>x.ticker===q.symbol);
-        if (!r || q.regularMarketPrice==null) continue;
+        const r = allResults.find(x => x.ticker === q.symbol);
+        if (!r || q.regularMarketPrice == null) continue;
         const prev = r.price;
         r.price  = q.regularMarketPrice;
         r.change = q.regularMarketChangePercent;
