@@ -1132,9 +1132,10 @@ function calcStoch(highs,lows,closes,period=14){if(closes.length<period)return n
 
 // ── Yahoo Finance: fetch OHLCV chart data ───────────────────
 async function yfChart(ticker, range='2y', interval='1d') {
-  // Try new /yf/chart route first (new worker deployment)
+  // 1. Worker /yf/chart
   try {
-    const res = await fetch(`${PROXY}/yf/chart/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}`);
+    const res = await fetch(`${PROXY}/yf/chart/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}`,
+      { signal: AbortSignal.timeout(12000) });
     if (res.ok) {
       const data = await res.json();
       const result = data?.chart?.result?.[0];
@@ -1147,64 +1148,141 @@ async function yfChart(ticker, range='2y', interval='1d') {
     }
   } catch(e) {}
 
-  // Fall back to existing /twelvedata/time_series (always deployed, always works)
+  // 2. Worker /twelvedata fallback
   try {
     const qs = new URLSearchParams({ symbol: ticker, interval: '1day', outputsize: 220 }).toString();
-    const res = await fetch(`${PROXY}/twelvedata/time_series?${qs}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data?.values?.length) return null;
-    const bars = [...data.values].reverse(); // oldest first
-    return {
-      closes:  bars.map(b => parseFloat(b.close)),
-      highs:   bars.map(b => parseFloat(b.high)),
-      lows:    bars.map(b => parseFloat(b.low)),
-      volumes: bars.map(b => parseFloat(b.volume)),
-      timestamps: bars.map(b => new Date(b.datetime).getTime() / 1000),
-    };
-  } catch(e) { return null; }
+    const res = await fetch(`${PROXY}/twelvedata/time_series?${qs}`,
+      { signal: AbortSignal.timeout(12000) });
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.values?.length) {
+        const bars = [...data.values].reverse();
+        return {
+          closes:  bars.map(b => parseFloat(b.close)),
+          highs:   bars.map(b => parseFloat(b.high)),
+          lows:    bars.map(b => parseFloat(b.low)),
+          volumes: bars.map(b => parseFloat(b.volume)),
+          timestamps: bars.map(b => new Date(b.datetime).getTime() / 1000),
+        };
+      }
+    }
+  } catch(e) {}
+
+  // 3. Finnhub candles — direct browser call (CORS enabled), no proxy needed
+  try {
+    if (!ticker.startsWith('^')) {
+      const to   = Math.floor(Date.now() / 1000);
+      const from = to - 365 * 2 * 86400; // 2 years
+      const res = await fetch(
+        `https://finnhub.io/api/v1/stock/candle?symbol=${ticker}&resolution=D&from=${from}&to=${to}&token=${FINNHUB_WS_KEY}`,
+        { signal: AbortSignal.timeout(12000) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.s === 'ok' && data.c?.length > 10) {
+          console.warn(`[AlgoScreen] Chart for ${ticker} via Finnhub direct fallback`);
+          return {
+            closes:  data.c,
+            highs:   data.h,
+            lows:    data.l,
+            volumes: data.v,
+            timestamps: data.t,
+          };
+        }
+      }
+    }
+  } catch(e) {}
+
+  return null;
 }
 
-// ── Yahoo Finance: single or batch quote ────────────────────
+// ── Quote fetcher: Worker → /batch fallback → Finnhub REST direct ──
 async function yfQuote(symbols) {
   const arr = Array.isArray(symbols) ? symbols : [symbols];
   const sym = arr.join(',');
 
-  // Try new /yf/quote route first (new worker deployment)
+  // 1. Worker /yf/quote (Yahoo Finance via Cloudflare proxy)
   try {
-    const res = await fetch(`${PROXY}/yf/quote?symbols=${encodeURIComponent(sym)}`);
+    const res = await fetch(`${PROXY}/yf/quote?symbols=${encodeURIComponent(sym)}`,
+      { signal: AbortSignal.timeout(10000) });
     if (res.ok) {
       const data = await res.json();
       const results = data?.quoteResponse?.result;
-      if (results?.length) return results;
+      if (results?.length && results[0]?.regularMarketPrice != null) return results;
     }
   } catch(e) {}
 
-  // Fall back to existing /batch route (always deployed, always works)
+  // 2. Worker /batch fallback
   try {
     const encoded = arr.map(t => encodeURIComponent(t)).join(',');
-    const res = await fetch(`${PROXY}/batch?symbols=${encoded}`);
-    if (!res.ok) return [];
-    const batchData = await res.json();
-    // Normalize batch response to match yfQuote shape
-    return arr.map(ticker => {
-      const q = batchData[ticker] || batchData[decodeURIComponent(ticker)] || null;
-      if (!q) return null;
-      return {
-        symbol: ticker,
-        regularMarketPrice: q.c,
-        regularMarketChangePercent: q.dp,
-        regularMarketDayHigh: q.h,
-        regularMarketDayLow: q.l,
-        regularMarketPreviousClose: q.pc,
-        regularMarketVolume: q.vol || null,
-        fiftyTwoWeekHigh: q.h52 || null,
-        fiftyTwoWeekLow: q.l52 || null,
-        fiftyDayAverage: q.ema50 || null,
-        twoHundredDayAverage: q.ema200 || null,
-      };
-    }).filter(Boolean);
-  } catch(e) { return []; }
+    const res = await fetch(`${PROXY}/batch?symbols=${encoded}`,
+      { signal: AbortSignal.timeout(10000) });
+    if (res.ok) {
+      const batchData = await res.json();
+      const mapped = arr.map(ticker => {
+        const q = batchData[ticker] || batchData[decodeURIComponent(ticker)] || null;
+        if (!q || q.c == null) return null;
+        return {
+          symbol: ticker,
+          regularMarketPrice: q.c,
+          regularMarketChangePercent: q.dp,
+          regularMarketDayHigh: q.h,
+          regularMarketDayLow: q.l,
+          regularMarketPreviousClose: q.pc,
+          regularMarketVolume: q.vol || null,
+          fiftyTwoWeekHigh: q.h52 || null,
+          fiftyTwoWeekLow: q.l52 || null,
+          fiftyDayAverage: q.ema50 || null,
+          twoHundredDayAverage: q.ema200 || null,
+        };
+      }).filter(Boolean);
+      if (mapped.length) return mapped;
+    }
+  } catch(e) {}
+
+  // 3. Finnhub REST — works directly in the browser (has CORS headers), no proxy needed.
+  //    Slower for big batches (60 req/min free), but guaranteed to work when Yahoo is blocked.
+  try {
+    const results = await Promise.all(arr.map(async ticker => {
+      try {
+        const fhTicker = ticker.startsWith('^') ? null : ticker; // skip indices
+        if (!fhTicker) return null;
+        const [qRes, mRes] = await Promise.all([
+          fetch(`https://finnhub.io/api/v1/quote?symbol=${fhTicker}&token=${FINNHUB_WS_KEY}`,
+            { signal: AbortSignal.timeout(8000) }),
+          fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${fhTicker}&metric=all&token=${FINNHUB_WS_KEY}`,
+            { signal: AbortSignal.timeout(8000) }),
+        ]);
+        const q = qRes.ok ? await qRes.json() : null;
+        const m = mRes.ok ? await mRes.json() : null;
+        if (!q || q.c == null || q.c === 0) return null;
+        const mt = m?.metric || {};
+        return {
+          symbol: ticker,
+          regularMarketPrice: q.c,
+          regularMarketChangePercent: q.dp,
+          regularMarketDayHigh: q.h,
+          regularMarketDayLow: q.l,
+          regularMarketPreviousClose: q.pc,
+          regularMarketVolume: null,
+          fiftyTwoWeekHigh: mt['52WeekHigh'] || null,
+          fiftyTwoWeekLow:  mt['52WeekLow']  || null,
+          fiftyDayAverage:  mt['50DayMovingAverage'] || null,
+          twoHundredDayAverage: mt['200DayMovingAverage'] || null,
+          trailingPE: mt['peBasicExclExtraTTM'] || null,
+          epsTrailingTwelveMonths: mt['epsBasicExclExtraAnnual'] || null,
+          beta: mt['beta'] || null,
+          marketCap: mt['marketCapitalization'] ? mt['marketCapitalization'] * 1e6 : null,
+        };
+      } catch(e) { return null; }
+    }));
+    const valid = results.filter(Boolean);
+    if (valid.length) {
+      console.warn('[AlgoScreen] Using Finnhub direct fallback — worker/Yahoo unavailable');
+      return valid;
+    }
+  } catch(e) {}
+
+  return [];
 }
 
 // ── fetchAllTechnicals — now uses YF chart (free, accurate) ─
