@@ -410,8 +410,7 @@ tbody tr{animation:fadeIn .25s ease both}
       <div class="g-card stat-card"><div class="stat-eye">QQQ</div><div class="stat-val" id="d-qqq">--</div><div class="stat-chg chg-neu" id="d-qqq-chg">--</div></div>
       <div class="g-card stat-card"><div class="stat-eye">VIX</div><div class="stat-val" id="d-vix">--</div><div class="stat-chg chg-neu" id="d-vix-chg">--</div></div>
     </div>
-      <div id="debugContent" style="white-space:pre-wrap;word-break:break-all;max-height:300px;overflow:auto;color:#aaa;line-height:1.6"></div>
-    </div>
+
     <!-- Middle: top5 + news -->
     <div class="dash-grid-mid">
       <!-- Top 5 picks -->
@@ -986,14 +985,13 @@ function renderDashEvents() {
 async function loadDashboard() {
   renderDashEvents();
   try {
-    // Single batch call for SPY+QQQ+VIX instead of 3 separate requests
     const [batchData, fngRes] = await Promise.all([
       fetch(`${PROXY}/batch?symbols=SPY,QQQ,%5EVIX`).then(r=>r.json()).catch(()=>({})),
       fetch(`${PROXY}/feargreed`).then(r=>r.json()).catch(()=>null)
     ]);
-    const spyQ = batchData['SPY'] || null;
-    const qqqQ = batchData['QQQ'] || null;
-    const vixQ = batchData['^VIX'] || batchData['%5EVIX'] || null;
+    const spyQ = batchData['SPY']||null;
+    const qqqQ = batchData['QQQ']||null;
+    const vixQ = batchData['^VIX']||batchData['%5EVIX']||null;
     const fmtChg = (v, invert=false) => {
       if(v==null) return '';
       const up = invert ? v <= 0 : v >= 0;
@@ -1022,9 +1020,7 @@ async function loadDashboard() {
       document.getElementById('d-fng-lbl').className = 'stat-chg';
     }
     const anyData = spyQ?.c!=null || qqqQ?.c!=null || vixQ?.c!=null;
-    document.getElementById('dashUpdated').textContent = anyData
-      ? 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})
-      : 'Stats unavailable';
+    document.getElementById('dashUpdated').textContent = anyData ? 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) : 'Stats unavailable';
   } catch(e) {
     document.getElementById('dashUpdated').textContent = 'Stats unavailable';
   }
@@ -1584,7 +1580,6 @@ function renderIndexCard(ticker,q){
 
 function renderSectorTile(ticker,q){
   const el=document.getElementById(`sector-${ticker}`);if(!el)return;
-  if(q.dp==null){el.style.background='var(--glass-border)';el.innerHTML=`<div class="sector-ticker" style="color:var(--muted)">${ticker}</div><div style="font-size:9px;color:var(--muted)">--</div>`;return;}
   const pct=q.dp;const absPct=Math.abs(pct);
   const green='rgba(0,230,118,';const red='rgba(255,77,109,';
   const intensity=Math.min(0.35,absPct*0.08);
@@ -1599,8 +1594,8 @@ function renderExtraCard(id,q){
   const labels={DXY:'DXY (US Dollar)',GLD:'Gold (GLD)',USO:'Oil (USO)',TLT:'Bonds (TLT)'};
   const valEl=document.getElementById(`macro-${id}-val`);
   const chgEl=document.getElementById(`macro-${id}-chg`);
-  if(valEl)valEl.textContent=q.c!=null?'$'+(+q.c).toFixed(2):'--';
-  if(chgEl){chgEl.textContent=q.dp!=null?(q.dp>=0?'+':'')+(+q.dp).toFixed(2)+'%':'--';chgEl.style.color=q.dp!=null?(q.dp>=0?'var(--green)':'var(--red)'):'var(--muted)';}
+  if(valEl)valEl.textContent='$'+q.c.toFixed(2);
+  if(chgEl){chgEl.textContent=(q.dp>=0?'+':'')+q.dp.toFixed(2)+'%';chgEl.style.color=q.dp>=0?'var(--green)':'var(--red)';}
 }
 
 let macroLoaded=false;
@@ -1609,32 +1604,23 @@ async function loadMacroDashboard(){
   const allMacroTickers=['SPY','QQQ','IWM','XLK','XLF','XLE','XLV','XLI','XLY','XLP','XLU','XLRE','XLB','XLC','UUP','GLD','USO','TLT'];
   ['VIX','SPY','QQQ','IWM'].forEach(t=>{const el=document.getElementById(`macro-${t}`);if(el)el.innerHTML='<div class="mi-loading"></div>';});
   document.getElementById('macroLastUpdated').textContent='Loading...';
-
-  // Single batch call for all tickers + VIX + Fear&Greed in parallel
-  const batchSymbols=[...allMacroTickers,'%5EVIX'].join(',');
-  const [batchData, fngRes] = await Promise.all([
-    fetch(`${PROXY}/batch?symbols=${batchSymbols}`).then(r=>r.json()).catch(()=>({})),
-    fetch(`${PROXY}/feargreed`).then(r=>r.json()).catch(()=>null),
-  ]);
-
-  // Fear & Greed
   try{
-    const fngData=fngRes?.fear_and_greed;
+    const fngRes=await fetch(`${PROXY}/feargreed`);const fngJson=await fngRes.json();const fngData=fngJson?.fear_and_greed;
     if(fngData?.score!=null){const score=Math.round(fngData.score);const color=getFngColor(score);const label=getFngLabel(score);
     document.getElementById('fngValue').textContent=score;document.getElementById('fngValue').style.color=color;
     document.getElementById('fngLabel').textContent=label;document.getElementById('fngLabel').style.color=color;
     drawFngGauge(score,color);}
   }catch(e){document.getElementById('fngLabel').textContent='UNAVAILABLE';}
-
-  // VIX — FMP returns it as ^VIX
-  const vixQ=batchData['^VIX']||batchData['%5EVIX']||null;
+  const batchSymbols=[...allMacroTickers,'%5EVIX'].join(',');
+  const batchData=await fetch(`${PROXY}/batch?symbols=${batchSymbols}`).then(r=>r.json()).catch(()=>({}));
+  const vixQ=batchData['^VIX']||null;
   if(vixQ?.c!=null){renderIndexCard('VIX',{c:vixQ.c,dp:vixQ.dp??0});}
   else{const el=document.getElementById('macro-VIX');if(el)el.innerHTML='<div class="mi-label">VIX</div><div class="mi-name" style="color:var(--muted)">Unavailable</div>';}
-
-  ['SPY','QQQ','IWM'].forEach(t=>{if(batchData[t])renderIndexCard(t,batchData[t]);});
-  Object.keys(SECTOR_META).forEach(t=>{if(batchData[t])renderSectorTile(t,batchData[t]);else{const el=document.getElementById(`sector-${t}`);if(el){el.style.background='var(--glass-border)';el.innerHTML=`<div class="sector-ticker" style="color:var(--muted)">${t}</div><div style="font-size:9px;color:var(--muted)">--</div>`;}}});
+  const quotes=batchData;
+  ['SPY','QQQ','IWM'].forEach(t=>{if(quotes[t]?.c!=null)renderIndexCard(t,quotes[t]);});
+  Object.keys(SECTOR_META).forEach(t=>{if(quotes[t]?.c!=null)renderSectorTile(t,quotes[t]);else{const el=document.getElementById(`sector-${t}`);if(el){el.style.background='var(--glass-border)';el.innerHTML=`<div class="sector-ticker" style="color:var(--muted)">${t}</div><div style="font-size:9px;color:var(--muted)">--</div>`;}}});
   const extraMap={UUP:'DXY',GLD:'GLD',USO:'USO',TLT:'TLT'};
-  Object.entries(extraMap).forEach(([ticker,id])=>{if(batchData[ticker])renderExtraCard(id,batchData[ticker]);});
+  Object.entries(extraMap).forEach(([ticker,id])=>{if(quotes[ticker]?.c!=null)renderExtraCard(id,quotes[ticker]);});
   document.getElementById('macroLastUpdated').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
   macroLoaded=true;
 }
