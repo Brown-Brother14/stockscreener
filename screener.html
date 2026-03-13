@@ -998,13 +998,15 @@ function renderDashEvents() {
 async function loadDashboard() {
   renderDashEvents();
   try {
-    const [batchData, fngRes] = await Promise.all([
-      fetch(`${PROXY}/batch?symbols=SPY,QQQ,%5EVIX`).then(r=>r.json()).catch(()=>({})),
+    const [dashQuotes, fngRes] = await Promise.all([
+      yfQuote(['SPY','QQQ','^VIX']).catch(()=>[]),
       fetch(`${PROXY}/feargreed`).then(r=>r.json()).catch(()=>null)
     ]);
+    const batchData = {};
+    dashQuotes.forEach(q => { batchData[q.symbol]={c:q.regularMarketPrice,dp:q.regularMarketChangePercent}; });
     const spyQ = batchData['SPY']||null;
     const qqqQ = batchData['QQQ']||null;
-    const vixQ = batchData['^VIX']||batchData['%5EVIX']||null;
+    const vixQ = batchData['^VIX']||null;
     const fmtChg = (v, invert=false) => {
       if(v==null) return '';
       const up = invert ? v <= 0 : v >= 0;
@@ -1084,10 +1086,11 @@ async function twelveFetch(endpoint, params={}) {
   return res.ok ? res.json() : null;
 }
 async function yahooQuote(ticker) {
-  try {
-    const res = await fetch(`${PROXY}/yahooquote/${ticker}`);
-    return res.ok ? res.json() : null;
-  } catch(e) { return null; }
+  // Now uses direct YF call
+  const quotes = await yfQuote(ticker);
+  const q = quotes[0];
+  if (!q || q.regularMarketPrice == null) return null;
+  return { c: q.regularMarketPrice, dp: q.regularMarketChangePercent, h: q.regularMarketDayHigh, l: q.regularMarketDayLow, pc: q.regularMarketPreviousClose };
 }
 
 // ── Technicals ──
@@ -1102,29 +1105,56 @@ function calcStoch(highs,lows,closes,period=14){if(closes.length<period)return n
 
 // ── Yahoo Finance: fetch OHLCV chart data ───────────────────
 async function yfChart(ticker, range='2y', interval='1d') {
-  try {
-    const res = await fetch(`${PROXY}/yf/chart/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}`);
-    const data = await res.json();
-    const result = data?.chart?.result?.[0];
-    if (!result) return null;
-    const ts     = result.timestamp || [];
-    const q      = result.indicators?.quote?.[0] || {};
-    const closes  = q.close  || [];
-    const highs   = q.high   || [];
-    const lows    = q.low    || [];
-    const volumes = q.volume || [];
-    return { closes, highs, lows, volumes, timestamps: ts };
-  } catch(e) { return null; }
+  // Call Yahoo Finance directly — supports CORS, no proxy needed
+  const urls = [
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}&includePrePost=false`,
+    `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}&includePrePost=false`,
+  ];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const result = data?.chart?.result?.[0];
+      if (!result) continue;
+      const ts      = result.timestamp || [];
+      const q       = result.indicators?.quote?.[0] || {};
+      const closes  = q.close  || [];
+      const highs   = q.high   || [];
+      const lows    = q.low    || [];
+      const volumes = q.volume || [];
+      return { closes, highs, lows, volumes, timestamps: ts };
+    } catch(e) { continue; }
+  }
+  return null;
 }
 
 // ── Yahoo Finance: single or batch quote ────────────────────
 async function yfQuote(symbols) {
-  try {
-    const sym = Array.isArray(symbols) ? symbols.join(',') : symbols;
-    const res = await fetch(`${PROXY}/yf/quote?symbols=${encodeURIComponent(sym)}`);
-    const data = await res.json();
-    return data?.quoteResponse?.result || [];
-  } catch(e) { return []; }
+  const sym = Array.isArray(symbols) ? symbols.join(',') : symbols;
+  const fields = [
+    'regularMarketPrice','regularMarketChangePercent','regularMarketDayHigh',
+    'regularMarketDayLow','regularMarketPreviousClose','regularMarketVolume',
+    'fiftyTwoWeekHigh','fiftyTwoWeekLow','fiftyDayAverage','twoHundredDayAverage',
+    'trailingPE','forwardPE','epsTrailingTwelveMonths','earningsGrowth','revenueGrowth',
+    'marketCap','beta','dividendYield','longName','shortName','symbol',
+    'preMarketPrice','preMarketChangePercent','postMarketPrice','postMarketChangePercent',
+    'averageVolume','sector','industry',
+  ].join(',');
+  const urls = [
+    `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&fields=${fields}&formatted=false&lang=en-US&region=US`,
+    `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&fields=${fields}&formatted=false`,
+  ];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const results = data?.quoteResponse?.result;
+      if (results?.length) return results;
+    } catch(e) { continue; }
+  }
+  return [];
 }
 
 // ── fetchAllTechnicals — now uses YF chart (free, accurate) ─
@@ -1740,13 +1770,17 @@ async function loadMacroDashboard(){
     document.getElementById('fngLabel').textContent=label;document.getElementById('fngLabel').style.color=color;
     drawFngGauge(score,color);}
   }catch(e){document.getElementById('fngLabel').textContent='UNAVAILABLE';}
-  const batchSymbols=[...allMacroTickers,'%5EVIX'].join(',');
-  const batchData=await fetch(`${PROXY}/batch?symbols=${batchSymbols}`).then(r=>r.json()).catch(()=>({}));
-  const vixQ=batchData['^VIX']||null;
+  const allMacroSymbols=[...allMacroTickers,'^VIX'];
+  const macroQuotes=await yfQuote(allMacroSymbols).catch(()=>[]);
+  const batchData={};
+  macroQuotes.forEach(q=>{batchData[q.symbol]={c:q.regularMarketPrice,dp:q.regularMarketChangePercent,h:q.regularMarketDayHigh,l:q.regularMarketDayLow,pc:q.regularMarketPreviousClose};});
+  const vixQ=batchData['^VIX']||batchData['%5EVIX']||null;
   if(vixQ?.c!=null){renderIndexCard('VIX',{c:vixQ.c,dp:vixQ.dp??0});}
   else{const el=document.getElementById('macro-VIX');if(el)el.innerHTML='<div class="mi-label">VIX</div><div class="mi-name" style="color:var(--muted)">Unavailable</div>';}
   const quotes=batchData;
-  ['SPY','QQQ','IWM'].forEach(t=>{if(quotes[t]?.c!=null)renderIndexCard(t,quotes[t]);});
+  ['SPY','QQQ','IWM'].forEach(t=>{if(batchData[t]?.c!=null)renderIndexCard(t,batchData[t]);});
+  // VIX is stored as ^VIX in YF
+  if(vixQ?.c!=null) renderIndexCard('VIX',{c:vixQ.c,dp:vixQ.dp??0});
   Object.keys(SECTOR_META).forEach(t=>{if(quotes[t]?.c!=null)renderSectorTile(t,quotes[t]);else{const el=document.getElementById(`sector-${t}`);if(el){el.style.background='var(--glass-border)';el.innerHTML=`<div class="sector-ticker" style="color:var(--muted)">${t}</div><div style="font-size:9px;color:var(--muted)">--</div>`;}}});
   const extraMap={UUP:'DXY',GLD:'GLD',USO:'USO',TLT:'TLT'};
   Object.entries(extraMap).forEach(([ticker,id])=>{if(quotes[ticker]?.c!=null)renderExtraCard(id,quotes[ticker]);});
@@ -1905,16 +1939,14 @@ async function refreshLivePrices(results) {
 
   for (let i = 0; i < tickers.length; i += BATCH) {
     const slice = tickers.slice(i, i + BATCH);
-    const encoded = slice.map(t => encodeURIComponent(t)).join(',');
     try {
-      const batchData = await fetch(`${PROXY}/batch?symbols=${encoded}`).then(r => r.json());
-      slice.forEach(ticker => {
-        const q = batchData[ticker] || batchData[ticker.replace('^','%5E')] || null;
-        if (!q || q.c == null) return;
-        const r = results.find(x => x.ticker === ticker);
+      const quotes = await yfQuote(slice);
+      quotes.forEach(q => {
+        if (q.regularMarketPrice == null) return;
+        const r = results.find(x => x.ticker === q.symbol);
         if (!r) return;
-        r.price  = +q.c;
-        r.change = +q.dp;
+        r.price  = q.regularMarketPrice;
+        r.change = q.regularMarketChangePercent;
         // Recompute signal based on fresh change + existing score
         r.signal = getSignal(r.score, r.macd);
       });
