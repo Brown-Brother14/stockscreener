@@ -1100,58 +1100,126 @@ function calcBollinger(closes,period=20){if(closes.length<period)return null;con
 function calcADX(highs,lows,closes,period=14){if(closes.length<period+1)return null;const tr=[],pDM=[],mDM=[];for(let i=1;i<closes.length;i++){const hl=highs[i]-lows[i],hpc=Math.abs(highs[i]-closes[i-1]),lpc=Math.abs(lows[i]-closes[i-1]);tr.push(Math.max(hl,hpc,lpc));const up=highs[i]-highs[i-1],dn=lows[i-1]-lows[i];pDM.push(up>dn&&up>0?up:0);mDM.push(dn>up&&dn>0?dn:0);}const atr=tr.slice(0,period).reduce((a,b)=>a+b,0);const pd=pDM.slice(0,period).reduce((a,b)=>a+b,0),md=mDM.slice(0,period).reduce((a,b)=>a+b,0);const pdi=(pd/atr)*100,mdi=(md/atr)*100;return Math.abs(pdi-mdi)/(pdi+mdi)*100;}
 function calcStoch(highs,lows,closes,period=14){if(closes.length<period)return null;const sh=highs.slice(-period),sl=lows.slice(-period);const hh=Math.max(...sh),ll=Math.min(...sl);const k=hh===ll?50:((closes[closes.length-1]-ll)/(hh-ll))*100;return{k,d:k};}
 
-async function fetchAllTechnicals(ticker){
-  const d=await twelveFetch('time_series',{symbol:ticker,interval:'1day',outputsize:220});
-  if(!d?.values?.length)return{};
-  const bars=[...d.values].reverse();
-  const closes=bars.map(b=>parseFloat(b.close));
-  const highs=bars.map(b=>parseFloat(b.high));
-  const lows=bars.map(b=>parseFloat(b.low));
-  const volume=parseFloat(bars[bars.length-1].volume);
-  const rsi=calcRSI(closes);
-  const macd=calcMACD(closes);
-  const ema20=calcEMA(closes,20),ema50=calcEMA(closes,50),ema200=calcEMA(closes,200);
-  const bb=calcBollinger(closes);
-  const adx=calcADX(highs,lows,closes);
-  const stoch=calcStoch(highs,lows,closes);
-  return{rsi,macd,ema20,ema50,ema200,bbUpper:bb?.upper||null,bbMiddle:bb?.middle||null,bbLower:bb?.lower||null,adx,stochK:stoch?.k||null,stochD:stoch?.d||null,volume};
+// ── Yahoo Finance: fetch OHLCV chart data ───────────────────
+async function yfChart(ticker, range='2y', interval='1d') {
+  try {
+    const res = await fetch(`${PROXY}/yf/chart/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}`);
+    const data = await res.json();
+    const result = data?.chart?.result?.[0];
+    if (!result) return null;
+    const ts     = result.timestamp || [];
+    const q      = result.indicators?.quote?.[0] || {};
+    const closes  = q.close  || [];
+    const highs   = q.high   || [];
+    const lows    = q.low    || [];
+    const volumes = q.volume || [];
+    return { closes, highs, lows, volumes, timestamps: ts };
+  } catch(e) { return null; }
 }
 
-async function fetchQuote(ticker){
-  const d=await finnhubFetch('quote',{symbol:ticker});
-  if(!d||!d.c)return null;
-  return{price:d.c,change:d.dp,high:d.h,low:d.l,prevClose:d.pc};
+// ── Yahoo Finance: single or batch quote ────────────────────
+async function yfQuote(symbols) {
+  try {
+    const sym = Array.isArray(symbols) ? symbols.join(',') : symbols;
+    const res = await fetch(`${PROXY}/yf/quote?symbols=${encodeURIComponent(sym)}`);
+    const data = await res.json();
+    return data?.quoteResponse?.result || [];
+  } catch(e) { return []; }
 }
 
-async function fetchExtendedHours(ticker){
-  try{
-    const now=new Date();
-    const etNow=new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
-    const hour=etNow.getHours()+etNow.getMinutes()/60;
-    const isWd=etNow.getDay()>=1&&etNow.getDay()<=5;
-    if(!isWd)return null;
-    let session=null;
-    if(hour>=4&&hour<9.5)session='pre';
-    else if(hour>=16&&hour<20)session='after';
-    if(!session)return null;
-    const interval=session==='pre'?'1min':'1min';
-    const d=await twelveFetch('time_series',{symbol:ticker,interval,outputsize:1,prepost:'true'});
-    if(!d?.values?.length)return null;
-    return{extPrice:parseFloat(d.values[0].close),session,extTime:d.values[0].datetime};
-  }catch(e){return null;}
+// ── fetchAllTechnicals — now uses YF chart (free, accurate) ─
+async function fetchAllTechnicals(ticker) {
+  const chart = await yfChart(ticker);
+  if (!chart || !chart.closes.length) return {};
+  const closes  = chart.closes.filter(v => v != null);
+  const highs   = chart.highs.filter(v => v != null);
+  const lows    = chart.lows.filter(v => v != null);
+  const volumes = chart.volumes.filter(v => v != null);
+  const volume  = volumes[volumes.length-1] || null;
+  const rsi     = calcRSI(closes);
+  const macd    = calcMACD(closes);
+  const ema20   = calcEMA(closes, 20);
+  const ema50   = calcEMA(closes, 50);
+  const ema200  = calcEMA(closes, 200);
+  const bb      = calcBollinger(closes);
+  const adx     = calcADX(highs, lows, closes);
+  const stoch   = calcStoch(highs, lows, closes);
+  return { rsi, macd, ema20, ema50, ema200,
+    bbUpper: bb?.upper||null, bbMiddle: bb?.middle||null, bbLower: bb?.lower||null,
+    adx, stochK: stoch?.k||null, stochD: stoch?.d||null, volume };
 }
 
-async function fetchProfile(ticker){
-  const d=await finnhubFetch('stock/profile2',{symbol:ticker});
-  if(!d||!d.name)return null;
-  return{name:d.name,sector:d.finnhubIndustry||'',industry:d.finnhubIndustry||'',marketCap:d.marketCapitalization||null};
+// ── fetchQuote — uses YF (real-time, pre/after market) ──────
+async function fetchQuote(ticker) {
+  const quotes = await yfQuote(ticker);
+  const q = quotes[0];
+  if (!q || q.regularMarketPrice == null) return null;
+  return {
+    price:    q.regularMarketPrice,
+    change:   q.regularMarketChangePercent,
+    high:     q.regularMarketDayHigh,
+    low:      q.regularMarketDayLow,
+    prevClose:q.regularMarketPreviousClose,
+    volume:   q.regularMarketVolume,
+  };
 }
 
-async function fetchFinancials(ticker){
-  const d=await finnhubFetch('stock/metric',{symbol:ticker,metric:'all'});
-  if(!d||!d.metric)return null;
-  const m=d.metric;
-  return{pe:m.peBasicExclExtraTTM||m.peTTM||null,eps:m.epsBasicExclExtraItemsTTM||null,high52w:m['52WeekHigh']||null,low52w:m['52WeekLow']||null,avgVolume:m['10DayAverageTradingVolume']?m['10DayAverageTradingVolume']*1e6:null,epsGrowth:m.epsGrowthTTMYoy!=null?m.epsGrowthTTMYoy/100:null,divYield:m.dividendYieldIndicatedAnnual||null,revenueGrowth:m.revenueGrowthTTMYoy!=null?m.revenueGrowthTTMYoy/100:null};
+// ── fetchExtendedHours — reads pre/after from YF quote ──────
+async function fetchExtendedHours(ticker) {
+  try {
+    const quotes = await yfQuote(ticker);
+    const q = quotes[0];
+    if (!q) return null;
+    const now  = new Date();
+    const etH  = new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'})).getHours() +
+                 new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'})).getMinutes()/60;
+    const isWd = new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'})).getDay() >= 1;
+    if (!isWd) return null;
+    if (etH >= 4 && etH < 9.5 && q.preMarketPrice) {
+      return { extPrice: q.preMarketPrice, session: 'pre',
+               extChange: q.preMarketChangePercent, extTime: null };
+    }
+    if (etH >= 16 && etH < 20 && q.postMarketPrice) {
+      return { extPrice: q.postMarketPrice, session: 'after',
+               extChange: q.postMarketChangePercent, extTime: null };
+    }
+    return null;
+  } catch(e) { return null; }
+}
+
+// ── fetchProfile — now from YF quote (name, sector, market cap) ──
+async function fetchProfile(ticker) {
+  const quotes = await yfQuote(ticker);
+  const q = quotes[0];
+  if (!q) return null;
+  return {
+    name:      q.longName || q.shortName || ticker,
+    sector:    q.sector   || '',
+    industry:  q.industry || '',
+    marketCap: q.marketCap ? q.marketCap / 1e9 : null, // in billions
+  };
+}
+
+// ── fetchFinancials — all from YF quote in one free call ─────
+async function fetchFinancials(ticker) {
+  const quotes = await yfQuote(ticker);
+  const q = quotes[0];
+  if (!q) return null;
+  return {
+    pe:            q.trailingPE          ?? null,
+    forwardPE:     q.forwardPE           ?? null,
+    eps:           q.epsTrailingTwelveMonths ?? null,
+    epsGrowth:     q.earningsGrowth      ?? null,
+    high52w:       q.fiftyTwoWeekHigh    ?? null,
+    low52w:        q.fiftyTwoWeekLow     ?? null,
+    ema50:         q.fiftyDayAverage     ?? null,  // free from YF!
+    ema200:        q.twoHundredDayAverage?? null,  // free from YF!
+    avgVolume:     q.averageVolume       ?? null,
+    beta:          q.beta                ?? null,
+    divYield:      q.dividendYield       ?? null,
+    revenueGrowth: q.revenueGrowth       ?? null,
+    priceToBook:   q.priceToBook         ?? null,
+  };
 }
 
 async function fetchAnalystTargets(ticker){
@@ -1819,6 +1887,7 @@ checkMarketStatus();
 updateGreeting();
 setInterval(checkMarketStatus,1000);
 setInterval(updateGreeting,60000);
+startLivePrices();
 
 // ══════════════════════════════════════════
 //  INIT
@@ -1868,7 +1937,6 @@ async function runBackgroundTopScan() {
   const tickers = [...BROAD_UNIVERSE];
   const results = [];
 
-  // Show scanning state in dashTop5 only if no cached data
   const hasCached = document.getElementById('dashTop5').querySelector('.top5-row');
   if (!hasCached) {
     document.getElementById('dashTop5').innerHTML = `
@@ -1878,48 +1946,99 @@ async function runBackgroundTopScan() {
       </div>`;
   }
 
-  // Scan in parallel batches of 8 to stay within rate limits
-  const BATCH = 8;
-  for (let i = 0; i < tickers.length; i += BATCH) {
-    const batch = tickers.slice(i, i + BATCH);
+  // ── Phase 1: Batch fetch all quotes + fundamentals from YF ──
+  // 150 stocks = 3 requests of 50. Replaces 150 individual Finnhub calls.
+  const QUOTE_BATCH = 50;
+  const quoteMap = {};
+  for (let i = 0; i < tickers.length; i += QUOTE_BATCH) {
+    const batch = tickers.slice(i, i + QUOTE_BATCH);
+    try {
+      const quotes = await yfQuote(batch);
+      for (const q of quotes) {
+        if (q.regularMarketPrice) quoteMap[q.symbol] = q;
+      }
+    } catch(e) {}
+    if (i + QUOTE_BATCH < tickers.length) await delay(200);
+  }
+
+  // ── Phase 2: Fetch OHLCV charts for technicals (parallel, 10 at a time) ──
+  // Only for tickers that returned valid quotes
+  const validTickers = Object.keys(quoteMap);
+  const chartMap = {};
+  const CHART_BATCH = 10;
+  for (let i = 0; i < validTickers.length; i += CHART_BATCH) {
+    const batch = validTickers.slice(i, i + CHART_BATCH);
     await Promise.all(batch.map(async ticker => {
       try {
-        const [quote, profile, financials] = await Promise.all([
-          fetchQuote(ticker), fetchProfile(ticker), fetchFinancials(ticker)
-        ]);
-        if (!quote) return;
-        const tech = await fetchAllTechnicals(ticker).catch(() => ({}));
-        const rsi = tech.rsi ?? null, macd = tech.macd ?? null;
-        const pe = financials?.pe || null;
-        const high52w = financials?.high52w || null, low52w = financials?.low52w || null;
-        const pos52w = (high52w && low52w) ? ((quote.price - low52w) / (high52w - low52w)) * 100 : null;
-        const revenueGrowth = financials?.revenueGrowth || null;
-        const emaAbove20 = tech?.ema20 && quote.price > tech.ema20;
-        const emaAbove50 = tech?.ema50 && quote.price > tech.ema50;
-        let bbPos = null;
-        if (tech?.bbUpper && tech?.bbLower) bbPos = ((quote.price - tech.bbLower) / (tech.bbUpper - tech.bbLower)) * 100;
-        const score = calculateScore({rsi, macd, change: quote.change, pe, pos52w, revenueGrowth, emaAbove20, emaAbove50, adx: tech?.adx, bbPos});
-        const signal = getSignal(score, macd);
-        results.push({
-          ticker, name: profile?.name || ticker, score, signal,
-          price: quote.price, change: quote.change,
-          industry: profile?.industry || '', sector: profile?.sector || '',
-          volume: tech?.volume || null, avgVolume: financials?.avgVolume || null,
-          marketCap: profile?.marketCap ? profile.marketCap / 1000 : null,
-          rsi, macd, pe, eps: financials?.eps || null, epsGrowth: financials?.epsGrowth || null,
-          divYield: financials?.divYield || null, pos52w, high52w, low52w, revenueGrowth,
-          ema20: tech?.ema20 || null, ema50: tech?.ema50 || null, ema200: tech?.ema200 || null,
-          emaAbove20, emaAbove50, emaAbove200: tech?.ema200 && quote.price > tech.ema200,
-          bbUpper: tech?.bbUpper || null, bbMiddle: tech?.bbMiddle || null, bbLower: tech?.bbLower || null,
-          bbPos, adx: tech?.adx || null, stochK: tech?.stochK || null, stochD: tech?.stochD || null,
-          extPrice: null, extSession: null, extTime: null,
-          signal
-        });
-        // Update top5 live as results come in
-        renderDashTop5(results);
+        const chart = await yfChart(ticker);
+        if (chart) chartMap[ticker] = chart;
       } catch(e) {}
     }));
-    await delay(150); // small pause between batches
+    // Update top5 progressively as we compute scores
+    for (const ticker of batch) {
+      const q     = quoteMap[ticker];
+      const chart = chartMap[ticker];
+      if (!q) continue;
+      let rsi=null, macd=null, ema20=null, ema50=null, ema200=null, adx=null;
+      let bbUpper=null, bbMiddle=null, bbLower=null, bbPos=null;
+      let stochK=null, stochD=null, volume=null;
+      if (chart) {
+        const closes = chart.closes.filter(v=>v!=null);
+        const highs  = chart.highs.filter(v=>v!=null);
+        const lows   = chart.lows.filter(v=>v!=null);
+        rsi   = calcRSI(closes);
+        macd  = calcMACD(closes);
+        ema20 = calcEMA(closes,20);
+        ema50 = calcEMA(closes,50);
+        ema200= calcEMA(closes,200);
+        const bb = calcBollinger(closes);
+        bbUpper=bb?.upper||null; bbMiddle=bb?.middle||null; bbLower=bb?.lower||null;
+        adx   = calcADX(highs,lows,closes);
+        const stoch = calcStoch(highs,lows,closes);
+        stochK=stoch?.k||null; stochD=stoch?.d||null;
+        volume=chart.volumes.filter(v=>v!=null).at(-1)||null;
+      }
+      // Use YF's built-in EMAs when we don't have chart data
+      if (!ema50)  ema50  = q.fiftyDayAverage    || null;
+      if (!ema200) ema200 = q.twoHundredDayAverage|| null;
+      const price   = q.regularMarketPrice;
+      const change  = q.regularMarketChangePercent;
+      const high52w = q.fiftyTwoWeekHigh  || null;
+      const low52w  = q.fiftyTwoWeekLow   || null;
+      const pos52w  = (high52w&&low52w) ? ((price-low52w)/(high52w-low52w))*100 : null;
+      if (bbUpper && bbLower) bbPos = ((price-bbLower)/(bbUpper-bbLower))*100;
+      const emaAbove20 = ema20  && price > ema20;
+      const emaAbove50 = ema50  && price > ema50;
+      const emaAbove200= ema200 && price > ema200;
+      const pe            = q.trailingPE ?? null;
+      const revenueGrowth = q.revenueGrowth ?? null;
+      const score  = calculateScore({rsi,macd,change,pe,pos52w,revenueGrowth,emaAbove20,emaAbove50,adx,bbPos});
+      const signal = getSignal(score, macd);
+      results.push({
+        ticker, score, signal,
+        name:       q.longName || q.shortName || ticker,
+        sector:     q.sector   || '',
+        industry:   q.industry || '',
+        price, change, volume,
+        avgVolume:  q.averageVolume     || null,
+        marketCap:  q.marketCap ? q.marketCap/1e9 : null,
+        rsi, macd, pe,
+        forwardPE:  q.forwardPE          ?? null,
+        eps:        q.epsTrailingTwelveMonths ?? null,
+        epsGrowth:  q.earningsGrowth     ?? null,
+        divYield:   q.dividendYield      ?? null,
+        beta:       q.beta               ?? null,
+        pos52w, high52w, low52w, revenueGrowth,
+        ema20, ema50, ema200, emaAbove20, emaAbove50, emaAbove200,
+        bbUpper, bbMiddle, bbLower, bbPos,
+        adx, stochK, stochD,
+        extPrice:   q.preMarketPrice || q.postMarketPrice || null,
+        extSession: q.preMarketPrice ? 'pre' : q.postMarketPrice ? 'after' : null,
+        extTime:    null,
+      });
+    }
+    renderDashTop5(results);
+    await delay(80);
   }
 
   // Final render — update everything
@@ -1951,9 +2070,201 @@ async function runBackgroundTopScan() {
   // Clean up age label
   const ageLabel = document.querySelector('.top5-age-label');
   if(ageLabel) ageLabel.remove();
+  // Subscribe new tickers to live stream
+  resubscribeYFStream();
 
   // Also merge into allResults if screener hasn't been run yet
   if (!allResults.length) allResults = results;
+}
+
+
+// ══════════════════════════════════════════
+//  LIVE PRICES — Yahoo Finance WebSocket
+//  Same stream Yahoo's own site uses.
+//  Prices push instantly on every tick.
+// ══════════════════════════════════════════
+let yfWS = null;
+let wsReconnectTimer = null;
+let wsSubscribed = new Set();
+
+function startLivePrices() {
+  connectYFStream();
+}
+
+function stopLivePrices() {
+  if (yfWS) { yfWS.close(); yfWS = null; }
+  if (wsReconnectTimer) { clearTimeout(wsReconnectTimer); wsReconnectTimer = null; }
+}
+
+function connectYFStream() {
+  if (yfWS && yfWS.readyState <= 1) return; // already open/connecting
+  try {
+    yfWS = new WebSocket('wss://streamer.finance.yahoo.com');
+  } catch(e) { fallbackPoll(); return; }
+
+  yfWS.onopen = () => {
+    document.getElementById('lastUpdated').textContent = 'Streaming live…';
+    subscribeYFStream();
+  };
+
+  // Yahoo sends Protobuf binary messages — decode manually
+  yfWS.onmessage = (evt) => {
+    try {
+      // YF WebSocket sends base64-encoded protobuf
+      const b64 = typeof evt.data === 'string' ? evt.data : null;
+      if (!b64) return;
+      const decoded = decodeYFProto(atob(b64));
+      if (!decoded || !decoded.id || decoded.price == null) return;
+
+      const ticker = decoded.id;
+      const r = allResults.find(x => x.ticker === ticker);
+      if (!r) return;
+
+      const prevPrice = r.price;
+      r.price  = decoded.price;
+      if (decoded.changePercent != null) r.change = decoded.changePercent;
+
+      patchRowPrice(r, prevPrice);
+      renderDashTop5();
+
+      // Pulse the status dot
+      const dot = document.querySelector('.status-dot');
+      if (dot) { dot.style.transform='scale(1.6)'; setTimeout(()=>dot.style.transform='',200); }
+      document.getElementById('lastUpdated').textContent =
+        '● Live · ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+    } catch(e) {}
+  };
+
+  yfWS.onerror = () => fallbackPoll();
+  yfWS.onclose = (e) => {
+    if (e.code !== 1000) {
+      // Reconnect after 5s on unexpected close
+      wsReconnectTimer = setTimeout(connectYFStream, 5000);
+    }
+  };
+}
+
+function subscribeYFStream() {
+  if (!yfWS || yfWS.readyState !== 1) return;
+  const tickers = allResults.length
+    ? allResults.map(r => r.ticker)
+    : BROAD_UNIVERSE;
+  // Subscribe in one message
+  yfWS.send(JSON.stringify({ subscribe: tickers }));
+  tickers.forEach(t => wsSubscribed.add(t));
+}
+
+// Re-subscribe when allResults changes (new scan loaded)
+function resubscribeYFStream() {
+  if (!yfWS || yfWS.readyState !== 1) { connectYFStream(); return; }
+  const newTickers = allResults.map(r => r.ticker).filter(t => !wsSubscribed.has(t));
+  if (newTickers.length) {
+    yfWS.send(JSON.stringify({ subscribe: newTickers }));
+    newTickers.forEach(t => wsSubscribed.add(t));
+  }
+}
+
+// ── Decode Yahoo Finance Protobuf ─────────────────────────────
+// YF uses a minimal protobuf schema. Field IDs:
+//   1 = id (string), 2 = price (float), 3 = time (int64),
+//   4 = currency, 5 = exchange, 6 = quoteType, 7 = marketHours,
+//   8 = changePercent (float), 9 = dayVolume (int64),
+//  10 = change (float), 11 = priceHint (int32)
+function decodeYFProto(bytes) {
+  const buf = typeof bytes === 'string'
+    ? Uint8Array.from(bytes, c => c.charCodeAt(0))
+    : new Uint8Array(bytes);
+  let pos = 0;
+  const result = {};
+
+  function readVarint() {
+    let val = 0, shift = 0, b;
+    do { b = buf[pos++]; val |= (b & 0x7f) << shift; shift += 7; } while (b & 0x80);
+    return val;
+  }
+  function readFloat() {
+    const view = new DataView(buf.buffer, buf.byteOffset + pos, 4);
+    pos += 4;
+    return view.getFloat32(0, true);
+  }
+  function readDouble() {
+    const view = new DataView(buf.buffer, buf.byteOffset + pos, 8);
+    pos += 8;
+    return view.getFloat64(0, true);
+  }
+  function readString(len) {
+    const slice = buf.slice(pos, pos + len);
+    pos += len;
+    return new TextDecoder().decode(slice);
+  }
+
+  try {
+    while (pos < buf.length) {
+      const tag   = readVarint();
+      const field = tag >>> 3;
+      const wire  = tag & 0x7;
+      if (wire === 0)      { const v = readVarint(); if (field===3) result.time=v; }
+      else if (wire === 1) { const v = readDouble(); if (field===2) result.price=v; else if(field===8) result.changePercent=v; }
+      else if (wire === 2) { const len = readVarint(); if (field===1) result.id=readString(len); else pos+=len; }
+      else if (wire === 5) { const v = readFloat();
+        if (field===2)  result.price         = v;
+        else if(field===8)  result.changePercent  = v;
+        else if(field===10) result.change        = v;
+      }
+      else break; // unknown wire type, stop
+    }
+  } catch(e) {}
+  return result;
+}
+
+// ── Fallback: poll every 5s if WebSocket unavailable ─────────
+let _fallbackInterval = null;
+function fallbackPoll() {
+  document.getElementById('lastUpdated').textContent = 'Polling every 5s…';
+  if (_fallbackInterval) return;
+  _fallbackInterval = setInterval(async () => {
+    if (!allResults.length) return;
+    const tickers = allResults.map(r=>r.ticker);
+    for (let i=0; i<tickers.length; i+=50) {
+      const quotes = await yfQuote(tickers.slice(i,i+50)).catch(()=>[]);
+      for (const q of quotes) {
+        const r = allResults.find(x=>x.ticker===q.symbol);
+        if (!r || q.regularMarketPrice==null) continue;
+        const prev = r.price;
+        r.price  = q.regularMarketPrice;
+        r.change = q.regularMarketChangePercent;
+        patchRowPrice(r, prev);
+      }
+    }
+    renderDashTop5();
+    document.getElementById('lastUpdated').textContent =
+      'Updated · ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+  }, 5000);
+}
+
+function patchRowPrice(r, prevPrice) {
+  const row = document.querySelector(`tr[data-ticker="${r.ticker}"]`);
+  if (!row) return;
+  const priceEl = row.querySelector('.t-price');
+  const chgEl   = row.querySelector('.t-chg');
+  const extEl   = row.querySelector('.ext-price');
+  if (priceEl) priceEl.textContent = '$' + r.price.toFixed(2);
+  if (chgEl) {
+    const up = r.change >= 0;
+    chgEl.textContent = (up?'+':'') + r.change.toFixed(2)+'%';
+    chgEl.className   = 't-chg '+(up?'up':'dn');
+  }
+  if (extEl && r.extPrice) {
+    extEl.textContent = (r.extSession==='pre'?'Pre ':'After ')+'$'+r.extPrice.toFixed(2);
+    extEl.className   = 'ext-price '+(r.extSession||'');
+  }
+  // Flash green/red on change
+  if (prevPrice != null && prevPrice !== r.price) {
+    const up = r.price >= prevPrice;
+    row.style.transition = 'background .1s';
+    row.style.background = up ? 'rgba(0,230,118,.07)' : 'rgba(255,82,82,.07)';
+    setTimeout(()=>{ row.style.transition='background .6s'; row.style.background=''; }, 400);
+  }
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
