@@ -1565,15 +1565,17 @@ function drawFngGauge(score,color){
 
 function renderIndexCard(ticker,q){
   const el=document.getElementById(`macro-${ticker}`);if(!el)return;
+  if(q.c==null||q.dp==null){el.innerHTML=`<div class="mi-label">${ticker}</div><div class="mi-name" style="color:var(--muted)">Unavailable</div>`;return;}
   const invert=ticker==='VIX';
   const up=invert?q.dp<=0:q.dp>=0;
   const cc=up?'chg-up':'chg-dn';
   const names={VIX:'Volatility Index',SPY:'S&P 500 ETF',QQQ:'Nasdaq 100 ETF',IWM:'Russell 2000 ETF'};
-  el.innerHTML=`<div class="mi-label">${ticker}</div><div class="mi-name">${names[ticker]||''}</div><div class="mi-price">$${q.c.toFixed(2)}</div><span class="mi-change ${cc}">${q.dp>=0?'+':''}${q.dp.toFixed(2)}%</span>${ticker==='VIX'?'<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:var(--muted);margin-top:4px">↑ rising = more fear</div>':''}`;
+  el.innerHTML=`<div class="mi-label">${ticker}</div><div class="mi-name">${names[ticker]||''}</div><div class="mi-price">$${(+q.c).toFixed(2)}</div><span class="mi-change ${cc}">${q.dp>=0?'+':''}${(+q.dp).toFixed(2)}%</span>${ticker==='VIX'?'<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:var(--muted);margin-top:4px">↑ rising = more fear</div>':''}`;
 }
 
 function renderSectorTile(ticker,q){
   const el=document.getElementById(`sector-${ticker}`);if(!el)return;
+  if(q.dp==null){el.style.background='var(--glass-border)';el.innerHTML=`<div class="sector-ticker" style="color:var(--muted)">${ticker}</div><div style="font-size:9px;color:var(--muted)">--</div>`;return;}
   const pct=q.dp;const absPct=Math.abs(pct);
   const green='rgba(0,230,118,';const red='rgba(255,77,109,';
   const intensity=Math.min(0.35,absPct*0.08);
@@ -1588,8 +1590,8 @@ function renderExtraCard(id,q){
   const labels={DXY:'DXY (US Dollar)',GLD:'Gold (GLD)',USO:'Oil (USO)',TLT:'Bonds (TLT)'};
   const valEl=document.getElementById(`macro-${id}-val`);
   const chgEl=document.getElementById(`macro-${id}-chg`);
-  if(valEl)valEl.textContent='$'+q.c.toFixed(2);
-  if(chgEl){chgEl.textContent=(q.dp>=0?'+':'')+q.dp.toFixed(2)+'%';chgEl.style.color=q.dp>=0?'var(--green)':'var(--red)';}
+  if(valEl)valEl.textContent=q.c!=null?'$'+(+q.c).toFixed(2):'--';
+  if(chgEl){chgEl.textContent=q.dp!=null?(q.dp>=0?'+':'')+(+q.dp).toFixed(2)+'%':'--';chgEl.style.color=q.dp!=null?(q.dp>=0?'var(--green)':'var(--red)'):'var(--muted)';}
 }
 
 let macroLoaded=false;
