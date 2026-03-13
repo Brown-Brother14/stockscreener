@@ -1000,7 +1000,7 @@ async function loadDashboard() {
   try {
     const [dashQuotes, fngRes] = await Promise.all([
       yfQuote(['SPY','QQQ','^VIX']).catch(()=>[]),
-      fetch(`${PROXY}/feargreed`).then(r=>r.json()).catch(()=>null)
+      fetch('https://api.alternative.me/fng/?limit=1&format=json').then(r=>r.json()).then(d=>({fear_and_greed:{score:parseInt(d.data[0].value),value_classification:d.data[0].value_classification}})).catch(()=>null)
     ]);
     const batchData = {};
     dashQuotes.forEach(q => { batchData[q.symbol]={c:q.regularMarketPrice,dp:q.regularMarketChangePercent}; });
