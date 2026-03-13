@@ -989,20 +989,22 @@ async function loadDashboard() {
       yahooQuote('SPY'), yahooQuote('QQQ'), yahooQuote('%5EVIX'),
       fetch(`${PROXY}/feargreed`).then(r=>r.json()).catch(()=>null)
     ]);
+    console.log('[Dashboard] SPY raw:', spyQ, 'QQQ raw:', qqqQ, 'VIX raw:', vixQ);
     const fmtChg = (v, invert=false) => {
+      if(v==null) return '';
       const up = invert ? v <= 0 : v >= 0;
-      return `<div class="stat-chg ${up?'chg-up':'chg-dn'}">${v>=0?'+':''}${v.toFixed(2)}%</div>`;
+      return `<div class="stat-chg ${up?'chg-up':'chg-dn'}">${v>=0?'+':''}${(+v).toFixed(2)}%</div>`;
     };
-    if (spyQ) {
-      document.getElementById('d-spy').textContent = '$'+spyQ.c.toFixed(2);
+    if (spyQ?.c!=null) {
+      document.getElementById('d-spy').textContent = '$'+(+spyQ.c).toFixed(2);
       document.getElementById('d-spy-chg').outerHTML = fmtChg(spyQ.dp);
     }
-    if (qqqQ) {
-      document.getElementById('d-qqq').textContent = '$'+qqqQ.c.toFixed(2);
+    if (qqqQ?.c!=null) {
+      document.getElementById('d-qqq').textContent = '$'+(+qqqQ.c).toFixed(2);
       document.getElementById('d-qqq-chg').outerHTML = fmtChg(qqqQ.dp);
     }
-    if (vixQ) {
-      document.getElementById('d-vix').textContent = vixQ.c.toFixed(2);
+    if (vixQ?.c!=null) {
+      document.getElementById('d-vix').textContent = (+vixQ.c).toFixed(2);
       document.getElementById('d-vix-chg').outerHTML = fmtChg(vixQ.dp, true);
     }
     if (fngRes?.fear_and_greed?.score != null) {
@@ -1015,8 +1017,12 @@ async function loadDashboard() {
       document.getElementById('d-fng-lbl').style.color = col;
       document.getElementById('d-fng-lbl').className = 'stat-chg';
     }
-    document.getElementById('dashUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const anyData = spyQ?.c!=null || qqqQ?.c!=null || vixQ?.c!=null;
+    document.getElementById('dashUpdated').textContent = anyData
+      ? 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})
+      : 'Proxy may be down — open DevTools console for details';
   } catch(e) {
+    console.error('[Dashboard] error:', e);
     document.getElementById('dashUpdated').textContent = 'Stats unavailable';
   }
 }
