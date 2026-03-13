@@ -480,23 +480,7 @@ tbody tr{animation:fadeIn .25s ease both}
 </style>
 </head>
 <body>
-<!-- ── SETUP BANNER (auto-hides once PROXY URL is set) ───────────────────── -->
-<div id="setupBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#1a1200,#1a0a00);border-bottom:1px solid rgba(251,191,36,.35);padding:11px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#fbbf24;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-  <span style="font-weight:700;font-size:13px">⚠ SETUP REQUIRED</span>
-  <span style="opacity:.85">Deploy <strong>worker.js</strong> to Cloudflare Workers (free), then replace the <code style="background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px">PROXY</code> constant in this file with your worker URL.</span>
-  <a href="https://workers.cloudflare.com" target="_blank" style="color:#fbbf24;font-weight:700;border:1px solid rgba(251,191,36,.4);padding:4px 12px;border-radius:6px;text-decoration:none">Open Cloudflare ↗</a>
-  <button onclick="document.getElementById('setupBanner').style.display='none'" style="margin-left:auto;background:none;border:none;color:rgba(251,191,36,.5);cursor:pointer;font-size:16px">✕</button>
-</div>
-<script>
-  // Show setup banner only when PROXY is still the placeholder
-  document.addEventListener('DOMContentLoaded', () => {
-    if (typeof PROXY !== 'undefined' && PROXY.includes('YOUR-WORKER-NAME')) {
-      document.getElementById('setupBanner').style.display = 'flex';
-      // Push content below banner
-      document.body.style.paddingTop = '46px';
-    }
-  });
-</script>
+
 
 <!-- SITE NAV -->
 <nav id="siteNav">
