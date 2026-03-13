@@ -1105,56 +1105,35 @@ function calcStoch(highs,lows,closes,period=14){if(closes.length<period)return n
 
 // ── Yahoo Finance: fetch OHLCV chart data ───────────────────
 async function yfChart(ticker, range='2y', interval='1d') {
-  // Call Yahoo Finance directly — supports CORS, no proxy needed
-  const urls = [
-    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}&includePrePost=false`,
-    `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}&includePrePost=false`,
-  ];
-  for (const url of urls) {
-    try {
-      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-      if (!res.ok) continue;
-      const data = await res.json();
-      const result = data?.chart?.result?.[0];
-      if (!result) continue;
-      const ts      = result.timestamp || [];
-      const q       = result.indicators?.quote?.[0] || {};
-      const closes  = q.close  || [];
-      const highs   = q.high   || [];
-      const lows    = q.low    || [];
-      const volumes = q.volume || [];
-      return { closes, highs, lows, volumes, timestamps: ts };
-    } catch(e) { continue; }
-  }
-  return null;
+  // Must go through proxy — YF blocks CORS from non-yahoo origins
+  try {
+    const res = await fetch(`${PROXY}/yf/chart/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const result = data?.chart?.result?.[0];
+    if (!result) return null;
+    const ts      = result.timestamp || [];
+    const q       = result.indicators?.quote?.[0] || {};
+    return {
+      closes:  q.close  || [],
+      highs:   q.high   || [],
+      lows:    q.low    || [],
+      volumes: q.volume || [],
+      timestamps: ts
+    };
+  } catch(e) { return null; }
 }
 
 // ── Yahoo Finance: single or batch quote ────────────────────
 async function yfQuote(symbols) {
+  // Must go through proxy — YF blocks CORS from non-yahoo origins
   const sym = Array.isArray(symbols) ? symbols.join(',') : symbols;
-  const fields = [
-    'regularMarketPrice','regularMarketChangePercent','regularMarketDayHigh',
-    'regularMarketDayLow','regularMarketPreviousClose','regularMarketVolume',
-    'fiftyTwoWeekHigh','fiftyTwoWeekLow','fiftyDayAverage','twoHundredDayAverage',
-    'trailingPE','forwardPE','epsTrailingTwelveMonths','earningsGrowth','revenueGrowth',
-    'marketCap','beta','dividendYield','longName','shortName','symbol',
-    'preMarketPrice','preMarketChangePercent','postMarketPrice','postMarketChangePercent',
-    'averageVolume','sector','industry',
-  ].join(',');
-  const urls = [
-    `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&fields=${fields}&formatted=false&lang=en-US&region=US`,
-    `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(sym)}&fields=${fields}&formatted=false`,
-  ];
-  for (const url of urls) {
-    try {
-      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-      if (!res.ok) continue;
-      const data = await res.json();
-      const results = data?.quoteResponse?.result;
-      if (results?.length) return results;
-    } catch(e) { continue; }
-  }
-  return [];
+  try {
+    const res = await fetch(`${PROXY}/yf/quote?symbols=${encodeURIComponent(sym)}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data?.quoteResponse?.result || [];
+  } catch(e) { return []; }
 }
 
 // ── fetchAllTechnicals — now uses YF chart (free, accurate) ─
