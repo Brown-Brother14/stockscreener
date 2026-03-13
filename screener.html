@@ -2169,14 +2169,6 @@ async function runBackgroundTopScan() {
 //  Docs: https://finnhub.io/docs/api/websocket-trades
 // ══════════════════════════════════════════════════════════════
 
-let fhWS = null;
-let fhReconnectTimer = null;
-let fhSubscribed = new Set();
-let _fallbackInterval = null;
-// Debounce UI patches so rapid ticks don't thrash the DOM
-let _pendingPatches = {};
-let _patchRaf = null;
-
 function startLivePrices() {
   connectFinnhubStream();
 }
