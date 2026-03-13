@@ -951,17 +951,29 @@ function renderDashTop5(data) {
   const el = document.getElementById('dashTop5');
   const source = data || allResults;
   if (!source.length) return;
-  const top5 = [...source].sort((a,b)=>b.score-a.score).slice(0,5);
   const isCached = !!data;
+
+  // Only show non-weak picks; if none exist show top 5 with a market note
+  const sorted = [...source].sort((a,b)=>b.score-a.score);
+  const strong = sorted.filter(d=>d.signal.cls!=='weak');
+  const top5 = strong.length >= 3 ? strong.slice(0,5) : sorted.slice(0,5);
+  const allWeak = strong.length < 3;
+
   el.innerHTML = top5.map((d,i) => {
     const sc = getScoreClass(d.score);
+    const subLabel = d.name && d.name !== d.ticker ? d.name : d.signal.label;
+    const chgColor = d.change>=0 ? 'var(--green)' : 'var(--red)';
+    const chgStr = d.change!=null ? `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:${chgColor}">${d.change>=0?'+':''}${(+d.change).toFixed(2)}%</span>` : '';
     return `<div class="top5-row" onclick="openChart('${d.ticker}')">
       <div class="top5-rank">${i+1}</div>
-      <div><div class="top5-ticker">${d.ticker}</div><div class="top5-name">${d.name !== d.ticker ? d.name : d.score >= 78 ? 'Breakout' : 'Momentum'}</div></div>
+      <div><div class="top5-ticker">${d.ticker}</div><div class="top5-name">${subLabel}</div></div>
+      ${chgStr}
       <div class="top5-score ${sc}">${d.score}</div>
       <span class="signal ${d.signal.cls}">${d.signal.label}</span>
     </div>`;
-  }).join('') + (isCached ? `<div style="padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">Last scan · Refreshing…</div>` : '');
+  }).join('')
+  + (allWeak ? `<div style="padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">⚠ Broad market weakness — scores suppressed</div>` : '')
+  + (isCached && !allWeak ? `<div style="padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">Last scan · Refreshing…</div>` : '');
 }
 
 // ── Dashboard today's events ──
