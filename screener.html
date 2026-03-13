@@ -360,15 +360,123 @@ tbody tr{animation:fadeIn .25s ease both}
 .next{color:var(--muted)!important}.open{color:var(--green)!important}.pre{color:#a78bfa!important}.after{color:#fb923c!important}
 #marketStatusText{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
 
-/* Smart Money styles */
-.sm-subtab{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:8px 18px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);cursor:pointer;transition:all .15s}
-.sm-subtab:hover{background:rgba(255,255,255,.07);color:var(--text)}
-.sm-subtab.active{background:rgba(0,230,118,.1);border-color:rgba(0,230,118,.3);color:var(--green)}
-.sm-buy{color:var(--green);font-weight:700}.sm-sell{color:var(--red);font-weight:700}.sm-exchange{color:var(--amber);font-weight:700}
-.sm-chamber-house{background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.2);padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace}
-.sm-chamber-senate{background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.2);padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace}
-.sm-amount{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.6)}
-.ins-buy{color:var(--green)}.ins-sell{color:var(--red)}.ins-award{color:var(--amber)}
+/* ── Smart Money Showcase ── */
+.sm-page{padding:0 0 120px}
+.sm-hero{padding:52px 0 36px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:40px}
+.sm-hero-eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sm-hero-eyebrow::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07)}
+.sm-hero-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-1.5px;line-height:1.05;margin-bottom:10px}
+.sm-hero-sub{font-size:15px;color:rgba(255,255,255,.4);font-weight:400;max-width:480px;line-height:1.6}
+.sm-ticker-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:20px}
+.sm-ticker-pill{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);cursor:pointer;transition:all .2s}
+.sm-ticker-pill:hover{background:rgba(255,255,255,.11);color:#fff;transform:translateY(-1px)}
+.sm-ticker-pill.buy{background:rgba(0,230,118,.08);border-color:rgba(0,230,118,.2);color:var(--green)}
+.sm-ticker-pill.sell{background:rgba(255,77,109,.08);border-color:rgba(255,77,109,.2);color:var(--red)}
+
+/* View toggle */
+.sm-view-toggle{display:flex;gap:0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:3px;margin-bottom:32px;width:fit-content}
+.sm-view-btn{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;padding:8px 22px;border-radius:9px;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;transition:all .2s}
+.sm-view-btn.active{background:#fff;color:#000}
+
+/* Marquee stats bar */
+.sm-stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:14px;overflow:hidden;margin-bottom:36px}
+.sm-stat{background:#050506;padding:18px 20px}
+.sm-stat-label{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:8px}
+.sm-stat-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;line-height:1}
+.sm-stat-val.green{color:var(--green)}.sm-stat-val.red{color:var(--red)}.sm-stat-val.white{color:#fff}
+
+/* Filter chips */
+.sm-chips{display:flex;align-items:center;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.sm-chip{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:6px 14px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.4);cursor:pointer;transition:all .15s;white-space:nowrap}
+.sm-chip:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.8)}
+.sm-chip.active{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff}
+.sm-chip.buy-on{background:rgba(0,230,118,.1);border-color:rgba(0,230,118,.25);color:var(--green)}
+.sm-chip.sell-on{background:rgba(255,77,109,.1);border-color:rgba(255,77,109,.25);color:var(--red)}
+.sm-search-wrap{margin-left:auto;position:relative}
+.sm-search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.3;width:14px;height:14px}
+.sm-search-input{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:8px;padding:7px 12px 7px 30px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#fff;outline:none;width:180px;transition:border-color .2s}
+.sm-search-input:focus{border-color:rgba(255,255,255,.2)}
+.sm-search-input::placeholder{color:rgba(255,255,255,.2)}
+
+/* Featured card (top trade) */
+.sm-featured{position:relative;border-radius:20px;padding:28px 32px;margin-bottom:24px;overflow:hidden;cursor:pointer;transition:transform .2s}
+.sm-featured:hover{transform:translateY(-2px)}
+.sm-featured.is-buy{background:linear-gradient(135deg,rgba(0,230,118,.12) 0%,rgba(0,230,118,.04) 60%,rgba(0,0,0,0) 100%);border:1px solid rgba(0,230,118,.2)}
+.sm-featured.is-sell{background:linear-gradient(135deg,rgba(255,77,109,.12) 0%,rgba(255,77,109,.04) 60%,rgba(0,0,0,0) 100%);border:1px solid rgba(255,77,109,.2)}
+.sm-featured-label{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:16px}
+.sm-featured-ticker{font-family:'Plus Jakarta Sans',sans-serif;font-size:42px;font-weight:800;letter-spacing:-1px;line-height:1}
+.sm-featured-action{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;margin-top:8px;letter-spacing:.5px}
+.sm-featured-action.buy{color:var(--green)}.sm-featured-action.sell{color:var(--red)}
+.sm-featured-meta{font-size:14px;color:rgba(255,255,255,.5);margin-top:6px}
+.sm-featured-amount{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;margin-top:12px}
+.sm-featured-glow{position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;filter:blur(60px);opacity:.15;pointer-events:none}
+.sm-featured-glow.buy{background:var(--green)}.sm-featured-glow.sell{background:var(--red)}
+
+/* Trade grid */
+.sm-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:700px){.sm-grid{grid-template-columns:1fr}}
+.sm-trade-card{position:relative;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:18px 20px;cursor:pointer;transition:background .15s,border-color .15s,transform .15s;overflow:hidden}
+.sm-trade-card:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.13);transform:translateY(-1px)}
+.sm-trade-card.is-buy{border-top:2px solid rgba(0,230,118,.5)}
+.sm-trade-card.is-sell{border-top:2px solid rgba(255,77,109,.5)}
+.sm-trade-card.is-other{border-top:2px solid rgba(251,191,36,.4)}
+.sm-tc-action{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.sm-tc-action.buy{color:var(--green)}.sm-tc-action.sell{color:var(--red)}.sm-tc-action.other{color:var(--amber)}
+.sm-tc-ticker{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+.sm-tc-amount{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.45);margin-bottom:12px}
+.sm-tc-name{font-size:12px;font-weight:600;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sm-tc-chamber{font-size:10px;color:rgba(255,255,255,.3);margin-top:2px}
+.sm-tc-date{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);margin-top:10px}
+.sm-tc-glow{position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;filter:blur(30px);opacity:.08;pointer-events:none}
+.sm-tc-glow.buy{background:var(--green)}.sm-tc-glow.sell{background:var(--red)}
+
+/* Load more */
+.sm-load-more{width:100%;padding:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;transition:all .2s;margin-top:4px}
+.sm-load-more:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.8)}
+
+/* Insider showcase */
+.ins-hero-ticker{display:flex;align-items:center;gap:16px;margin-bottom:32px;flex-wrap:wrap}
+.ins-ticker-input{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 18px;color:#fff;outline:none;width:180px;text-transform:uppercase;transition:border-color .2s,box-shadow .2s}
+.ins-ticker-input:focus{border-color:rgba(255,255,255,.25);box-shadow:0 0 0 3px rgba(255,255,255,.04)}
+.ins-ticker-input::placeholder{color:rgba(255,255,255,.18);font-size:18px;letter-spacing:0;text-transform:none}
+.ins-go-btn{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;padding:13px 28px;border-radius:12px;background:#fff;color:#000;border:none;cursor:pointer;transition:opacity .15s,transform .15s}
+.ins-go-btn:hover{opacity:.88;transform:translateY(-1px)}
+
+/* MSPR showcase card */
+.mspr-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:28px 32px;margin-bottom:28px;display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center}
+@media(max-width:600px){.mspr-card{grid-template-columns:1fr}}
+.mspr-score-wrap{text-align:center}
+.mspr-score{font-family:'Plus Jakarta Sans',sans-serif;font-size:56px;font-weight:800;letter-spacing:-2px;line-height:1}
+.mspr-score-label{font-size:13px;font-weight:600;margin-top:6px}
+.mspr-bar-wrap{flex:1}
+.mspr-bar-label{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:12px}
+.mspr-track{height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden;margin-bottom:8px}
+.mspr-fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.34,1.56,.64,1),background .5s}
+.mspr-range{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.22)}
+.mspr-desc{font-size:12px;color:rgba(255,255,255,.35);margin-top:14px;line-height:1.6;max-width:380px}
+
+/* Insider cards */
+.ins-section-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.ins-section-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+.ins-card-new{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px 20px;display:grid;grid-template-columns:1fr auto;gap:8px 20px;cursor:default;transition:background .15s}
+.ins-card-new:hover{background:rgba(255,255,255,.055)}
+.ins-card-new.is-buy{border-left:3px solid rgba(0,230,118,.55)}
+.ins-card-new.is-sell{border-left:3px solid rgba(255,77,109,.5)}
+.ins-card-new.is-other{border-left:3px solid rgba(251,191,36,.45)}
+.ins-card-name{font-size:14px;font-weight:700;color:rgba(255,255,255,.88)}
+.ins-card-title{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px}
+.ins-card-type{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.5px}
+.ins-card-type.buy{color:var(--green)}.ins-card-type.sell{color:var(--red)}.ins-card-type.other{color:var(--amber)}
+.ins-card-value{font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;text-align:right}
+.ins-card-shares{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.3);text-align:right;margin-top:2px}
+.ins-card-date{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.25);grid-column:1/-1;margin-top:4px}
+.ins-grid{display:flex;flex-direction:column;gap:8px}
+
+.sm-empty-state{text-align:center;padding:80px 20px}
+.sm-empty-icon{font-size:40px;margin-bottom:16px;opacity:.3}
+.sm-empty-text{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:700;color:rgba(255,255,255,.25);margin-bottom:6px}
+.sm-empty-sub{font-size:13px;color:rgba(255,255,255,.15)}
+.sm-loading-state{text-align:center;padding:80px 20px}
 </style>
 </head>
 <body>
@@ -757,125 +865,113 @@ tbody tr{animation:fadeIn .25s ease both}
 
 <!-- ═══════════════ SMART MONEY TAB ═══════════════ -->
 <div id="tab-smartmoney" class="tab-panel">
-  <div class="wrap">
-    <div class="dash-header">
-      <div class="dash-title">Smart Money</div>
-      <div class="dash-sub">Insider transactions (SEC Form 4) + Congressional trades (STOCK Act disclosures)</div>
+  <div class="wrap sm-page" style="max-width:1100px">
+
+    <!-- HERO -->
+    <div class="sm-hero">
+      <div class="sm-hero-eyebrow">Smart Money</div>
+      <div class="sm-hero-title">Who's buying.<br>Who's selling.</div>
+      <div class="sm-hero-sub">Congressional STOCK Act disclosures and SEC Form 4 insider filings — updated as they're filed.</div>
+      <div class="sm-ticker-pills" id="sm-hot-pills"><!-- populated by JS --></div>
     </div>
 
-    <!-- Sub-tabs -->
-    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
-      <button class="sm-subtab active" id="sm-tab-congress" onclick="smSwitchTab('congress',this)">🏛 Congress Trades</button>
-      <button class="sm-subtab" id="sm-tab-insider" onclick="smSwitchTab('insider',this)">👔 Insider Transactions</button>
+    <!-- VIEW TOGGLE -->
+    <div class="sm-view-toggle">
+      <button class="sm-view-btn active" id="sm-view-btn-congress" onclick="smSetView('congress',this)">🏛 Congress</button>
+      <button class="sm-view-btn" id="sm-view-btn-insider" onclick="smSetView('insider',this)">👔 Insiders</button>
     </div>
 
-    <!-- CONGRESS PANEL -->
-    <div id="sm-panel-congress">
-      <!-- Stats strip -->
-      <div class="stats-strip" style="margin-bottom:16px">
-        <div class="stats-strip-item"><div class="stats-strip-label">Total Trades</div><div class="stats-strip-val" id="sm-total">—</div></div>
-        <div class="stats-strip-item"><div class="stats-strip-label">Buys</div><div class="stats-strip-val green" id="sm-buys">—</div></div>
-        <div class="stats-strip-item"><div class="stats-strip-label">Sells</div><div class="stats-strip-val" style="color:var(--red)" id="sm-sells">—</div></div>
-        <div class="stats-strip-item"><div class="stats-strip-label">Most Traded</div><div class="stats-strip-val" id="sm-hotticker" style="font-size:14px">—</div></div>
-        <div class="stats-strip-item"><div class="stats-strip-label">Last Updated</div><div class="stats-strip-val" id="sm-updated" style="font-size:11px">—</div></div>
-      </div>
+    <!-- ══ CONGRESS VIEW ══ -->
+    <div id="sm-congress-view">
 
-      <!-- Filter bar -->
-      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-        <input id="sm-ticker-filter" class="scan-input" style="max-width:160px" placeholder="Filter by ticker…" oninput="smFilterTable()">
-        <input id="sm-name-filter" class="scan-input" style="max-width:200px" placeholder="Filter by name…" oninput="smFilterTable()">
-        <button class="btn-outline active" id="sm-all-btn" onclick="smSetType('all',this)">All</button>
-        <button class="btn-outline" id="sm-buy-btn" onclick="smSetType('buy',this)">Buys only</button>
-        <button class="btn-outline" id="sm-sell-btn" onclick="smSetType('sell',this)">Sells only</button>
-        <select id="sm-chamber" class="scan-input" style="max-width:130px" onchange="smFilterTable()">
-          <option value="all">All chambers</option>
-          <option value="House">House</option>
-          <option value="Senate">Senate</option>
-        </select>
-        <span id="sm-count-label" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-left:auto"></span>
-      </div>
-
-      <!-- Table -->
-      <div class="tbl-wrap">
-        <div class="tbl-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th onclick="smSort('chamber')">Chamber</th>
-                <th onclick="smSort('name')">Politician</th>
-                <th onclick="smSort('ticker')">Ticker</th>
-                <th onclick="smSort('type')">Action</th>
-                <th onclick="smSort('amount')">Amount</th>
-                <th onclick="smSort('date')">Trade Date ▼</th>
-                <th onclick="smSort('disclosed')">Disclosed</th>
-                <th>Asset</th>
-              </tr>
-            </thead>
-            <tbody id="sm-tbody">
-              <tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px">
-                <div class="loader" style="width:20px;height:20px;border-width:2px;margin:0 auto 12px"></div>
-                Loading congressional trades…
-              </td></tr>
-            </tbody>
-          </table>
+      <!-- Stats bar -->
+      <div class="sm-stats-bar">
+        <div class="sm-stat">
+          <div class="sm-stat-label">Total Trades</div>
+          <div class="sm-stat-val white" id="sm-stat-total">—</div>
         </div>
-      </div>
-    </div>
-
-    <!-- INSIDER PANEL -->
-    <div id="sm-panel-insider" style="display:none">
-      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-        <input id="ins-ticker-input" class="scan-input" style="max-width:160px" placeholder="Enter ticker (e.g. AAPL)">
-        <button class="btn-scan" onclick="loadInsiderData()">Load</button>
-        <button class="btn-outline active" id="ins-all-btn" onclick="insSetType('all',this)">All</button>
-        <button class="btn-outline" id="ins-buy-btn" onclick="insSetType('buy',this)">Buys</button>
-        <button class="btn-outline" id="ins-sell-btn" onclick="insSetType('sell',this)">Sells</button>
-      </div>
-
-      <!-- Insider sentiment gauge -->
-      <div id="ins-sentiment-box" style="display:none;background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:16px 20px;margin-bottom:14px">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Insider Sentiment (MSPR — Monthly Share Purchase Ratio)</div>
-        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-          <div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700" id="ins-mspr-val">—</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px" id="ins-mspr-lbl">—</div>
-          </div>
-          <div style="flex:1;min-width:200px">
-            <div style="height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden;position:relative">
-              <div id="ins-mspr-bar" style="height:100%;border-radius:4px;transition:width .5s,background .5s;width:50%"></div>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px"><span>-100 Max Sell</span><span>0</span><span>+100 Max Buy</span></div>
-          </div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)" id="ins-mspr-desc">Range: -100 (all selling) to +100 (all buying). Signal is strongest 30–90 days ahead.</div>
+        <div class="sm-stat">
+          <div class="sm-stat-label">Purchases</div>
+          <div class="sm-stat-val green" id="sm-stat-buys">—</div>
+        </div>
+        <div class="sm-stat">
+          <div class="sm-stat-label">Sales</div>
+          <div class="sm-stat-val red" id="sm-stat-sells">—</div>
+        </div>
+        <div class="sm-stat">
+          <div class="sm-stat-label">Most Active Stock</div>
+          <div class="sm-stat-val white" id="sm-stat-hot" style="font-size:18px;letter-spacing:-.5px">—</div>
         </div>
       </div>
 
-      <div class="tbl-wrap">
-        <div class="tbl-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Title</th>
-                <th>Action</th>
-                <th>Shares</th>
-                <th>Price</th>
-                <th>Value</th>
-                <th>Shares After</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody id="ins-tbody">
-              <tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px">Enter a ticker above and click Load</td></tr>
-            </tbody>
-          </table>
+      <!-- Filter chips -->
+      <div class="sm-chips">
+        <button class="sm-chip active" id="sm-c-all"  onclick="smSetFilter('all',this)">All trades</button>
+        <button class="sm-chip" id="sm-c-buy"  onclick="smSetFilter('buy',this)">Buys only</button>
+        <button class="sm-chip" id="sm-c-sell" onclick="smSetFilter('sell',this)">Sells only</button>
+        <button class="sm-chip" id="sm-c-house"   onclick="smSetChamber('House',this)">House</button>
+        <button class="sm-chip" id="sm-c-senate"  onclick="smSetChamber('Senate',this)">Senate</button>
+        <div class="sm-search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="sm-search-input" id="sm-q" placeholder="Ticker or name…" oninput="smRender()">
         </div>
       </div>
+
+      <!-- Featured card -->
+      <div id="sm-featured-wrap"><!-- populated by JS --></div>
+
+      <!-- Trade grid -->
+      <div class="sm-grid" id="sm-grid">
+        <div class="sm-loading-state">
+          <div class="loader" style="width:24px;height:24px;border-width:2px;margin:0 auto 14px"></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.25)">Loading congressional trades…</div>
+        </div>
+      </div>
+      <button class="sm-load-more" id="sm-load-more" style="display:none" onclick="smLoadMore()">Show more trades</button>
+    </div>
+
+    <!-- ══ INSIDER VIEW ══ -->
+    <div id="sm-insider-view" style="display:none">
+
+      <!-- Ticker search -->
+      <div class="ins-hero-ticker">
+        <input class="ins-ticker-input" id="ins-q" placeholder="Ticker…" maxlength="6" onkeydown="if(event.key==='Enter')loadInsiders()" oninput="this.value=this.value.toUpperCase()">
+        <button class="ins-go-btn" onclick="loadInsiders()">Look up →</button>
+        <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap">
+          <button class="sm-chip active" id="ins-c-all"  onclick="insSetFilter('all',this)">All</button>
+          <button class="sm-chip" id="ins-c-buy"  onclick="insSetFilter('buy',this)">Buys</button>
+          <button class="sm-chip" id="ins-c-sell" onclick="insSetFilter('sell',this)">Sells</button>
+        </div>
+      </div>
+
+      <!-- MSPR card -->
+      <div id="ins-mspr-card" style="display:none" class="mspr-card">
+        <div class="mspr-score-wrap">
+          <div class="mspr-score" id="mspr-num">—</div>
+          <div class="mspr-score-label" id="mspr-label">—</div>
+        </div>
+        <div>
+          <div class="mspr-bar-label">Insider Sentiment · MSPR</div>
+          <div class="mspr-track"><div class="mspr-fill" id="mspr-bar" style="width:50%"></div></div>
+          <div class="mspr-range"><span>−100 Max Sell</span><span>Neutral</span><span>+100 Max Buy</span></div>
+          <div class="mspr-desc">Monthly Share Purchase Ratio. Aggregates all insider buy/sell volume. Range −100 (all selling) to +100 (all buying). Strongest predictive signal 30–90 days ahead.</div>
+        </div>
+      </div>
+
+      <!-- Insider grid -->
+      <div id="ins-grid">
+        <div class="sm-empty-state">
+          <div class="sm-empty-icon">👔</div>
+          <div class="sm-empty-text">Enter a ticker above</div>
+          <div class="sm-empty-sub">See every SEC Form 4 filing — who bought, who sold, and how much</div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ BOTTOM PILL NAV ═══════════════ -->
+<!-- ═══════════════ BOTTOM PILL NAV ═══════════════ --><!-- ═══════════════ BOTTOM PILL NAV ═══════════════ -->
 <nav id="bottomNav">
   <button class="tab-btn active" id="btn-home" onclick="switchTab('home')" title="Dashboard">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -2632,274 +2728,350 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 <script>
 // ══════════════════════════════════════════════════════════
-//  SMART MONEY — Congress + Insider Transactions
+//  SMART MONEY — Showcase
 // ══════════════════════════════════════════════════════════
 
-let smAllTrades = [];
-let smTypeFilter = 'all';
-let smSortField = 'date';
-let smSortDir = -1;
-let smLoaded = false;
+let smAllTrades  = [];
+let smFilter     = 'all';
+let smChamber    = 'all';
+let smLoaded     = false;
+let smShowing    = 20;
+let insAllData   = [];
+let insFilter    = 'all';
 
-let insAllData = [];
-let insTypeFilter = 'all';
+const isBuyTrade  = t => /purchase|buy/i.test(t.type);
+const isSellTrade = t => /sale|sell/i.test(t.type);
+const fmtAmount   = v => v || '—';
 
-// ── Sub-tab switcher ──
-function smSwitchTab(name, btn) {
-  document.querySelectorAll('.sm-subtab').forEach(b => b.classList.remove('active'));
+// ── View switcher ──────────────────────────────────────────
+function smSetView(name, btn) {
+  document.querySelectorAll('.sm-view-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('sm-panel-congress').style.display = name === 'congress' ? '' : 'none';
-  document.getElementById('sm-panel-insider').style.display  = name === 'insider'  ? '' : 'none';
+  document.getElementById('sm-congress-view').style.display = name === 'congress' ? '' : 'none';
+  document.getElementById('sm-insider-view').style.display  = name === 'insider'  ? '' : 'none';
   if (name === 'congress' && !smLoaded) loadCongressTrades();
 }
 
-// ── Load all congressional trades ──
+// ── Load congressional trades ──────────────────────────────
 async function loadCongressTrades() {
   smLoaded = true;
   try {
     const res  = await fetch(`${PROXY}/smartmoney?limit=200`, { signal: AbortSignal.timeout(20000) });
-    const data = await res.json();
-    smAllTrades = data.trades || [];
-    updateSmStats();
-    smRenderTable();
-    document.getElementById('sm-updated').textContent = 'Just now';
+    const json = await res.json();
+    smAllTrades = json.trades || [];
+    smUpdateStats();
+    smBuildHotPills();
+    smRender();
   } catch(e) {
-    document.getElementById('sm-tbody').innerHTML =
-      `<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--red);font-family:'JetBrains Mono',monospace;font-size:11px">Failed to load: ${e.message}</td></tr>`;
+    document.getElementById('sm-grid').innerHTML =
+      `<div class="sm-empty-state" style="grid-column:1/-1">
+        <div class="sm-empty-icon">⚠</div>
+        <div class="sm-empty-text">Failed to load</div>
+        <div class="sm-empty-sub">${e.message}</div>
+      </div>`;
   }
 }
 
-function updateSmStats() {
-  const buys  = smAllTrades.filter(t => /purchase|buy/i.test(t.type)).length;
-  const sells = smAllTrades.filter(t => /sale|sell/i.test(t.type)).length;
-  // Find most traded ticker
-  const tcount = {};
-  smAllTrades.forEach(t => { if(t.ticker) tcount[t.ticker] = (tcount[t.ticker]||0)+1; });
-  const hot = Object.entries(tcount).sort((a,b)=>b[1]-a[1])[0];
-  document.getElementById('sm-total').textContent  = smAllTrades.length;
-  document.getElementById('sm-buys').textContent   = buys;
-  document.getElementById('sm-sells').textContent  = sells;
-  document.getElementById('sm-hotticker').textContent = hot ? `${hot[0]} (${hot[1]})` : '—';
+function smUpdateStats() {
+  const buys  = smAllTrades.filter(isBuyTrade).length;
+  const sells = smAllTrades.filter(isSellTrade).length;
+  const tc    = {};
+  smAllTrades.forEach(t => { if (t.ticker) tc[t.ticker] = (tc[t.ticker]||0)+1; });
+  const hot = Object.entries(tc).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('sm-stat-total').textContent = smAllTrades.length;
+  document.getElementById('sm-stat-buys').textContent  = buys;
+  document.getElementById('sm-stat-sells').textContent = sells;
+  document.getElementById('sm-stat-hot').textContent   = hot ? hot[0] : '—';
 }
 
-function smSetType(type, btn) {
-  smTypeFilter = type;
-  document.querySelectorAll('#sm-all-btn,#sm-buy-btn,#sm-sell-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  smRenderTable();
+function smBuildHotPills() {
+  // Top 8 most traded tickers as clickable pills
+  const tc = {};
+  smAllTrades.forEach(t => { if (t.ticker) tc[t.ticker] = (tc[t.ticker]||0)+1; });
+  const top = Object.entries(tc).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  document.getElementById('sm-hot-pills').innerHTML = top.map(([ticker]) => {
+    const trades = smAllTrades.filter(t => t.ticker === ticker);
+    const buys   = trades.filter(isBuyTrade).length;
+    const sells  = trades.filter(isSellTrade).length;
+    const cls    = buys > sells ? 'buy' : sells > buys ? 'sell' : '';
+    return `<button class="sm-ticker-pill ${cls}" onclick="smQuickFilter('${ticker}')">${ticker}</button>`;
+  }).join('');
 }
 
-function smSort(field) {
-  smSortDir = smSortField === field ? smSortDir * -1 : -1;
-  smSortField = field;
-  smRenderTable();
+function smQuickFilter(ticker) {
+  document.getElementById('sm-q').value = ticker;
+  smRender();
 }
 
-function smFilterTable() { smRenderTable(); }
+function smSetFilter(type, btn) {
+  smFilter = type;
+  document.querySelectorAll('#sm-c-all,#sm-c-buy,#sm-c-sell').forEach(b => {
+    b.classList.remove('active','buy-on','sell-on');
+  });
+  if (type === 'buy')  btn.classList.add('buy-on');
+  else if (type === 'sell') btn.classList.add('sell-on');
+  else btn.classList.add('active');
+  smShowing = 20;
+  smRender();
+}
 
-function smRenderTable() {
-  const tickerF  = (document.getElementById('sm-ticker-filter').value || '').toUpperCase().trim();
-  const nameF    = (document.getElementById('sm-name-filter').value   || '').toLowerCase().trim();
-  const chamberF = document.getElementById('sm-chamber').value;
+function smSetChamber(val, btn) {
+  smChamber = smChamber === val ? 'all' : val;
+  document.querySelectorAll('#sm-c-house,#sm-c-senate').forEach(b => b.classList.remove('active'));
+  if (smChamber !== 'all') btn.classList.add('active');
+  smRender();
+}
+
+function smLoadMore() {
+  smShowing += 20;
+  smRender();
+}
+
+function smRender() {
+  const q = (document.getElementById('sm-q').value||'').toLowerCase().trim();
 
   let data = smAllTrades.filter(t => {
-    if (tickerF  && !t.ticker?.toUpperCase().includes(tickerF)) return false;
-    if (nameF    && !t.name?.toLowerCase().includes(nameF)) return false;
-    if (chamberF !== 'all' && t.chamber !== chamberF) return false;
-    if (smTypeFilter === 'buy'  && !/purchase|buy/i.test(t.type))  return false;
-    if (smTypeFilter === 'sell' && !/sale|sell/i.test(t.type)) return false;
+    if (q && !t.ticker?.toLowerCase().includes(q) && !t.name?.toLowerCase().includes(q)) return false;
+    if (smFilter === 'buy'  && !isBuyTrade(t))  return false;
+    if (smFilter === 'sell' && !isSellTrade(t)) return false;
+    if (smChamber !== 'all' && t.chamber !== smChamber) return false;
     return true;
   });
 
-  data.sort((a, b) => {
-    const av = a[smSortField] || '', bv = b[smSortField] || '';
-    if (smSortField === 'date' || smSortField === 'disclosed')
-      return smSortDir * (new Date(bv) - new Date(av));
-    return smSortDir * av.localeCompare(bv);
-  });
+  // Featured card — top trade (most recent buy with largest named amount)
+  const featured = data.find(t => isBuyTrade(t) && t.amount) || data[0];
+  renderFeatured(featured);
 
-  document.getElementById('sm-count-label').textContent = `${data.length} trades`;
-
-  if (!data.length) {
-    document.getElementById('sm-tbody').innerHTML =
-      '<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:11px">No trades match filters</td></tr>';
+  // Grid — skip featured
+  const rest = data.filter(t => t !== featured).slice(0, smShowing);
+  if (!rest.length && !featured) {
+    document.getElementById('sm-grid').innerHTML =
+      `<div class="sm-empty-state" style="grid-column:1/-1">
+        <div class="sm-empty-icon">🔍</div>
+        <div class="sm-empty-text">No trades match</div>
+        <div class="sm-empty-sub">Try a different filter or search</div>
+      </div>`;
+    document.getElementById('sm-load-more').style.display = 'none';
     return;
   }
 
-  const isBuy  = t => /purchase|buy/i.test(t.type);
-  const isSell = t => /sale|sell/i.test(t.type);
-
-  document.getElementById('sm-tbody').innerHTML = data.map(t => {
-    const typeCls = isBuy(t) ? 'sm-buy' : isSell(t) ? 'sm-sell' : 'sm-exchange';
-    const typeLabel = isBuy(t) ? '▲ Buy' : isSell(t) ? '▼ Sell' : t.type || '—';
-    const chamberBadge = t.chamber === 'Senate'
-      ? '<span class="sm-chamber-senate">SENATE</span>'
-      : '<span class="sm-chamber-house">HOUSE</span>';
-    const daysLag = t.disclosed && t.date
-      ? Math.round((new Date(t.disclosed) - new Date(t.date)) / 86400000)
-      : null;
-    const lagStr = daysLag != null && daysLag > 0 ? `<span style="color:var(--muted);font-size:9px">(+${daysLag}d lag)</span>` : '';
-    return `<tr onclick="smClickTicker('${t.ticker}')">
-      <td>${chamberBadge}</td>
-      <td style="font-weight:600;font-size:12px">${t.name||'—'}${t.party?` <span style="color:var(--muted);font-size:9px">(${t.party})</span>`:''}</td>
-      <td><span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;cursor:pointer;color:#fff">${t.ticker||'—'}</span></td>
-      <td><span class="${typeCls}">${typeLabel}</span></td>
-      <td class="sm-amount">${t.amount||'—'}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${t.date||'—'}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${t.disclosed||'—'} ${lagStr}</td>
-      <td style="font-size:11px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.asset||'—'}</td>
-    </tr>`;
+  document.getElementById('sm-grid').innerHTML = rest.map(t => {
+    const buy      = isBuyTrade(t), sell = isSellTrade(t);
+    const cardCls  = buy ? 'is-buy' : sell ? 'is-sell' : 'is-other';
+    const actCls   = buy ? 'buy'   : sell ? 'sell'   : 'other';
+    const actLbl   = buy ? '▲ PURCHASE' : sell ? '▼ SALE' : (t.type||'TRANSACTION').toUpperCase().slice(0,14);
+    const glowCls  = buy ? 'buy' : sell ? 'sell' : '';
+    const chmb     = t.chamber === 'Senate' ? 'Senate' : 'House';
+    return `<div class="sm-trade-card ${cardCls}" onclick="smClickTicker('${t.ticker}')">
+      <div class="sm-tc-action ${actCls}">${actLbl}</div>
+      <div class="sm-tc-ticker">${t.ticker||'—'}</div>
+      <div class="sm-tc-amount">${fmtAmount(t.amount)}</div>
+      <div class="sm-tc-name">${t.name||'—'}</div>
+      <div class="sm-tc-chamber">${chmb}${t.party?' · '+t.party:''}</div>
+      <div class="sm-tc-date">${t.date||'—'}</div>
+      ${glowCls ? `<div class="sm-tc-glow ${glowCls}"></div>` : ''}
+    </div>`;
   }).join('');
+
+  const hasMore = data.filter(t => t !== featured).length > smShowing;
+  document.getElementById('sm-load-more').style.display = hasMore ? '' : 'none';
+  if (hasMore) document.getElementById('sm-load-more').textContent =
+    `Show more · ${data.filter(t=>t!==featured).length - smShowing} remaining`;
+}
+
+function renderFeatured(t) {
+  const wrap = document.getElementById('sm-featured-wrap');
+  if (!t) { wrap.innerHTML = ''; return; }
+  const buy  = isBuyTrade(t), sell = isSellTrade(t);
+  const cls  = buy ? 'is-buy' : sell ? 'is-sell' : 'is-other';
+  const actCls = buy ? 'buy' : 'sell';
+  const actLbl = buy ? '▲ PURCHASE' : sell ? '▼ SALE' : (t.type||'').toUpperCase();
+  const chmb   = t.chamber === 'Senate' ? 'Senate' : 'House';
+  wrap.innerHTML = `<div class="sm-featured ${cls}" onclick="smClickTicker('${t.ticker}')">
+    <div class="sm-featured-label">Latest highlighted trade</div>
+    <div class="sm-featured-ticker">${t.ticker||'—'}</div>
+    <div class="sm-featured-action ${actCls}">${actLbl}</div>
+    <div class="sm-featured-meta">${t.name||'—'} · ${chmb}${t.party?' · '+t.party:''}</div>
+    <div class="sm-featured-amount">${fmtAmount(t.amount)}</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.25);margin-top:10px">${t.date||'—'}${t.disclosed?' · disclosed '+t.disclosed:''}</div>
+    <div class="sm-featured-glow ${actCls}"></div>
+  </div>`;
 }
 
 function smClickTicker(ticker) {
   if (!ticker || ticker === '—') return;
-  // Jump to screener and pre-fill
   document.getElementById('tickerInput').value = ticker;
   switchTab('screener');
   runScan();
 }
 
-// ── Load insider transactions for a specific ticker ──
-async function loadInsiderData() {
-  const ticker = (document.getElementById('ins-ticker-input').value || '').trim().toUpperCase();
+// ── Insider transactions ───────────────────────────────────
+async function loadInsiders() {
+  const ticker = (document.getElementById('ins-q').value||'').trim().toUpperCase();
   if (!ticker) return;
-  document.getElementById('ins-tbody').innerHTML =
-    `<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px"><div class="loader" style="width:16px;height:16px;border-width:2px;margin:0 auto 8px"></div>Loading ${ticker}…</td></tr>`;
-
+  document.getElementById('ins-mspr-card').style.display = 'none';
+  document.getElementById('ins-grid').innerHTML =
+    `<div class="sm-loading-state">
+      <div class="loader" style="width:22px;height:22px;border-width:2px;margin:0 auto 14px"></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.25)">Loading ${ticker}…</div>
+    </div>`;
   try {
     const [txRes, sentRes] = await Promise.all([
-      fetch(`${PROXY}/insider?symbol=${ticker}`, { signal: AbortSignal.timeout(12000) }),
+      fetch(`${PROXY}/insider?symbol=${ticker}`,           { signal: AbortSignal.timeout(12000) }),
       fetch(`${PROXY}/insider-sentiment?symbol=${ticker}`, { signal: AbortSignal.timeout(12000) }),
     ]);
-    const txData   = txRes.ok   ? await txRes.json()   : { data: [] };
-    const sentData = sentRes.ok ? await sentRes.json() : { data: [] };
-
-    insAllData = txData.data || [];
-    insRenderSentiment(sentData.data || []);
-    insRenderTable();
+    insAllData = txRes.ok  ? ((await txRes.json()).data||[])  : [];
+    const sent = sentRes.ok ? ((await sentRes.json()).data||[]) : [];
+    insRenderMSPR(sent, ticker);
+    insRender();
   } catch(e) {
-    document.getElementById('ins-tbody').innerHTML =
-      `<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--red);font-family:'JetBrains Mono',monospace;font-size:11px">Failed: ${e.message}</td></tr>`;
+    document.getElementById('ins-grid').innerHTML =
+      `<div class="sm-empty-state">
+        <div class="sm-empty-icon">⚠</div>
+        <div class="sm-empty-text">Failed to load</div>
+        <div class="sm-empty-sub">${e.message}</div>
+      </div>`;
   }
 }
 
-function insRenderSentiment(sentData) {
-  if (!sentData.length) { document.getElementById('ins-sentiment-box').style.display = 'none'; return; }
-  const latest = sentData.at(-1);
-  const mspr = latest?.mspr ?? 0;
-  const box = document.getElementById('ins-sentiment-box');
-  box.style.display = '';
-  const col = mspr > 20 ? 'var(--green)' : mspr < -20 ? 'var(--red)' : 'var(--amber)';
-  const lbl = mspr > 50 ? 'Strong Buy Signal' : mspr > 20 ? 'Mild Buy Bias' : mspr < -50 ? 'Heavy Selling' : mspr < -20 ? 'Mild Sell Bias' : 'Neutral';
-  document.getElementById('ins-mspr-val').textContent = mspr.toFixed(1);
-  document.getElementById('ins-mspr-val').style.color = col;
-  document.getElementById('ins-mspr-lbl').textContent = lbl;
-  document.getElementById('ins-mspr-lbl').style.color = col;
-  const pct = Math.round(((mspr + 100) / 200) * 100);
-  document.getElementById('ins-mspr-bar').style.width = pct + '%';
-  document.getElementById('ins-mspr-bar').style.background = col;
+// Alias for backward compat (modal calls this)
+function loadInsiderData() { loadInsiders(); }
+
+function insRenderMSPR(data, ticker) {
+  if (!data.length) return;
+  const mspr = data.at(-1)?.mspr ?? 0;
+  const col  = mspr > 20 ? 'var(--green)' : mspr < -20 ? 'var(--red)' : 'var(--amber)';
+  const lbl  = mspr > 60 ? 'Insiders are buying aggressively'
+             : mspr > 20 ? 'Mild insider buy bias'
+             : mspr < -60 ? 'Heavy insider selling'
+             : mspr < -20 ? 'Mild insider sell bias' : 'Neutral — mixed signals';
+  const pct  = Math.round(((mspr + 100) / 200) * 100);
+  document.getElementById('mspr-num').textContent   = mspr.toFixed(1);
+  document.getElementById('mspr-num').style.color   = col;
+  document.getElementById('mspr-label').textContent = lbl;
+  document.getElementById('mspr-label').style.color = col;
+  document.getElementById('mspr-bar').style.width      = pct + '%';
+  document.getElementById('mspr-bar').style.background = col;
+  document.getElementById('ins-mspr-card').style.display = '';
 }
 
-function insSetType(type, btn) {
-  insTypeFilter = type;
-  document.querySelectorAll('#ins-all-btn,#ins-buy-btn,#ins-sell-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  insRenderTable();
+function insSetFilter(type, btn) {
+  insFilter = type;
+  document.querySelectorAll('#ins-c-all,#ins-c-buy,#ins-c-sell').forEach(b => {
+    b.classList.remove('active','buy-on','sell-on');
+  });
+  if (type === 'buy')  btn.classList.add('buy-on');
+  else if (type === 'sell') btn.classList.add('sell-on');
+  else btn.classList.add('active');
+  insRender();
 }
 
-function insRenderTable() {
-  const actionMap = { 'P': 'Purchase', 'S': 'Sale', 'A': 'Award', 'M': 'Option Exercise', 'D': 'Disposition', 'G': 'Gift', 'F': 'Tax Withhold' };
-  let data = insAllData;
-  if (insTypeFilter === 'buy')  data = data.filter(t => t.transactionCode === 'P' || /buy|purchase/i.test(t.transactionCode));
-  if (insTypeFilter === 'sell') data = data.filter(t => t.transactionCode === 'S' || /sell|sale/i.test(t.transactionCode));
+function insRender() {
+  const amap = { P:'Purchase', S:'Sale', A:'Award', M:'Option Exercise', D:'Disposition', G:'Gift', F:'Tax Withhold' };
+  let buys  = insAllData.filter(t => t.transactionCode === 'P');
+  let sells = insAllData.filter(t => t.transactionCode === 'S');
+  let other = insAllData.filter(t => t.transactionCode !== 'P' && t.transactionCode !== 'S');
+  let data  = insFilter === 'buy' ? buys : insFilter === 'sell' ? sells : insAllData;
 
   if (!data.length) {
-    document.getElementById('ins-tbody').innerHTML =
-      '<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:11px">No transactions</td></tr>';
+    document.getElementById('ins-grid').innerHTML =
+      `<div class="sm-empty-state">
+        <div class="sm-empty-icon">📭</div>
+        <div class="sm-empty-text">No transactions found</div>
+        <div class="sm-empty-sub">Try a different filter</div>
+      </div>`;
     return;
   }
 
-  document.getElementById('ins-tbody').innerHTML = data.slice(0, 100).map(t => {
-    const code  = t.transactionCode || '';
-    const label = actionMap[code] || code;
-    const isBuy  = code === 'P';
-    const isSell = code === 'S';
-    const isAward = code === 'A' || code === 'M';
-    const cls   = isBuy ? 'ins-buy' : isSell ? 'ins-sell' : isAward ? 'ins-award' : '';
-    const shares = t.share != null ? Number(t.share).toLocaleString() : '—';
-    const price  = t.price != null ? '$' + Number(t.price).toFixed(2) : '—';
-    const value  = (t.share && t.price) ? '$' + (t.share * t.price).toLocaleString(undefined,{maximumFractionDigits:0}) : '—';
-    const after  = t.sharesAfterTransaction != null ? Number(t.sharesAfterTransaction).toLocaleString() : '—';
-    return `<tr>
-      <td style="font-weight:600;font-size:12px">${t.name||'—'}</td>
-      <td style="font-size:11px;color:var(--muted)">${t.officerTitle||t.reportingRelationship||'—'}</td>
-      <td><span class="${cls}" style="font-weight:700">${isBuy?'▲ ':isSell?'▼ ':isAward?'★ ':''}${label}</span></td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${shares}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${price}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:${isBuy?'var(--green)':isSell?'var(--red)':'inherit'}">${value}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">${after}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${t.transactionDate||t.filingDate||'—'}</td>
-    </tr>`;
-  }).join('');
+  const renderGroup = (items, title) => {
+    if (!items.length) return '';
+    return `<div class="ins-section-title">${title} <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:400;color:rgba(255,255,255,.25)">${items.length}</span></div>
+    <div class="ins-grid">
+      ${items.slice(0,30).map(t => {
+        const code  = t.transactionCode || '';
+        const buy   = code === 'P', sell = code === 'S';
+        const cardCls = buy ? 'is-buy' : sell ? 'is-sell' : 'is-other';
+        const typCls  = buy ? 'buy'   : sell ? 'sell'   : 'other';
+        const typLbl  = buy ? '▲ PURCHASE' : sell ? '▼ SALE' : `◆ ${amap[code]||code}`;
+        const value   = (t.share && t.price)
+          ? '$' + (t.share * t.price).toLocaleString(undefined, { maximumFractionDigits: 0 }) : null;
+        const shares  = t.share ? Number(t.share).toLocaleString() + ' shares' : null;
+        const valCol  = buy ? 'var(--green)' : sell ? 'var(--red)' : 'var(--amber)';
+        return `<div class="ins-card-new ${cardCls}">
+          <div>
+            <div class="ins-card-name">${t.name||'—'}</div>
+            <div class="ins-card-title">${t.officerTitle||t.reportingRelationship||'—'}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="ins-card-type ${typCls}">${typLbl}</div>
+            <div class="ins-card-value" style="color:${valCol}">${value||shares||'—'}</div>
+            <div class="ins-card-shares">${shares&&value?shares+' @ $'+Number(t.price).toFixed(2):''}</div>
+          </div>
+          <div class="ins-card-date">${t.transactionDate||t.filingDate||'—'}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  };
+
+  if (insFilter === 'all') {
+    document.getElementById('ins-grid').innerHTML =
+      renderGroup(buys, 'Purchases') +
+      renderGroup(sells, 'Sales') +
+      renderGroup(other, 'Other');
+  } else {
+    document.getElementById('ins-grid').innerHTML = renderGroup(data,
+      insFilter === 'buy' ? 'Purchases' : 'Sales');
+  }
 }
 
-// ── Load insider data from the stock modal ──────────────────
+// ── Modal insider + congress ───────────────────────────────
 async function loadModalInsider(ticker) {
-  const el = document.getElementById('modalInsiderSection');
-  const congressEl = document.getElementById('modalCongressSection');
-  if (!el && !congressEl) return;
-
+  const el  = document.getElementById('modalInsiderSection');
+  const cel = document.getElementById('modalCongressSection');
+  if (!el && !cel) return;
+  const loading = () => `<div style="color:rgba(255,255,255,.25);font-family:'JetBrains Mono',monospace;font-size:11px;padding:10px 0;opacity:.6">Loading…</div>`;
+  if (el)  el.innerHTML  = loading();
+  if (cel) cel.innerHTML = loading();
   try {
-    const [insRes, conRes] = await Promise.all([
-      fetch(`${PROXY}/insider?symbol=${ticker}`, { signal: AbortSignal.timeout(10000) }),
+    const [iRes, cRes] = await Promise.all([
+      fetch(`${PROXY}/insider?symbol=${ticker}`,  { signal: AbortSignal.timeout(10000) }),
       fetch(`${PROXY}/congress?symbol=${ticker}`, { signal: AbortSignal.timeout(10000) }),
     ]);
-    const insData = insRes.ok ? await insRes.json() : { data: [] };
-    const conData = conRes.ok ? await conRes.json() : { data: [] };
+    const iData = iRes.ok  ? (await iRes.json()).data  : [];
+    const cData = cRes.ok  ? (await cRes.json()).data  : [];
 
-    // Insider section
     if (el) {
-      const txs = (insData.data || []).slice(0, 8);
-      if (!txs.length) { el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:12px 0">No recent insider transactions</div>'; }
-      else {
-        const actionMap = { 'P':'Purchase','S':'Sale','A':'Award','M':'Option Exer.','D':'Disposition','G':'Gift','F':'Tax Withhold' };
-        el.innerHTML = txs.map(t => {
-          const isBuy = t.transactionCode==='P', isSell = t.transactionCode==='S';
-          const col = isBuy?'var(--green)':isSell?'var(--red)':'var(--amber)';
-          const val = (t.share && t.price) ? '$'+(t.share*t.price).toLocaleString(undefined,{maximumFractionDigits:0}) : '—';
-          return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-            <span style="color:${col};font-weight:700;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:70px">${isBuy?'▲ BUY':isSell?'▼ SELL':'◆ '+(actionMap[t.transactionCode]||t.transactionCode)}</span>
-            <span style="font-size:12px;font-weight:600;flex:1">${t.name||'—'}</span>
-            <span style="font-size:10px;color:var(--muted)">${t.officerTitle||''}</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${col}">${val}</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">${t.transactionDate||'—'}</span>
-          </div>`;
-        }).join('');
-      }
+      const txs = (iData||[]).slice(0, 6);
+      el.innerHTML = txs.length ? txs.map(t => {
+        const buy = t.transactionCode==='P', sell = t.transactionCode==='S';
+        const col = buy?'var(--green)':sell?'var(--red)':'var(--amber)';
+        const val = (t.share&&t.price)?'$'+(t.share*t.price).toLocaleString(undefined,{maximumFractionDigits:0}):'—';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="color:${col};font-weight:700;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:64px">${buy?'▲ BUY':sell?'▼ SELL':'◆ OTHER'}</span>
+          <span style="font-size:12px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.name||'—'}</span>
+          <span style="font-size:10px;color:rgba(255,255,255,.3)">${t.officerTitle||''}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${col}">${val}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.3)">${t.transactionDate||'—'}</span>
+        </div>`;
+      }).join('') : '<div style="color:rgba(255,255,255,.2);font-size:12px;padding:10px 0">No recent insider transactions</div>';
     }
-
-    // Congress section
-    if (congressEl) {
-      const trades = (conData.data || []).slice(0, 6);
-      if (!trades.length) { congressEl.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:12px 0">No recent congressional trades</div>'; }
-      else {
-        congressEl.innerHTML = trades.map(t => {
-          const isBuy = /purchase|buy/i.test(t.transactionType||'');
-          const col = isBuy ? 'var(--green)' : 'var(--red)';
-          return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-            <span style="color:${col};font-weight:700;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:60px">${isBuy?'▲ BUY':'▼ SELL'}</span>
-            <span style="font-size:12px;font-weight:600;flex:1">${t.name||'—'}</span>
-            <span style="font-size:10px;color:var(--muted)">${t.chamber||''}</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">${t.amount||'—'}</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">${t.transactionDate||'—'}</span>
-          </div>`;
-        }).join('');
-      }
+    if (cel) {
+      const trades = (cData||[]).slice(0,5);
+      cel.innerHTML = trades.length ? trades.map(t => {
+        const buy = /purchase|buy/i.test(t.transactionType||'');
+        const col = buy?'var(--green)':'var(--red)';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <span style="color:${col};font-weight:700;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:64px">${buy?'▲ BUY':'▼ SELL'}</span>
+          <span style="font-size:12px;font-weight:600;flex:1">${t.name||'—'}</span>
+          <span style="font-size:10px;color:rgba(255,255,255,.3)">${t.chamber||''}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.35)">${t.amount||'—'}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.3)">${t.transactionDate||'—'}</span>
+        </div>`;
+      }).join('') : '<div style="color:rgba(255,255,255,.2);font-size:12px;padding:10px 0">No recent congressional trades</div>';
     }
   } catch(e) {
-    if (el) el.innerHTML = '<div style="color:var(--muted);font-size:11px">Unavailable</div>';
-    if (congressEl) congressEl.innerHTML = '<div style="color:var(--muted);font-size:11px">Unavailable</div>';
+    if (el)  el.innerHTML  = '<div style="color:rgba(255,255,255,.2);font-size:11px;padding:8px 0">Unavailable</div>';
+    if (cel) cel.innerHTML = '<div style="color:rgba(255,255,255,.2);font-size:11px;padding:8px 0">Unavailable</div>';
   }
 }
 </script>
