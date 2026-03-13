@@ -1198,6 +1198,39 @@ const PRESETS={
   meme:'GME,AMC,CLOV,SPCE,PLTR,TLRY,SNDL,NOK,BB,KOSS',
 };
 
+
+// ── Broad universe for background top-picks scan (150 tickers, diversified) ──
+const BROAD_UNIVERSE = [
+  // Mega cap tech
+  'AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','AVGO','ORCL','ADBE',
+  // Financials
+  'JPM','BAC','GS','MS','V','MA','AXP','BLK','SCHW','COF',
+  // Healthcare / Biotech
+  'UNH','LLY','JNJ','ABBV','MRK','PFE','TMO','ABT','AMGN','ISRG','VRTX','REGN',
+  // Energy
+  'XOM','CVX','COP','EOG','SLB','OXY','PSX','VLO','MPC','DVN',
+  // Consumer
+  'WMT','COST','MCD','SBUX','NKE','HD','TGT','AMZN','LOW','CMG',
+  // Industrials
+  'GE','HON','CAT','DE','RTX','LMT','NOC','BA','UPS','ETN',
+  // Semis
+  'AMD','INTC','QCOM','AMAT','LRCX','MU','KLAC','ASML','ARM','TSM',
+  // Software / Cloud
+  'CRM','NOW','SNOW','DDOG','NET','PLTR','HUBS','WDAY','ZS','MDB',
+  // Small/mid momentum
+  'AXON','CRWD','PANW','FTNT','S','HOOD','SOFI','AFRM','COIN','MSTR',
+  // Defensive / dividend
+  'KO','PG','PEP','CL','GIS','MO','PM','O','NEE','DUK',
+  // Materials / commodities
+  'GLD','SLV','NEM','FCX','ALB','LIN','APD','SHW','NUE','VMC',
+  // Healthcare devices
+  'DHR','BSX','SYK','EW','ZBH','HOLX','PODD','DXCM','IDXX','ALGN',
+  // Real estate / REIT
+  'AMT','PLD','EQIX','CCI','PSA','SPG','DLR','WELL',
+  // AI / emerging
+  'SMCI','AI','SOUN','IONQ','RKLB','PATH','BBAI','ASTS',
+];
+
 function loadPreset(name){
   const t=PRESETS[name];
   if(!t)return;
@@ -1295,11 +1328,13 @@ async function runScan(){
     renderTable();
     document.getElementById('clickHint').style.display='block';
     renderDashTop5();
-    // Cache results so they show instantly next page load
-    try{localStorage.setItem('algoscreen_top5',JSON.stringify(allResults.map(r=>({
-      ticker:r.ticker,name:r.name,score:r.score,signal:r.signal,
-      price:r.price,change:r.change
-    }))));}catch(e){}
+    // Cache full results locally and share to worker
+    const manualTs = Date.now();
+    try{ localStorage.setItem('algoscreen_scandata', JSON.stringify({results:allResults, ts:manualTs})); }catch(e){}
+    fetch(`${PROXY}/scandata`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({results: allResults})
+    }).catch(()=>{});
   }
 }
 
@@ -1789,6 +1824,139 @@ setInterval(updateGreeting,60000);
 // ══════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════
+
+
+// ── Refresh live prices without re-running full scan ─────────────────────────
+// Scores, signals, RSI, MACD are computed from daily candles — valid all day.
+// Only price and % change need live updates.
+async function refreshLivePrices(results) {
+  if (!results || !results.length) return;
+  const tickers = results.map(r => r.ticker);
+  const BATCH = 8;
+
+  for (let i = 0; i < tickers.length; i += BATCH) {
+    const slice = tickers.slice(i, i + BATCH);
+    const encoded = slice.map(t => encodeURIComponent(t)).join(',');
+    try {
+      const batchData = await fetch(`${PROXY}/batch?symbols=${encoded}`).then(r => r.json());
+      slice.forEach(ticker => {
+        const q = batchData[ticker] || batchData[ticker.replace('^','%5E')] || null;
+        if (!q || q.c == null) return;
+        const r = results.find(x => x.ticker === ticker);
+        if (!r) return;
+        r.price  = +q.c;
+        r.change = +q.dp;
+        // Recompute signal based on fresh change + existing score
+        r.signal = getSignal(r.score, r.macd);
+      });
+      // Re-render after each batch so prices appear progressively
+      renderDashTop5();
+      renderTable();
+    } catch(e) {}
+    await delay(120);
+  }
+
+  document.getElementById('lastUpdated').textContent = 'Prices live · ' + new Date().toLocaleTimeString();
+  // Save updated prices back to local cache
+  try {
+    const ts = JSON.parse(localStorage.getItem('algoscreen_scandata') || '{}').ts || Date.now();
+    localStorage.setItem('algoscreen_scandata', JSON.stringify({ results, ts }));
+  } catch(e) {}
+}
+
+// ── Silent background scan to populate Top AlgoScore Picks ──
+async function runBackgroundTopScan() {
+  const tickers = [...BROAD_UNIVERSE];
+  const results = [];
+
+  // Show scanning state in dashTop5 only if no cached data
+  const hasCached = document.getElementById('dashTop5').querySelector('.top5-row');
+  if (!hasCached) {
+    document.getElementById('dashTop5').innerHTML = `
+      <div style="padding:20px 18px;display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">
+        <div class="loader" style="width:14px;height:14px;border-width:2px;margin:0"></div>
+        Scanning for top picks…
+      </div>`;
+  }
+
+  // Scan in parallel batches of 8 to stay within rate limits
+  const BATCH = 8;
+  for (let i = 0; i < tickers.length; i += BATCH) {
+    const batch = tickers.slice(i, i + BATCH);
+    await Promise.all(batch.map(async ticker => {
+      try {
+        const [quote, profile, financials] = await Promise.all([
+          fetchQuote(ticker), fetchProfile(ticker), fetchFinancials(ticker)
+        ]);
+        if (!quote) return;
+        const tech = await fetchAllTechnicals(ticker).catch(() => ({}));
+        const rsi = tech.rsi ?? null, macd = tech.macd ?? null;
+        const pe = financials?.pe || null;
+        const high52w = financials?.high52w || null, low52w = financials?.low52w || null;
+        const pos52w = (high52w && low52w) ? ((quote.price - low52w) / (high52w - low52w)) * 100 : null;
+        const revenueGrowth = financials?.revenueGrowth || null;
+        const emaAbove20 = tech?.ema20 && quote.price > tech.ema20;
+        const emaAbove50 = tech?.ema50 && quote.price > tech.ema50;
+        let bbPos = null;
+        if (tech?.bbUpper && tech?.bbLower) bbPos = ((quote.price - tech.bbLower) / (tech.bbUpper - tech.bbLower)) * 100;
+        const score = calculateScore({rsi, macd, change: quote.change, pe, pos52w, revenueGrowth, emaAbove20, emaAbove50, adx: tech?.adx, bbPos});
+        const signal = getSignal(score, macd);
+        results.push({
+          ticker, name: profile?.name || ticker, score, signal,
+          price: quote.price, change: quote.change,
+          industry: profile?.industry || '', sector: profile?.sector || '',
+          volume: tech?.volume || null, avgVolume: financials?.avgVolume || null,
+          marketCap: profile?.marketCap ? profile.marketCap / 1000 : null,
+          rsi, macd, pe, eps: financials?.eps || null, epsGrowth: financials?.epsGrowth || null,
+          divYield: financials?.divYield || null, pos52w, high52w, low52w, revenueGrowth,
+          ema20: tech?.ema20 || null, ema50: tech?.ema50 || null, ema200: tech?.ema200 || null,
+          emaAbove20, emaAbove50, emaAbove200: tech?.ema200 && quote.price > tech.ema200,
+          bbUpper: tech?.bbUpper || null, bbMiddle: tech?.bbMiddle || null, bbLower: tech?.bbLower || null,
+          bbPos, adx: tech?.adx || null, stochK: tech?.stochK || null, stochD: tech?.stochD || null,
+          extPrice: null, extSession: null, extTime: null,
+          signal
+        });
+        // Update top5 live as results come in
+        renderDashTop5(results);
+      } catch(e) {}
+    }));
+    await delay(150); // small pause between batches
+  }
+
+  // Final render — update everything
+  allResults = results;
+  renderDashTop5();
+  renderTable();
+  const br2 = results.filter(r=>r.signal.cls==='breakout').length;
+  const bm2 = results.filter(r=>r.macd&&r.macd.bullish).length;
+  const avg2 = Math.round(results.reduce((s,r)=>s+r.score,0)/results.length);
+  const top2 = [...results].sort((a,b)=>b.score-a.score)[0];
+  document.getElementById('totalScanned').textContent = results.length;
+  document.getElementById('breakoutCount').textContent = br2;
+  document.getElementById('bullishCount').textContent = bm2;
+  document.getElementById('avgScore').textContent = avg2;
+  document.getElementById('topPick').textContent = top2 ? top2.ticker : '--';
+  document.getElementById('lastUpdated').textContent = 'Updated '+new Date().toLocaleTimeString();
+
+  const now = Date.now();
+  // Save full results locally
+  try{ localStorage.setItem('algoscreen_scandata', JSON.stringify({results, ts: now})); }catch(e){}
+
+  // POST full results to shared worker — every future visitor gets this instantly
+  fetch(`${PROXY}/scandata`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ results })
+  }).catch(()=>{});
+
+  // Clean up age label
+  const ageLabel = document.querySelector('.top5-age-label');
+  if(ageLabel) ageLabel.remove();
+
+  // Also merge into allResults if screener hasn't been run yet
+  if (!allResults.length) allResults = results;
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   // Load dashboard immediately
   loadDashboard();
@@ -1799,19 +1967,72 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Auto-load calendar
   loadEconCalendar();
   calendarLoaded=true;
-  // Load cached top5 instantly if available
+  // 1. Show local cache instantly (0ms) while network loads
   try{
-    const cached=localStorage.getItem('algoscreen_top5');
+    const cached = localStorage.getItem('algoscreen_scandata');
     if(cached){
-      const parsed=JSON.parse(cached);
-      if(parsed.length) renderDashTop5(parsed);
+      const parsed = JSON.parse(cached);
+      if(parsed.results && parsed.results.length){
+        allResults = parsed.results;
+        renderDashTop5();
+        renderTable();
+        document.getElementById('clickHint').style.display='block';
+        screenerAutoLoaded = true;
+        // Update stats strip
+        const br = allResults.filter(r=>r.signal.cls==='breakout').length;
+        const bm = allResults.filter(r=>r.macd&&r.macd.bullish).length;
+        const avg = Math.round(allResults.reduce((s,r)=>s+r.score,0)/allResults.length);
+        const top = [...allResults].sort((a,b)=>b.score-a.score)[0];
+        document.getElementById('totalScanned').textContent = allResults.length;
+        document.getElementById('breakoutCount').textContent = br;
+        document.getElementById('bullishCount').textContent = bm;
+        document.getElementById('avgScore').textContent = avg;
+        document.getElementById('topPick').textContent = top ? top.ticker : '--';
+        document.getElementById('lastUpdated').textContent = 'Cached · refreshing prices…';
+        refreshLivePrices(allResults);
+      }
     }
   }catch(e){}
-  // Auto-load screener with Top 20 since it's the core feature
+
+  // 2. Fetch full shared scan from worker (~100ms, populates everything for new users)
+  fetch(`${PROXY}/scandata`).then(r=>r.json()).then(d=>{
+    if(!d.results || !d.results.length) return;
+    const mins = Math.round((Date.now()-d.ts)/60000);
+    const age = mins<1?'just now':mins<60?`${mins}m ago`:`${Math.round(mins/60)}h ago`;
+    // Only replace if shared data is newer or we had nothing
+    const localTs = (() => { try{ const c=localStorage.getItem('algoscreen_scandata'); return c?JSON.parse(c).ts:0; }catch(e){return 0;} })();
+    if(d.ts > localTs || !allResults.length){
+      allResults = d.results;
+      renderDashTop5();
+      renderTable();
+      document.getElementById('clickHint').style.display='block';
+      screenerAutoLoaded = true;
+      const br = allResults.filter(r=>r.signal.cls==='breakout').length;
+      const bm = allResults.filter(r=>r.macd&&r.macd.bullish).length;
+      const avg = Math.round(allResults.reduce((s,r)=>s+r.score,0)/allResults.length);
+      const top = [...allResults].sort((a,b)=>b.score-a.score)[0];
+      document.getElementById('totalScanned').textContent = allResults.length;
+      document.getElementById('breakoutCount').textContent = br;
+      document.getElementById('bullishCount').textContent = bm;
+      document.getElementById('avgScore').textContent = avg;
+      document.getElementById('topPick').textContent = top ? top.ticker : '--';
+      document.getElementById('lastUpdated').textContent = `Scores from ${age} · Refreshing prices…`;
+      try{ localStorage.setItem('algoscreen_scandata', JSON.stringify({results:d.results,ts:d.ts})); }catch(e){}
+
+      // ── Refresh live prices in batches of 8 ──────────────────────────────
+      // Scores/signals/technicals are valid all day (daily candles).
+      // Prices and % change must always be current.
+      refreshLivePrices(allResults);
+    }
+    const el = document.getElementById('dashTop5');
+    if(el){ const old=el.querySelector('.top5-age-label'); if(old) old.textContent='Scores from '+age+' · prices live'; }
+  }).catch(()=>{});
+
+  // 3. Run fresh background scan in background — posts full results when done
   setTimeout(()=>{
-    loadPreset('top20');
-    screenerAutoLoaded=true;
-  }, 500);
+    if(!screenerAutoLoaded) screenerAutoLoaded = true;
+    runBackgroundTopScan();
+  }, 1200);
 });
 </script>
 </body>
