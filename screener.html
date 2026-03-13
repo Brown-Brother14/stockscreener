@@ -986,11 +986,14 @@ function renderDashEvents() {
 async function loadDashboard() {
   renderDashEvents();
   try {
-    const [spyQ, qqqQ, vixQ, fngRes] = await Promise.all([
-      yahooQuote('SPY'), yahooQuote('QQQ'), yahooQuote('%5EVIX'),
+    // Single batch call for SPY+QQQ+VIX instead of 3 separate requests
+    const [batchData, fngRes] = await Promise.all([
+      fetch(`${PROXY}/batch?symbols=SPY,QQQ,%5EVIX`).then(r=>r.json()).catch(()=>({})),
       fetch(`${PROXY}/feargreed`).then(r=>r.json()).catch(()=>null)
     ]);
-    console.log('[Dashboard] SPY raw:', spyQ, 'QQQ raw:', qqqQ, 'VIX raw:', vixQ);
+    const spyQ = batchData['SPY'] || null;
+    const qqqQ = batchData['QQQ'] || null;
+    const vixQ = batchData['^VIX'] || batchData['%5EVIX'] || null;
     const fmtChg = (v, invert=false) => {
       if(v==null) return '';
       const up = invert ? v <= 0 : v >= 0;
@@ -1021,9 +1024,8 @@ async function loadDashboard() {
     const anyData = spyQ?.c!=null || qqqQ?.c!=null || vixQ?.c!=null;
     document.getElementById('dashUpdated').textContent = anyData
       ? 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})
-      : 'Proxy may be down — open DevTools console for details';
+      : 'Stats unavailable';
   } catch(e) {
-    console.error('[Dashboard] error:', e);
     document.getElementById('dashUpdated').textContent = 'Stats unavailable';
   }
 }
@@ -1236,7 +1238,7 @@ async function runScan(){
     updateLoadingText(`Analyzing ${ticker}… (${i+1}/${tickers.length})`);
     try{
       const[quote,profile,financials]=await Promise.all([fetchQuote(ticker),fetchProfile(ticker),fetchFinancials(ticker)]);
-      await delay(300);
+      await delay(100);
       if(!quote){continue;}
       const tech=await fetchAllTechnicals(ticker).catch(()=>({}));
       const rsi=tech.rsi??null,macd=tech.macd??null;
@@ -1607,22 +1609,32 @@ async function loadMacroDashboard(){
   const allMacroTickers=['SPY','QQQ','IWM','XLK','XLF','XLE','XLV','XLI','XLY','XLP','XLU','XLRE','XLB','XLC','UUP','GLD','USO','TLT'];
   ['VIX','SPY','QQQ','IWM'].forEach(t=>{const el=document.getElementById(`macro-${t}`);if(el)el.innerHTML='<div class="mi-loading"></div>';});
   document.getElementById('macroLastUpdated').textContent='Loading...';
+
+  // Single batch call for all tickers + VIX + Fear&Greed in parallel
+  const batchSymbols=[...allMacroTickers,'%5EVIX'].join(',');
+  const [batchData, fngRes] = await Promise.all([
+    fetch(`${PROXY}/batch?symbols=${batchSymbols}`).then(r=>r.json()).catch(()=>({})),
+    fetch(`${PROXY}/feargreed`).then(r=>r.json()).catch(()=>null),
+  ]);
+
+  // Fear & Greed
   try{
-    const fngRes=await fetch(`${PROXY}/feargreed`);const fngJson=await fngRes.json();const fngData=fngJson?.fear_and_greed;
+    const fngData=fngRes?.fear_and_greed;
     if(fngData?.score!=null){const score=Math.round(fngData.score);const color=getFngColor(score);const label=getFngLabel(score);
     document.getElementById('fngValue').textContent=score;document.getElementById('fngValue').style.color=color;
     document.getElementById('fngLabel').textContent=label;document.getElementById('fngLabel').style.color=color;
     drawFngGauge(score,color);}
   }catch(e){document.getElementById('fngLabel').textContent='UNAVAILABLE';}
-  const vq=await yahooQuote('%5EVIX');
-  if(vq){const up=vq.dp<=0;renderIndexCard('VIX',{c:vq.c,dp:vq.dp});}
+
+  // VIX — FMP returns it as ^VIX
+  const vixQ=batchData['^VIX']||batchData['%5EVIX']||null;
+  if(vixQ?.c!=null){renderIndexCard('VIX',{c:vixQ.c,dp:vixQ.dp??0});}
   else{const el=document.getElementById('macro-VIX');if(el)el.innerHTML='<div class="mi-label">VIX</div><div class="mi-name" style="color:var(--muted)">Unavailable</div>';}
-  const quotes={};
-  await Promise.all(allMacroTickers.map(async t=>{const q=await yahooQuote(t);if(q)quotes[t]=q;}));
-  ['SPY','QQQ','IWM'].forEach(t=>{if(quotes[t])renderIndexCard(t,quotes[t]);});
-  Object.keys(SECTOR_META).forEach(t=>{if(quotes[t])renderSectorTile(t,quotes[t]);else{const el=document.getElementById(`sector-${t}`);if(el){el.style.background='var(--glass-border)';el.innerHTML=`<div class="sector-ticker" style="color:var(--muted)">${t}</div><div style="font-size:9px;color:var(--muted)">--</div>`;}}});
+
+  ['SPY','QQQ','IWM'].forEach(t=>{if(batchData[t])renderIndexCard(t,batchData[t]);});
+  Object.keys(SECTOR_META).forEach(t=>{if(batchData[t])renderSectorTile(t,batchData[t]);else{const el=document.getElementById(`sector-${t}`);if(el){el.style.background='var(--glass-border)';el.innerHTML=`<div class="sector-ticker" style="color:var(--muted)">${t}</div><div style="font-size:9px;color:var(--muted)">--</div>`;}}});
   const extraMap={UUP:'DXY',GLD:'GLD',USO:'USO',TLT:'TLT'};
-  Object.entries(extraMap).forEach(([ticker,id])=>{if(quotes[ticker])renderExtraCard(id,quotes[ticker]);});
+  Object.entries(extraMap).forEach(([ticker,id])=>{if(batchData[ticker])renderExtraCard(id,batchData[ticker]);});
   document.getElementById('macroLastUpdated').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
   macroLoaded=true;
 }
