@@ -1105,34 +1105,78 @@ function calcStoch(highs,lows,closes,period=14){if(closes.length<period)return n
 
 // ── Yahoo Finance: fetch OHLCV chart data ───────────────────
 async function yfChart(ticker, range='2y', interval='1d') {
-  // Must go through proxy — YF blocks CORS from non-yahoo origins
+  // Try new /yf/chart route first (new worker deployment)
   try {
     const res = await fetch(`${PROXY}/yf/chart/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}`);
+    if (res.ok) {
+      const data = await res.json();
+      const result = data?.chart?.result?.[0];
+      if (result) {
+        const ts = result.timestamp || [];
+        const q  = result.indicators?.quote?.[0] || {};
+        if ((q.close||[]).filter(Boolean).length > 10)
+          return { closes: q.close||[], highs: q.high||[], lows: q.low||[], volumes: q.volume||[], timestamps: ts };
+      }
+    }
+  } catch(e) {}
+
+  // Fall back to existing /twelvedata/time_series (always deployed, always works)
+  try {
+    const qs = new URLSearchParams({ symbol: ticker, interval: '1day', outputsize: 220 }).toString();
+    const res = await fetch(`${PROXY}/twelvedata/time_series?${qs}`);
     if (!res.ok) return null;
     const data = await res.json();
-    const result = data?.chart?.result?.[0];
-    if (!result) return null;
-    const ts      = result.timestamp || [];
-    const q       = result.indicators?.quote?.[0] || {};
+    if (!data?.values?.length) return null;
+    const bars = [...data.values].reverse(); // oldest first
     return {
-      closes:  q.close  || [],
-      highs:   q.high   || [],
-      lows:    q.low    || [],
-      volumes: q.volume || [],
-      timestamps: ts
+      closes:  bars.map(b => parseFloat(b.close)),
+      highs:   bars.map(b => parseFloat(b.high)),
+      lows:    bars.map(b => parseFloat(b.low)),
+      volumes: bars.map(b => parseFloat(b.volume)),
+      timestamps: bars.map(b => new Date(b.datetime).getTime() / 1000),
     };
   } catch(e) { return null; }
 }
 
 // ── Yahoo Finance: single or batch quote ────────────────────
 async function yfQuote(symbols) {
-  // Must go through proxy — YF blocks CORS from non-yahoo origins
-  const sym = Array.isArray(symbols) ? symbols.join(',') : symbols;
+  const arr = Array.isArray(symbols) ? symbols : [symbols];
+  const sym = arr.join(',');
+
+  // Try new /yf/quote route first (new worker deployment)
   try {
     const res = await fetch(`${PROXY}/yf/quote?symbols=${encodeURIComponent(sym)}`);
+    if (res.ok) {
+      const data = await res.json();
+      const results = data?.quoteResponse?.result;
+      if (results?.length) return results;
+    }
+  } catch(e) {}
+
+  // Fall back to existing /batch route (always deployed, always works)
+  try {
+    const encoded = arr.map(t => encodeURIComponent(t)).join(',');
+    const res = await fetch(`${PROXY}/batch?symbols=${encoded}`);
     if (!res.ok) return [];
-    const data = await res.json();
-    return data?.quoteResponse?.result || [];
+    const batchData = await res.json();
+    // Normalize batch response to match yfQuote shape
+    return arr.map(ticker => {
+      const q = batchData[ticker] || batchData[decodeURIComponent(ticker)] || null;
+      if (!q) return null;
+      return {
+        symbol: ticker,
+        regularMarketPrice: q.c,
+        regularMarketChangePercent: q.dp,
+        regularMarketDayHigh: q.h,
+        regularMarketDayLow: q.l,
+        regularMarketPreviousClose: q.pc,
+        regularMarketVolume: q.vol || null,
+        fiftyTwoWeekHigh: q.h52 || null,
+        fiftyTwoWeekLow: q.l52 || null,
+        fiftyDayAverage: q.ema50 || null,
+        twoHundredDayAverage: q.ema200 || null,
+      };
+    }).filter(Boolean);
   } catch(e) { return []; }
 }
 
