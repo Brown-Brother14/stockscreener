@@ -1369,7 +1369,7 @@ function debouncedRenderDashTop5() {
 
 function renderDashTop5(data) {
   const el = document.getElementById('dashTop5');
-  const source = data || allResults;
+  const source = data || (dashboardResults.length ? dashboardResults : allResults);
   if (!source.length) return;
   const isCached = !!data;
   const sorted = [...source].sort((a,b)=>b.score-a.score);
@@ -1400,7 +1400,7 @@ function renderDashTop5(data) {
     </div>`;
   }).join('')
   + (allWeak ? `<div style="padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">Broad market weakness — scores suppressed</div>` : '')
-  + (isCached && !allWeak ? `<div style="padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">Last scan · Refreshing…</div>` : '');
+  + (isCached && !allWeak ? `<div style="padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">Scores cached · refreshes every 6 hours</div>` : '');
 
   // Draw sparklines from stored chart data
   top5.forEach(d => {
@@ -1870,36 +1870,63 @@ const PRESETS={
 };
 
 
-// ── Broad universe for background top-picks scan (150 tickers, diversified) ──
+// ── Broad universe — 400+ stocks across all sectors for dashboard top-picks ──
 const BROAD_UNIVERSE = [
-  // Mega cap tech
-  'AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA','AVGO','ORCL','ADBE',
-  // Financials
-  'JPM','BAC','GS','MS','V','MA','AXP','BLK','SCHW','COF',
-  // Healthcare / Biotech
-  'UNH','LLY','JNJ','ABBV','MRK','PFE','TMO','ABT','AMGN','ISRG','VRTX','REGN',
-  // Energy
-  'XOM','CVX','COP','EOG','SLB','OXY','PSX','VLO','MPC','DVN',
-  // Consumer
-  'WMT','COST','MCD','SBUX','NKE','HD','TGT','AMZN','LOW','CMG',
-  // Industrials
-  'GE','HON','CAT','DE','RTX','LMT','NOC','BA','UPS','ETN',
-  // Semis
-  'AMD','INTC','QCOM','AMAT','LRCX','MU','KLAC','ASML','ARM','TSM',
-  // Software / Cloud
-  'CRM','NOW','SNOW','DDOG','NET','PLTR','HUBS','WDAY','ZS','MDB',
-  // Small/mid momentum
-  'AXON','CRWD','PANW','FTNT','S','HOOD','SOFI','AFRM','COIN','MSTR',
-  // Defensive / dividend
-  'KO','PG','PEP','CL','GIS','MO','PM','O','NEE','DUK',
-  // Materials / commodities
-  'GLD','SLV','NEM','FCX','ALB','LIN','APD','SHW','NUE','VMC',
-  // Healthcare devices
-  'DHR','BSX','SYK','EW','ZBH','HOLX','PODD','DXCM','IDXX','ALGN',
-  // Real estate / REIT
-  'AMT','PLD','EQIX','CCI','PSA','SPG','DLR','WELL',
-  // AI / emerging
-  'SMCI','AI','SOUN','IONQ','RKLB','PATH','BBAI','ASTS',
+  // ── Mega cap / S&P 500 leaders ──
+  'AAPL','MSFT','NVDA','AMZN','GOOGL','GOOG','META','TSLA','BRK.B','AVGO',
+  'LLY','JPM','V','UNH','XOM','MA','COST','HD','PG','JNJ',
+  'ORCL','ABBV','BAC','MRK','NFLX','CRM','CVX','WMT','KO','AMD',
+  'PEP','TMO','ABT','LIN','MCD','GE','PM','DHR','ADBE','TXN',
+  'ISRG','CAT','SPGI','GS','BLK','AMAT','MS','RTX','NOW','SCHW',
+  // ── Technology ──
+  'INTC','QCOM','MU','LRCX','KLAC','MRVL','FTNT','PANW','CRWD','ZS',
+  'NET','DDOG','SNOW','PLTR','HUBS','WDAY','VEEV','TEAM','ZM','TWLO',
+  'MDB','OKTA','S','BILL','GTLB','U','RBLX','HOOD','COIN','MSTR',
+  'ARM','ASML','TSM','STX','WDC','SMCI','AI','IONQ','SOUN','ASTS',
+  'AKAM','CDNS','SNPS','ANSS','PTC','EPAM','FFIV','JNPR','NTAP',
+  // ── Financials ──
+  'WFC','C','AXP','USB','PNC','TFC','COF','MTB','FITB','HBAN',
+  'RF','KEY','CFG','ALLY','SYF','DFS','AIG','MET','PRU','AFL',
+  'CB','ALL','TRV','PGR','HIG','CME','ICE','NDAQ','MSCI','MCO',
+  'WEX','BR','FDS','FNF','FAF','ARES','APO','KKR','BX','CG',
+  // ── Healthcare ──
+  'PFE','BMY','AMGN','GILD','BIIB','VRTX','REGN','ALNY','MRNA',
+  'CVS','CI','HCA','ELV','MOH','CNC','HUM','DVA','IQV','IQVIA',
+  'ZBH','BSX','SYK','MDT','EW','HOLX','PODD','DXCM','IDXX','ALGN',
+  'INTU','VEEVA','TDOC','DOCS','ACAD','JAZZ','UTHR','NBIX','BMRN',
+  // ── Consumer ──
+  'SBUX','NKE','TGT','LOW','TJX','ROST','BURL','FIVE','DG','DLTR',
+  'CMG','YUM','QSR','DPZ','WING','JACK','TXRH','DINE','EAT','DRI',
+  'BKNG','MAR','HLT','H','IHG','MGM','WYNN','LVS','CZR','PENN',
+  'ABNB','UBER','LYFT','DASH','EXPE','TRIP','NCLH','CCL','RCL',
+  'AMZN','ETSY','EBAY','W','CHWY','CPNG','SE','MELI','SHOP',
+  // ── Industrials ──
+  'HON','UPS','FDX','DE','PH','EMR','ROK','ETN','IR','ITW',
+  'MMM','DOV','AME','XYL','GNRC','ROP','FTV','CSGP','LDOS','BAH',
+  'LMT','NOC','HII','GD','HEI','TDG','AXON','KTOS','CACI','SAIC',
+  'CSX','UNP','NSC','CP','CNI','WAB','TT','CARR','OTIS','JCI',
+  // ── Energy ──
+  'COP','EOG','SLB','OXY','PSX','VLO','MPC','DVN','HAL','BKR',
+  'FANG','HES','APA','MRO','CTRA','SM','MTDR','VTLE','CPE','MGY',
+  'WMB','OKE','KMI','ET','EPD','MPLX','PAA','TRGP','DT','LNG',
+  'NEE','D','SO','AEP','DUK','EXC','SRE','PCG','ED','ES',
+  // ── Materials ──
+  'LIN','APD','SHW','ECL','PPG','RPM','NEM','NUE','STLD','CLF',
+  'FCX','ALB','MOS','CF','FMC','VMC','MLM','CRH','EXP','SLGN',
+  // ── Real Estate ──
+  'AMT','PLD','EQIX','CCI','PSA','SPG','O','DLR','WELL','AVB',
+  'EQR','ARE','BXP','VTR','IRM','COLD','VICI','GLPI','MAA','CPT',
+  // ── Communication ──
+  'GOOGL','META','T','VZ','CMCSA','CHTR','NFLX','DIS','WBD','PARA',
+  'FOXA','NYT','IPG','OMC','TTD','MGNI','PUBM','IAS','DV',
+  // ── Utilities ──
+  'NEE','DUK','SO','D','AEP','EXC','SRE','PCG','ED','ES',
+  'FE','ETR','PPL','CNP','AES','NI','CMS','PNW','OGE','EVRG',
+  // ── Small/Mid cap value plays ──
+  'EXAS','CELH','DKNG','MRVI','RH','BBWI','ANF','AEO','URBN',
+  'OXM','PVH','HBI','VFC','COLM','SKX','CROX','DECK','BOOT',
+  'WYNN','RNG','FIVN','NICE','MXIM','SWKS','QRVO','COHR','AMBA',
+  'SLAB','MCHP','MPWR','WOLF','ON','PI','ACLS','ONTO','KLIC',
 ];
 
 function loadPreset(name){
@@ -2185,17 +2212,28 @@ function calculateScore({
     revenue_growth:    revenueGrowthScore(revenueGrowth),
     div_buyback_yield: divBuybackScore(divYield, buybackYield),
     earnings_quality:  earningsQualityScore(null, epsGrowth),
-    insider_buying:    0.5, // placeholder — would need Form 4 data
+    insider_buying:    0.4, // placeholder — Form 4 data not yet fetched
     analyst_upside:    analystUpsideScore(price, analystTarget),
     macro_sensitivity: macroSensitivityScore(beta, sector),
   };
 
   // Weighted sum → 0-100
+  // For factors with no data, exclude their weight from totalW so they don't drag the score
   let raw = 0;
+  let effectiveW = 0;
   for (const [f, score] of Object.entries(factors)) {
-    raw += (w[f] || 0) * score;
+    const fw = w[f] || 0;
+    // If score is exactly 0 AND the raw input was null/missing, skip this factor
+    const isMissing = score === 0 && [
+      'peg_ratio','pe_vs_sector','pb_ratio','roe','debt_equity',
+      'revenue_growth','div_buyback_yield','earnings_quality','analyst_upside'
+    ].includes(f);
+    if (!isMissing) {
+      raw += fw * score;
+      effectiveW += fw;
+    }
   }
-  const normalized = Math.round((raw / totalW) * 100);
+  const normalized = effectiveW > 0 ? Math.round((raw / effectiveW) * 100) : 50;
 
   // Combo bonus: oversold RSI at strong support = extra conviction
   let bonus = 0;
@@ -2218,7 +2256,7 @@ function getSignal(score) {
 
 function getScoreClass(s) { return s >= 70 ? 'high' : s >= 50 ? 'mid' : 'low'; }
 
-let allResults=[], currentFilter='all', sortField='score', sortDir=-1;
+let allResults=[], dashboardResults=[], currentFilter='all', sortField='score', sortDir=-1;
 let fhWS=null, fhReconnectTimer=null, fhSubscribed=new Set(), _fallbackInterval=null;
 let _pendingPatches={}, _patchRaf=null;
 
@@ -2898,7 +2936,8 @@ async function refreshLivePrices(results) {
 
 // ── Silent background scan to populate Top AlgoScore Picks ──
 async function runBackgroundTopScan() {
-  const tickers = [...BROAD_UNIVERSE];
+  // Deduplicate universe
+  const tickers = [...new Set(BROAD_UNIVERSE)];
   const results = [];
 
   const hasCached = document.getElementById('dashTop5').querySelector('.top5-row');
@@ -2906,12 +2945,11 @@ async function runBackgroundTopScan() {
     document.getElementById('dashTop5').innerHTML = `
       <div style="padding:20px 18px;display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">
         <div class="loader" style="width:14px;height:14px;border-width:2px;margin:0"></div>
-        Scanning for top picks…
+        Scanning ${tickers.length} stocks for top picks…
       </div>`;
   }
 
   // ── Phase 1: Batch fetch all quotes + fundamentals from YF ──
-  // 150 stocks = 3 requests of 50. Replaces 150 individual Finnhub calls.
   const QUOTE_BATCH = 50;
   const quoteMap = {};
   for (let i = 0; i < tickers.length; i += QUOTE_BATCH) {
@@ -3019,18 +3057,28 @@ async function runBackgroundTopScan() {
         lows:       chartLows,
       });
     }
-    renderDashTop5(results);
+    // Progressive render — show best results found so far
+    if (results.length > 0) {
+      const sorted = [...results].sort((a,b) => b.score - a.score);
+      renderDashTop5(sorted);
+    }
     await delay(80);
   }
 
-  // Final render — update everything
-  allResults = results;
-  renderDashTop5();
-  renderTable();
+  // Store in dashboardResults — separate from user's screener results
+  dashboardResults = [...results].sort((a,b) => b.score - a.score);
+  renderDashTop5(dashboardResults);
+
+  // Only update screener table if user hasn't run a manual scan
+  if (!allResults.length) {
+    allResults = results;
+    renderTable();
+  }
+
   const br2 = results.filter(r=>r.signal.cls==='breakout').length;
   const bm2 = results.filter(r=>r.signal.cls==='momentum').length;
   const avg2 = Math.round(results.reduce((s,r)=>s+r.score,0)/results.length);
-  const top2 = [...results].sort((a,b)=>b.score-a.score)[0];
+  const top2 = dashboardResults[0];
   document.getElementById('totalScanned').textContent = results.length;
   document.getElementById('breakoutCount').textContent = br2;
   document.getElementById('bullishCount').textContent = bm2;
@@ -3039,24 +3087,21 @@ async function runBackgroundTopScan() {
   document.getElementById('lastUpdated').textContent = 'Updated '+new Date().toLocaleTimeString();
 
   const now = Date.now();
-  // Save full results locally
-  try{ localStorage.setItem('algoscreen_scandata', JSON.stringify({results, ts: now, date:new Date(now).toISOString().slice(0,10)})); }catch(e){}
+  try{ localStorage.setItem('algoscreen_scandata', JSON.stringify({results, ts: now})); }catch(e){}
 
-  // POST full results to shared worker — every future visitor gets this instantly
+  // POST to shared worker so next visitor gets results instantly
   fetch(`${PROXY}/scandata`, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ results })
   }).catch(()=>{});
 
-  // Clean up age label
+  // Schedule next auto-scan in 6 hours
+  setTimeout(() => runBackgroundTopScan(), 6 * 60 * 60 * 1000);
+
   const ageLabel = document.querySelector('.top5-age-label');
   if(ageLabel) ageLabel.remove();
-  // Subscribe new tickers to live stream
   resubscribeYFStream();
-
-  // Also merge into allResults if screener hasn't been run yet
-  if (!allResults.length) allResults = results;
 }
 
 
@@ -3226,8 +3271,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(cached){
       const parsed = JSON.parse(cached);
       if(parsed.results && parsed.results.length){
+        dashboardResults = [...parsed.results].sort((a,b)=>b.score-a.score);
         allResults = parsed.results;
-        renderDashTop5();
+        renderDashTop5(dashboardResults);
         renderTable();
         document.getElementById('clickHint').style.display='block';
         screenerAutoLoaded = true;
@@ -3256,8 +3302,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     const localTs = (() => { try{ const c=localStorage.getItem('algoscreen_scandata'); return c?JSON.parse(c).ts:0; }catch(e){return 0;} })();
     if(d.ts > localTs || !allResults.length){
       window._lastWorkerTs = d.ts;
+      dashboardResults = [...d.results].sort((a,b)=>b.score-a.score);
       allResults = d.results;
-      renderDashTop5();
+      renderDashTop5(dashboardResults);
       renderTable();
       document.getElementById('clickHint').style.display='block';
       screenerAutoLoaded = true;
@@ -3270,7 +3317,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       document.getElementById('bullishCount').textContent = bm;
       document.getElementById('avgScore').textContent = avg;
       document.getElementById('topPick').textContent = top ? top.ticker : '--';
-      document.getElementById('lastUpdated').textContent = `Scores updated ${age} · next refresh in ${Math.max(0,30-Math.round((Date.now()-d.ts)/60000))}m · refreshing prices…`;
+      document.getElementById('lastUpdated').textContent = `Scores updated ${age} · next refresh in ${Math.max(0,360-Math.round((Date.now()-d.ts)/60000))}m · refreshing prices…`;
       try{ localStorage.setItem('algoscreen_scandata', JSON.stringify({results:d.results,ts:d.ts})); }catch(e){}
 
       // ── Refresh live prices in batches of 8 ──────────────────────────────
@@ -3290,7 +3337,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const workerTs = window._lastWorkerTs || 0;
     const freshestTs = Math.max(cachedTs, workerTs);
     const ageMs = Date.now() - freshestTs;
-    const THIRTY_MINS = 30 * 60 * 1000;
+    const THIRTY_MINS = 6 * 60 * 60 * 1000; // 6 hours
     const hasRecent = freshestTs > 0 && ageMs < THIRTY_MINS;
     if(!hasRecent || !allResults.length){
       runBackgroundTopScan();
