@@ -47,20 +47,34 @@ body{
   overflow-x:hidden;
 }
 
-/* ── SITE NAV ── */
-#siteNav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:200;background:rgba(12,12,15,.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 8px 0 16px;height:52px;border-radius:100px;border:1px solid rgba(255,255,255,.12);box-shadow:0 8px 40px rgba(0,0,0,.5);white-space:nowrap}
-.nav-logo{display:flex;align-items:center;gap:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;color:#fff;text-decoration:none;letter-spacing:-.3px;padding-right:4px}
-.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(0,230,118,.7)}
-.nav-links{display:flex;align-items:center;gap:2px}
-.nav-link{font-family:'Inter',sans-serif;font-size:13px;color:var(--muted2);text-decoration:none;padding:6px 14px;border-radius:8px;transition:color .2s,background .2s}
-.nav-link:hover{color:#fff;background:rgba(255,255,255,.06)}
-.nav-link.active{color:#fff;background:rgba(255,255,255,.08)}
-.nav-cta{background:#fff;color:#000;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;padding:8px 18px;border-radius:100px;text-decoration:none;transition:all .2s;display:flex;align-items:center;gap:4px}
-.nav-cta:hover{background:rgba(255,255,255,.85)}
-@media(max-width:700px){#siteNav{top:12px;padding:0 8px 0 14px;max-width:calc(100vw - 32px)}.nav-links{display:none}}
+/* ═══════════════════════ NAV ═══════════════════════ */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px 0}
+.nav-inner{
+  display:flex;align-items:center;gap:2px;
+  background:rgba(14,15,18,.75);
+  border:1px solid var(--glass-border-hi);
+  border-radius:50px;padding:7px 10px;
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 8px 32px rgba(0,0,0,.5);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.01) 100%);
+}
+.nav-logo{display:flex;align-items:center;gap:10px;padding:6px 16px 6px 10px;margin-right:6px;border-right:1px solid rgba(255,255,255,.1);text-decoration:none}
+.nav-logo-text{font-family:'Plus Jakarta Sans', system-ui, sans-serif;font-size:16px;font-weight:700;letter-spacing:-.3px;color:#fff}
+.nav-link{font-size:15px;color:var(--muted2);text-decoration:none;padding:7px 16px;border-radius:30px;transition:all .2s;white-space:nowrap}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,.08);box-shadow:0 0 18px rgba(255,255,255,.06)}
+.nav-link.active{color:#fff}
+.nav-cta{
+  font-family:'Plus Jakarta Sans', system-ui, sans-serif;font-size:14px;font-weight:700;
+  background:linear-gradient(135deg,#fff 0%,#d8d8d8 100%);
+  color:#000;padding:9px 22px;border-radius:30px;text-decoration:none;margin-left:6px;
+  transition:opacity .2s,transform .2s,box-shadow .2s;
+  box-shadow:0 1px 0 rgba(255,255,255,.8) inset;
+}
+.nav-cta:hover{opacity:1 !important;box-shadow:0 0 32px rgba(255,255,255,.18),0 1px 0 rgba(255,255,255,.8) inset;transform:translateY(-1px)}
+@media(max-width:700px){.nav-inner{padding:5px 7px}.nav-link:not(.sm){display:none}.nav-logo{border-right:none}}
 
 /* ── TAB PANELS ── */
-.tab-panel{display:none;min-height:100vh;padding:80px 0 120px}
+.tab-panel{display:none;min-height:100vh;padding:100px 0 120px}
 .tab-panel.active{display:block}
 
 /* ── BOTTOM PILL NAV ── */
@@ -482,19 +496,26 @@ tbody tr{animation:fadeIn .25s ease both}
 <body>
 
 
-<!-- SITE NAV -->
-<nav id="siteNav">
-  <a class="nav-logo" href="index.html">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="12" width="4" height="10" rx="1" fill="#00e676"/><rect x="10" y="7" width="4" height="15" rx="1" fill="#00e676" opacity=".8"/><rect x="18" y="2" width="4" height="20" rx="1" fill="#00e676" opacity=".6"/></svg>
-    AlgoScreen Pro
-  </a>
-  <div class="nav-links">
-    <a href="index.html" class="nav-link">Home</a>
-    <a href="screener.html" class="nav-link active">Screener</a>
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+        <rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(255,255,255,.3)"/>
+        <rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(255,255,255,.6)"/>
+        <rect x="15" y="7" width="4" height="18" rx="1" fill="#fff"/>
+        <rect x="21" y="13" width="4" height="12" rx="1" fill="rgba(255,255,255,.6)"/>
+        <polyline points="5,15 11,10 17,6 23,12" stroke="#00e676" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="17" cy="6" r="2" fill="#00e676"/>
+      </svg>
+      <span class="nav-logo-text">AlgoScreen Pro</span>
+    </a>
+    <a href="index.html" class="nav-link sm">Home</a>
+    <a href="screener.html" class="nav-link active sm">Screener</a>
     <a href="portfolio.html" class="nav-link">Portfolio</a>
     <a href="about.html" class="nav-link">About</a>
+    <a href="screener.html" class="nav-cta">Open App ↗</a>
   </div>
-  <a href="screener.html" class="nav-cta">Open App ↗</a>
 </nav>
 
 <!-- ═══════════════ DASHBOARD TAB ═══════════════ -->
