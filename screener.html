@@ -305,80 +305,82 @@ tbody td{font-family:'Inter',sans-serif;padding:10px 14px;font-size:12px;color:v
 .today-badge{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--green);background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.2);padding:2px 7px;border-radius:4px;margin-left:8px}
 
 /* ── MODAL ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;overflow-y:auto;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.modal-overlay.open{display:flex;align-items:flex-start;justify-content:center;padding:24px 16px 40px}
-.modal{background:rgba(10,11,14,.97);border:1px solid rgba(255,255,255,.1);border-radius:20px;width:100%;max-width:820px;overflow:hidden;margin-top:60px;box-shadow:0 24px 80px rgba(0,0,0,.7)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;overflow-y:auto;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.modal-overlay.open{display:flex;align-items:flex-start;justify-content:center;padding:20px 16px 60px}
+.modal{background:rgba(7,8,10,.99);border:1px solid rgba(255,255,255,.08);border-radius:22px;width:100%;max-width:860px;overflow:hidden;margin-top:72px;box-shadow:0 40px 100px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.03) inset}
 
 /* Header */
-.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.07)}
-.modal-ticker-wrap{display:flex;align-items:center;gap:14px}
-.modal-ticker{font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.5px;color:#fff}
-.modal-name{font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);margin-top:3px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 26px;background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.07)}
+.modal-ticker-wrap{display:flex;align-items:center;gap:16px}
+.modal-ticker{font-family:'Plus Jakarta Sans',sans-serif;font-size:30px;font-weight:800;letter-spacing:-.8px;color:#fff;line-height:1}
+.modal-name{font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,255,255,.38);margin-top:5px}
 .modal-header-right{display:flex;align-items:center;gap:8px}
-.modal-close{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--muted);font-size:16px;cursor:pointer;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.modal-close:hover{background:rgba(255,255,255,.12);color:#fff}
+.modal-close{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.35);font-size:15px;cursor:pointer;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.modal-close:hover{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.16)}
 
 /* Stats strip */
-.modal-stats-strip{display:flex;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.07)}
-.modal-stat{flex-shrink:0;padding:14px 20px;border-right:1px solid rgba(255,255,255,.06)}
+.modal-stats-strip{display:flex;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.01)}
+.modal-stat{flex-shrink:0;padding:11px 18px;border-right:1px solid rgba(255,255,255,.05)}
 .modal-stat:last-child{border-right:none}
-.modal-stat-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.modal-stat-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:5px}
 .modal-stat-value{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:#fff}
 
 /* 52W range */
-.range-row{display:flex;align-items:center;gap:12px;padding:12px 24px;border-bottom:1px solid rgba(255,255,255,.07)}
-.range-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);white-space:nowrap}
+.range-row{display:flex;align-items:center;gap:12px;padding:10px 26px;border-bottom:1px solid rgba(255,255,255,.06)}
+.range-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:.8px;white-space:nowrap}
 .range-price{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;white-space:nowrap}
-.range-track{position:relative;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
-.range-gradient{position:absolute;inset:0;background:linear-gradient(90deg,var(--red),var(--amber),var(--green))}
-.range-dot{position:absolute;top:-5px;width:14px;height:14px;background:#fff;border-radius:50%;transform:translateX(-50%);box-shadow:0 0 6px rgba(255,255,255,.4)}
+.range-track{position:relative;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.range-gradient{position:absolute;inset:0;background:linear-gradient(90deg,var(--red),var(--amber),var(--green));opacity:.6}
+.range-dot{position:absolute;top:-5px;width:13px;height:13px;background:#fff;border-radius:50%;transform:translateX(-50%);box-shadow:0 0 8px rgba(255,255,255,.6)}
 
 /* Chart */
-.tv-container{height:380px;position:relative;background:#06070a;border-bottom:1px solid rgba(255,255,255,.07)}
-.tv-loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:10px}
-.interval-btns{display:flex;gap:4px}
-.interval-btn{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:5px 11px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);color:var(--muted);cursor:pointer;transition:all .15s}
-.interval-btn.active,.interval-btn:hover{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.18)}
+.tv-container{height:360px;position:relative;background:#050506;border-bottom:1px solid rgba(255,255,255,.06);overflow:hidden}
+.tv-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#050506}
+
+/* Section labels */
+.modal-section-label{padding:10px 26px;font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.22);background:rgba(255,255,255,.015);border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
 
 /* Score breakdown */
-.score-breakdown{display:grid;grid-template-columns:110px 1fr;gap:20px;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.07)}
-.score-big{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
-.score-circle{width:86px;height:86px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:rgba(255,255,255,.03)}
-.score-circle-num{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;line-height:1}
-.score-circle-denom{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
-.score-bars-list{display:flex;flex-direction:column;gap:7px}
-.score-bar-row{display:grid;grid-template-columns:120px 1fr 64px 44px;align-items:center;gap:8px}
-.score-bar-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.5)}
-.score-bar-track{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.score-breakdown{display:grid;grid-template-columns:96px 1fr;gap:20px;padding:16px 26px;border-bottom:1px solid rgba(255,255,255,.06)}
+.score-big{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.score-circle{width:78px;height:78px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.025);border:2px solid rgba(255,255,255,.07)}
+.score-circle-num{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;line-height:1}
+.score-circle-denom{font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,.28)}
+.score-bars-list{display:flex;flex-direction:column;gap:6px;justify-content:center}
+.score-bar-row{display:grid;grid-template-columns:114px 1fr 56px 38px;align-items:center;gap:8px}
+.score-bar-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.38);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default}
+.score-bar-track{height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
 .score-bar-fill{height:100%;border-radius:2px;transition:width .5s ease}
-.score-bar-val{font-family:'JetBrains Mono',monospace;font-size:9px;text-align:right;color:rgba(255,255,255,.6)}
+.score-bar-val{font-family:'JetBrains Mono',monospace;font-size:9px;text-align:right;color:rgba(255,255,255,.45)}
 .score-bar-pts{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;text-align:right}
 
-/* Data grid — technicals + fundamentals in one clean row */
-.modal-data-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.07)}
+/* Data grid */
+.modal-data-grid{display:grid;grid-template-columns:repeat(3,1fr)}
 @media(max-width:600px){.modal-data-grid{grid-template-columns:1fr 1fr}}
-.modal-data-card{padding:14px 18px;background:rgba(10,11,14,.97)}
-.modal-data-title{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:10px}
-.modal-data-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.modal-data-card{padding:14px 18px;background:rgba(7,8,10,.99);border-right:1px solid rgba(255,255,255,.05)}
+.modal-data-card:last-child{border-right:none}
+.modal-data-title{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-bottom:10px}
+.modal-data-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.035)}
 .modal-data-row:last-child{border-bottom:none}
-.modal-data-key{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
+.modal-data-key{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.32)}
 .modal-data-val{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#fff}
 
-/* RSI bar inside data card */
-.rsi-track{position:relative;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:visible;margin:8px 0 4px}
+/* RSI */
+.rsi-big{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;line-height:1;margin-bottom:6px}
+.rsi-track{position:relative;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:visible;margin:0 0 5px}
+.rsi-zones{position:absolute;inset:0;background:linear-gradient(90deg,var(--green) 0%,rgba(255,255,255,.08) 43%,rgba(255,255,255,.08) 57%,var(--red) 100%);opacity:.4;border-radius:2px}
 .rsi-marker{position:absolute;top:-5px;width:13px;height:13px;border-radius:50%;transform:translateX(-50%)}
-.rsi-big{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;line-height:1}
-.rsi-zones{position:absolute;inset:0;background:linear-gradient(90deg,var(--green) 0%,var(--amber) 30%,rgba(255,255,255,.15) 50%,var(--amber) 70%,var(--red) 100%);opacity:.25}
 
 /* Badges */
-.bull-badge{background:rgba(0,230,118,.1);color:var(--green);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px}
-.bear-badge{background:rgba(255,77,109,.1);color:var(--red);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px}
+.bull-badge{background:rgba(0,230,118,.1);color:var(--green);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;border:1px solid rgba(0,230,118,.18)}
+.bear-badge{background:rgba(255,77,109,.08);color:var(--red);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;border:1px solid rgba(255,77,109,.18)}
 
-/* News inside modal */
-.modal-news-item{display:block;padding:10px 24px;border-bottom:1px solid rgba(255,255,255,.05);text-decoration:none;transition:background .12s}
-.modal-news-item:hover{background:rgba(255,255,255,.03)}
+/* News */
+.modal-news-item{display:block;padding:11px 26px;border-bottom:1px solid rgba(255,255,255,.04);text-decoration:none;transition:background .12s}
+.modal-news-item:hover{background:rgba(255,255,255,.025)}
 .modal-news-item:last-child{border-bottom:none}
-.modal-section-label{padding:12px 24px;font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.28);background:rgba(255,255,255,.02);border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07)}
+
+/* Misc retained */
 .click-hint{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:8px;display:none}
 .news-loading{padding:20px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
 .news-item{display:flex;align-items:flex-start;gap:10px;padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.05);text-decoration:none;transition:background .12s}
@@ -1081,7 +1083,7 @@ tbody tr{animation:fadeIn .25s ease both}
   </button>
 </nav>
 
-<!-- STOCK DETAIL MODAL (carried over from existing) -->
+<!-- STOCK DETAIL MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
   <div class="modal">
 
@@ -1092,23 +1094,16 @@ tbody tr{animation:fadeIn .25s ease both}
           <div class="modal-ticker" id="modalTicker">--</div>
           <div class="modal-name" id="modalName">--</div>
         </div>
-        <span id="modalSignal" style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px"></span>
+        <span id="modalSignal"></span>
       </div>
-      <div class="modal-header-right">
-        <div class="interval-btns">
-          <button class="interval-btn" onclick="setChartInterval('1D')">1D</button>
-          <button class="interval-btn active" onclick="setChartInterval('W')">1W</button>
-          <button class="interval-btn" onclick="setChartInterval('M')">1M</button>
-        </div>
-        <button class="modal-close" onclick="closeModal()">&#x2715;</button>
-      </div>
+      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
     </div>
 
     <!-- Stats strip -->
     <div class="modal-stats-strip">
-      <div class="modal-stat"><div class="modal-stat-label">Price</div><div class="modal-stat-value" id="mPrice">--</div><div id="mExtPrice" style="font-family:'JetBrains Mono',monospace;font-size:9px;margin-top:3px;color:var(--muted)"></div></div>
+      <div class="modal-stat"><div class="modal-stat-label">Price</div><div class="modal-stat-value" id="mPrice">--</div><div id="mExtPrice" style="font-family:'JetBrains Mono',monospace;font-size:9px;margin-top:3px;color:rgba(255,255,255,.35)"></div></div>
       <div class="modal-stat"><div class="modal-stat-label">Change</div><div class="modal-stat-value" id="mChange">--</div></div>
-      <div class="modal-stat"><div class="modal-stat-label">Market Cap</div><div class="modal-stat-value" id="mMktCap">--</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">Mkt Cap</div><div class="modal-stat-value" id="mMktCap">--</div></div>
       <div class="modal-stat"><div class="modal-stat-label">P/E</div><div class="modal-stat-value" id="mPE">--</div></div>
       <div class="modal-stat"><div class="modal-stat-label">EPS TTM</div><div class="modal-stat-value" id="mEPS">--</div></div>
       <div class="modal-stat"><div class="modal-stat-label">Div Yield</div><div class="modal-stat-value" id="mDivYield">--</div></div>
@@ -1120,21 +1115,18 @@ tbody tr{animation:fadeIn .25s ease both}
       <span class="range-lbl">52W Low</span>
       <span class="range-price" id="mLow52" style="color:var(--red)">--</span>
       <div style="flex:1;display:flex;flex-direction:column;gap:4px;margin:0 10px">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-align:center" id="m52wPct">52-Week Range</div>
-        <div class="range-track" style="flex:1">
-          <div class="range-gradient"></div>
-          <div class="range-dot" id="rangeDot" style="left:50%"></div>
-        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,.28);text-align:center" id="m52wPct">52-Week Range</div>
+        <div class="range-track"><div class="range-gradient"></div><div class="range-dot" id="rangeDot" style="left:50%"></div></div>
       </div>
       <span class="range-price" id="mHigh52" style="color:var(--green)">--</span>
       <span class="range-lbl">52W High</span>
     </div>
 
-    <!-- TradingView chart -->
+    <!-- TradingView Symbol Overview chart -->
     <div class="tv-container" id="tvContainer">
       <div class="tv-loading" id="tvLoading">
         <div class="loader"></div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">Loading chart...</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.3)">Loading chart...</div>
       </div>
     </div>
 
@@ -2405,26 +2397,83 @@ function renderTable(){
 
 <script>
 // ══════════════════════════════════════════
-//  CHART MODAL
 // ══════════════════════════════════════════
-let currentTicker=null,currentInterval='W';
+//  CHART MODAL — TradingView Symbol Overview
+// ══════════════════════════════════════════
+let currentTicker = null;
 
-function buildTVUrl(ticker,interval){
-  const p=new URLSearchParams({symbol:ticker,interval,theme:'dark',style:'1',locale:'en',toolbar_bg:'#0d0e10',enable_publishing:'0',hide_top_toolbar:'0',hide_legend:'0',save_image:'0',container_id:'tv_chart',studies:JSON.stringify(['RSI@tv-basicstudies','MACD@tv-basicstudies','MASimple@tv-basicstudies']),show_popup_button:'0',withdateranges:'1',range:'6M',hide_side_toolbar:'0'});
-  return `https://s.tradingview.com/widgetembed/?${p.toString()}`;
-}
+function loadTVChart(ticker) {
+  const container = document.getElementById('tvContainer');
+  const loading   = document.getElementById('tvLoading');
+  if (!container) return;
 
-function loadTVChart(ticker,interval){
-  const container=document.getElementById('tvContainer');
-  document.getElementById('tvLoading').style.display='flex';
-  const old=container.querySelector('iframe');if(old)old.remove();
-  const iframe=document.createElement('iframe');
-  iframe.src=buildTVUrl(ticker,interval);
-  iframe.style.cssText='width:100%;height:100%;border:none;display:none';
-  iframe.onload=()=>{document.getElementById('tvLoading').style.display='none';iframe.style.display='block';};
-  container.appendChild(iframe);
+  // Clear previous widget
+  container.innerHTML = '';
+
+  // Re-add loading indicator
+  const loadDiv = document.createElement('div');
+  loadDiv.id = 'tvLoading';
+  loadDiv.className = 'tv-loading';
+  loadDiv.innerHTML = '<div class="loader"></div><div style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:rgba(255,255,255,.3)">Loading chart...</div>';
+  container.appendChild(loadDiv);
+
+  // Widget wrapper
+  const wrap = document.createElement('div');
+  wrap.className = 'tradingview-widget-container';
+  wrap.style.cssText = 'width:100%;height:360px;display:none';
+
+  const inner = document.createElement('div');
+  inner.className = 'tradingview-widget-container__widget';
+  inner.style.cssText = 'width:100%;height:360px';
+  wrap.appendChild(inner);
+
+  // Config script
+  const script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js';
+  script.async = true;
+  script.innerHTML = JSON.stringify({
+    symbols: [[ticker]],
+    chartOnly: true,
+    width: '100%',
+    height: 360,
+    locale: 'en',
+    colorTheme: 'dark',
+    autosize: true,
+    showVolume: false,
+    showMA: false,
+    hideDateRanges: false,
+    hideMarketStatus: true,
+    hideSymbolLogo: true,
+    scalePosition: 'right',
+    scaleMode: 'Normal',
+    fontFamily: 'JetBrains Mono, monospace',
+    fontSize: '10',
+    noTimeScale: false,
+    valuesTracking: '1',
+    changeMode: 'price-and-percent',
+    chartType: 'area',
+    lineWidth: 2,
+    lineType: 0,
+    dateRanges: ['1d|1','1m|30','3m|60','12m|1D','60m|1W','all|1M'],
+    backgroundColor: 'rgba(5,5,6,1)',
+    lineColor: 'rgba(96,165,250,1)',
+    topColor: 'rgba(96,165,250,0.18)',
+    bottomColor: 'rgba(96,165,250,0)',
+  });
+
+  // Show widget once script loads
+  script.onload = () => {
+    setTimeout(() => {
+      const tvLoading = document.getElementById('tvLoading');
+      if (tvLoading) tvLoading.style.display = 'none';
+      wrap.style.display = 'block';
+    }, 800);
+  };
+
+  wrap.appendChild(script);
+  container.appendChild(wrap);
 }
-function setChartInterval(interval){currentInterval=interval;document.querySelectorAll('.interval-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');if(currentTicker)loadTVChart(currentTicker,interval);}
 
 function openChart(ticker){
   const s = allResults.find(x=>x.ticker===ticker) || dashboardResults.find(x=>x.ticker===ticker);
@@ -2442,7 +2491,7 @@ function openChart(ticker){
     watch:    'background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.25)',
     weak:     'background:rgba(255,77,109,.08);color:var(--red);border:1px solid rgba(255,77,109,.2)',
   };
-  sigEl.style.cssText = `font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;${sigStyles[s.signal.cls]}`;
+  sigEl.style.cssText = `font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:5px 14px;border-radius:20px;letter-spacing:.5px;${sigStyles[s.signal.cls]}`;
 
   // Stats strip
   document.getElementById('mPrice').textContent = '$'+s.price.toFixed(2);
@@ -2532,7 +2581,7 @@ function openChart(ticker){
   fetchNews(s.ticker);
   fetchAndRenderAnalyst(s.ticker, s.price);
   loadModalInsider(s.ticker);
-  loadTVChart(ticker, currentInterval);
+  loadTVChart(ticker);
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
