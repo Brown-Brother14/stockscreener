@@ -2864,7 +2864,7 @@ async function refreshLivePrices(results) {
         r.price  = q.regularMarketPrice;
         r.change = q.regularMarketChangePercent;
         // Recompute signal based on fresh change + existing score
-        r.signal = getSignal(r.score, r.macd);
+        r.signal = getSignal(r.score);
       });
       // Re-render after each batch so prices appear progressively
       debouncedRenderDashTop5();
