@@ -1358,6 +1358,12 @@ function drawDashFngGauge(score) {
 }
 
 // ── Dashboard top 5 picks ──
+let _top5Timer = null;
+function debouncedRenderDashTop5() {
+  clearTimeout(_top5Timer);
+  _top5Timer = setTimeout(() => renderDashTop5(), 600);
+}
+
 function renderDashTop5(data) {
   const el = document.getElementById('dashTop5');
   const source = data || allResults;
@@ -1956,7 +1962,7 @@ async function runScan(){
       if(macd?.bullish)bullishMACD++;
       totalScore+=score;
       allResults.push({ticker,name,industry:profile?.industry||'',sector:profile?.sector||'',price:quote.price,change:quote.change,prevClose:quote.prevClose||null,volume,avgVolume,marketCap,score,signal,rsi,macd,pe,eps:financials?.eps||null,epsGrowth:financials?.epsGrowth||null,divYield:financials?.divYield||null,pos52w,high52w,low52w,revenueGrowth,ema20:tech?.ema20||null,ema50:tech?.ema50||null,ema200:tech?.ema200||null,emaAbove20,emaAbove50,emaAbove200,bbUpper:tech?.bbUpper||null,bbMiddle:tech?.bbMiddle||null,bbLower:tech?.bbLower||null,bbPos,adx:tech?.adx||null,stochK:tech?.stochK||null,stochD:tech?.stochD||null,extPrice:ext?.extPrice||null,extSession:ext?.session||null,extTime:ext?.extTime||null,closes:tech?.closes||[]});
-      renderDashTop5();
+      debouncedRenderDashTop5();
       document.getElementById('totalScanned').textContent=allResults.length;
       document.getElementById('breakoutCount').textContent=breakouts;
       document.getElementById('bullishCount').textContent=bullishMACD;
@@ -2505,7 +2511,7 @@ async function refreshLivePrices(results) {
         r.signal = getSignal(r.score, r.macd);
       });
       // Re-render after each batch so prices appear progressively
-      renderDashTop5();
+      debouncedRenderDashTop5();
       renderTable();
     } catch(e) {}
     await delay(120);
