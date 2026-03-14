@@ -304,65 +304,81 @@ tbody td{font-family:'Inter',sans-serif;padding:10px 14px;font-size:12px;color:v
 .no-cal-events{padding:12px 18px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)}
 .today-badge{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--green);background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.2);padding:2px 7px;border-radius:4px;margin-left:8px}
 
-/* ── MODAL (existing) ── */
-.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:9000;overflow-y:auto;backdrop-filter:blur(6px)}
-.modal-overlay.open{display:flex;align-items:flex-start;justify-content:center;padding:20px}
-.modal{background:#0d0e10;border:1px solid var(--glass-border);border-radius:14px;width:100%;max-width:860px;overflow:hidden;margin-top:40px}
-.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--glass-border)}
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;overflow-y:auto;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.modal-overlay.open{display:flex;align-items:flex-start;justify-content:center;padding:24px 16px 40px}
+.modal{background:rgba(10,11,14,.97);border:1px solid rgba(255,255,255,.1);border-radius:20px;width:100%;max-width:820px;overflow:hidden;margin-top:60px;box-shadow:0 24px 80px rgba(0,0,0,.7)}
+
+/* Header */
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.07)}
 .modal-ticker-wrap{display:flex;align-items:center;gap:14px}
-.modal-ticker{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800}
-.modal-name{font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);margin-top:2px}
-.modal-header-right{display:flex;align-items:center;gap:10px}
-.modal-close{background:rgba(255,255,255,.07);border:none;color:var(--muted);font-size:18px;cursor:pointer;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.modal-ticker{font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.5px;color:#fff}
+.modal-name{font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);margin-top:3px}
+.modal-header-right{display:flex;align-items:center;gap:8px}
+.modal-close{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--muted);font-size:16px;cursor:pointer;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .modal-close:hover{background:rgba(255,255,255,.12);color:#fff}
-.modal-stats-strip{display:flex;overflow-x:auto;border-bottom:1px solid var(--glass-border)}
-.modal-stat{flex-shrink:0;padding:12px 20px;border-right:1px solid var(--glass-border)}
+
+/* Stats strip */
+.modal-stats-strip{display:flex;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.07)}
+.modal-stat{flex-shrink:0;padding:14px 20px;border-right:1px solid rgba(255,255,255,.06)}
 .modal-stat:last-child{border-right:none}
-.modal-stat-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
-.modal-stat-value{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700}
-.range-row{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--glass-border);flex-wrap:wrap}
-.range-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
-.range-price{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700}
-.range-track{position:relative;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
-.range-gradient{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,var(--red),var(--amber),var(--green))}
-.range-dot{position:absolute;top:-4px;width:14px;height:14px;background:#fff;border-radius:50%;transform:translateX(-50%)}
-.tv-container{height:400px;position:relative;background:#090a0c}
+.modal-stat-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.modal-stat-value{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:#fff}
+
+/* 52W range */
+.range-row{display:flex;align-items:center;gap:12px;padding:12px 24px;border-bottom:1px solid rgba(255,255,255,.07)}
+.range-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);white-space:nowrap}
+.range-price{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;white-space:nowrap}
+.range-track{position:relative;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.range-gradient{position:absolute;inset:0;background:linear-gradient(90deg,var(--red),var(--amber),var(--green))}
+.range-dot{position:absolute;top:-5px;width:14px;height:14px;background:#fff;border-radius:50%;transform:translateX(-50%);box-shadow:0 0 6px rgba(255,255,255,.4)}
+
+/* Chart */
+.tv-container{height:380px;position:relative;background:#06070a;border-bottom:1px solid rgba(255,255,255,.07)}
 .tv-loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:10px}
-.detail-section-header{padding:14px 22px;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.02);border-top:1px solid var(--glass-border);border-bottom:1px solid var(--glass-border)}
 .interval-btns{display:flex;gap:4px}
-.interval-btn{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:5px 12px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--muted);cursor:pointer;transition:all .15s}
-.interval-btn.active,.interval-btn:hover{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.2)}
-.score-breakdown{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:16px 22px}
-.score-big{display:flex;flex-direction:column;align-items:center;gap:8px}
-.score-circle{width:90px;height:90px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.interval-btn{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:5px 11px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);color:var(--muted);cursor:pointer;transition:all .15s}
+.interval-btn.active,.interval-btn:hover{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.18)}
+
+/* Score breakdown */
+.score-breakdown{display:grid;grid-template-columns:110px 1fr;gap:20px;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.07)}
+.score-big{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.score-circle{width:86px;height:86px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:rgba(255,255,255,.03)}
 .score-circle-num{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;line-height:1}
 .score-circle-denom{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
-.score-bars-list{display:flex;flex-direction:column;gap:6px}
-.score-bar-row{display:grid;grid-template-columns:100px 1fr 60px 50px;align-items:center;gap:8px}
-.score-bar-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
-.score-bar-track{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
-.score-bar-fill{height:100%;border-radius:2px;transition:width .6s}
-.score-bar-val{font-family:'JetBrains Mono',monospace;font-size:10px;text-align:right}
-.score-bar-pts{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;text-align:right}
-.tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.05)}
-@media(max-width:600px){.tech-grid{grid-template-columns:1fr}}
-.tech-card{padding:14px 18px;background:#0d0e10}
-.tech-title{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.rsi-track{position:relative;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:visible;margin:6px 0}
-.rsi-marker{position:absolute;top:-4px;width:14px;height:14px;border-radius:50%;transform:translateX(-50%)}
-.rsi-big{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700}
-.rsi-zones{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,var(--red) 0%,var(--amber) 30%,var(--green) 50%,var(--amber) 70%,var(--red) 100%);opacity:.3}
-.macd-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
-.macd-row:last-child{border-bottom:none}
-.macd-key{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
-.macd-val{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700}
+.score-bars-list{display:flex;flex-direction:column;gap:7px}
+.score-bar-row{display:grid;grid-template-columns:120px 1fr 64px 44px;align-items:center;gap:8px}
+.score-bar-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.5)}
+.score-bar-track{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:2px;transition:width .5s ease}
+.score-bar-val{font-family:'JetBrains Mono',monospace;font-size:9px;text-align:right;color:rgba(255,255,255,.6)}
+.score-bar-pts{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;text-align:right}
+
+/* Data grid — technicals + fundamentals in one clean row */
+.modal-data-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.07)}
+@media(max-width:600px){.modal-data-grid{grid-template-columns:1fr 1fr}}
+.modal-data-card{padding:14px 18px;background:rgba(10,11,14,.97)}
+.modal-data-title{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:10px}
+.modal-data-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.modal-data-row:last-child{border-bottom:none}
+.modal-data-key{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
+.modal-data-val{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#fff}
+
+/* RSI bar inside data card */
+.rsi-track{position:relative;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:visible;margin:8px 0 4px}
+.rsi-marker{position:absolute;top:-5px;width:13px;height:13px;border-radius:50%;transform:translateX(-50%)}
+.rsi-big{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;line-height:1}
+.rsi-zones{position:absolute;inset:0;background:linear-gradient(90deg,var(--green) 0%,var(--amber) 30%,rgba(255,255,255,.15) 50%,var(--amber) 70%,var(--red) 100%);opacity:.25}
+
+/* Badges */
 .bull-badge{background:rgba(0,230,118,.1);color:var(--green);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px}
 .bear-badge{background:rgba(255,77,109,.1);color:var(--red);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px}
-.earnings-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.06)}
-.earnings-card{padding:14px 18px;background:#0d0e10}
-.earnings-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:6px}
-.earnings-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700}
-.earnings-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px}
+
+/* News inside modal */
+.modal-news-item{display:block;padding:10px 24px;border-bottom:1px solid rgba(255,255,255,.05);text-decoration:none;transition:background .12s}
+.modal-news-item:hover{background:rgba(255,255,255,.03)}
+.modal-news-item:last-child{border-bottom:none}
+.modal-section-label{padding:12px 24px;font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.28);background:rgba(255,255,255,.02);border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07)}
 .click-hint{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:8px;display:none}
 .news-loading{padding:20px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
 .news-item{display:flex;align-items:flex-start;gap:10px;padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.05);text-decoration:none;transition:background .12s}
@@ -733,10 +749,10 @@ tbody tr{animation:fadeIn .25s ease both}
     <!-- Filter row -->
     <div class="filter-row">
       <button class="btn-outline active" onclick="filterBy('all',this)">All</button>
-      <button class="btn-outline" onclick="filterBy('breakout',this)">🟢 Strong Buy</button>
-      <button class="btn-outline" onclick="filterBy('momentum',this)">🔵 Buy</button>
-      <button class="btn-outline" onclick="filterBy('top',this)">⭐ Top 5</button>
-      <button class="btn-outline" onclick="filterBy('weak',this)">🔴 Avoid</button>
+      <button class="btn-outline" onclick="filterBy('breakout',this)">Strong Buy</button>
+      <button class="btn-outline" onclick="filterBy('momentum',this)">Buy</button>
+      <button class="btn-outline" onclick="filterBy('top',this)">Top 5</button>
+      <button class="btn-outline" onclick="filterBy('weak',this)">Avoid</button>
     </div>
 
     <!-- Stats strip -->
@@ -1068,13 +1084,15 @@ tbody tr{animation:fadeIn .25s ease both}
 <!-- STOCK DETAIL MODAL (carried over from existing) -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
   <div class="modal">
+
+    <!-- Header -->
     <div class="modal-header">
       <div class="modal-ticker-wrap">
         <div>
           <div class="modal-ticker" id="modalTicker">--</div>
           <div class="modal-name" id="modalName">--</div>
         </div>
-        <span id="modalSignal" style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px"></span>
+        <span id="modalSignal" style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px"></span>
       </div>
       <div class="modal-header-right">
         <div class="interval-btns">
@@ -1085,128 +1103,113 @@ tbody tr{animation:fadeIn .25s ease both}
         <button class="modal-close" onclick="closeModal()">&#x2715;</button>
       </div>
     </div>
+
+    <!-- Stats strip -->
     <div class="modal-stats-strip">
-      <div class="modal-stat"><div class="modal-stat-label">Price</div><div class="modal-stat-value" id="mPrice">--</div><div id="mExtPrice" style="font-size:10px;margin-top:2px"></div></div>
+      <div class="modal-stat"><div class="modal-stat-label">Price</div><div class="modal-stat-value" id="mPrice">--</div><div id="mExtPrice" style="font-family:'JetBrains Mono',monospace;font-size:9px;margin-top:3px;color:var(--muted)"></div></div>
       <div class="modal-stat"><div class="modal-stat-label">Change</div><div class="modal-stat-value" id="mChange">--</div></div>
       <div class="modal-stat"><div class="modal-stat-label">Market Cap</div><div class="modal-stat-value" id="mMktCap">--</div></div>
-      <div class="modal-stat"><div class="modal-stat-label">Volume</div><div class="modal-stat-value" id="mVolume">--</div></div>
-      <div class="modal-stat"><div class="modal-stat-label">Avg Volume</div><div class="modal-stat-value" id="mAvgVol">--</div></div>
-      <div class="modal-stat"><div class="modal-stat-label">P/E Ratio</div><div class="modal-stat-value" id="mPE">--</div></div>
-      <div class="modal-stat"><div class="modal-stat-label">EPS dil TTM</div><div class="modal-stat-value" id="mEPS">--</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">P/E</div><div class="modal-stat-value" id="mPE">--</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">EPS TTM</div><div class="modal-stat-value" id="mEPS">--</div></div>
+      <div class="modal-stat"><div class="modal-stat-label">Div Yield</div><div class="modal-stat-value" id="mDivYield">--</div></div>
       <div class="modal-stat"><div class="modal-stat-label">AlgoScore</div><div class="modal-stat-value" id="mScore">--</div></div>
     </div>
+
+    <!-- 52W range -->
     <div class="range-row">
-      <div class="range-lbl">52W Low</div>
-      <div class="range-price" id="mLow52" style="color:var(--red)">--</div>
-      <div style="flex:1;display:flex;flex-direction:column;gap:3px;margin:0 12px">
+      <span class="range-lbl">52W Low</span>
+      <span class="range-price" id="mLow52" style="color:var(--red)">--</span>
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px;margin:0 10px">
         <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-align:center" id="m52wPct">52-Week Range</div>
-        <div class="range-track">
+        <div class="range-track" style="flex:1">
           <div class="range-gradient"></div>
           <div class="range-dot" id="rangeDot" style="left:50%"></div>
         </div>
       </div>
-      <div class="range-price" id="mHigh52" style="color:var(--green)">--</div>
-      <div class="range-lbl">52W High</div>
+      <span class="range-price" id="mHigh52" style="color:var(--green)">--</span>
+      <span class="range-lbl">52W High</span>
     </div>
+
+    <!-- TradingView chart -->
     <div class="tv-container" id="tvContainer">
       <div class="tv-loading" id="tvLoading">
         <div class="loader"></div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">Loading chart...</div>
       </div>
     </div>
-    <div class="detail-section-header">AlgoScore Breakdown</div>
+
+    <!-- AlgoScore breakdown -->
+    <div class="modal-section-label">AlgoScore Breakdown</div>
     <div class="score-breakdown">
       <div class="score-big">
         <div class="score-circle" id="scoreCircle">
           <div class="score-circle-num" id="scoreCircleNum">--</div>
           <div class="score-circle-denom">/100</div>
         </div>
-        <div id="scoreSignalLabel" style="font-size:12px;font-weight:700"></div>
+        <div id="scoreSignalLabel" style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;text-align:center"></div>
       </div>
       <div class="score-bars-list" id="scoreBars"></div>
     </div>
-    <div class="detail-section-header">Technical Indicators</div>
-    <div class="tech-grid">
-      <div class="tech-card">
-        <div class="tech-title">RSI (14-period)</div>
-        <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:4px"><span>Oversold &lt;30</span><span>Neutral</span><span>Overbought &gt;70</span></div>
-        <div class="rsi-track"><div class="rsi-zones"></div><div class="rsi-marker" id="rsiMarker" style="left:50%"></div></div>
+
+    <!-- Data grid: RSI · Technicals · Fundamentals -->
+    <div class="modal-section-label">Indicators &amp; Fundamentals</div>
+    <div class="modal-data-grid">
+
+      <!-- RSI -->
+      <div class="modal-data-card">
+        <div class="modal-data-title">RSI (14)</div>
         <div class="rsi-big" id="rsiBig">--</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:4px" id="rsiLabel">--</div>
+        <div class="rsi-track"><div class="rsi-zones"></div><div class="rsi-marker" id="rsiMarker" style="left:50%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted)"><span>&lt;30 Oversold</span><span>70&gt; Overbought</span></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:8px" id="rsiLabel">--</div>
       </div>
-      <div class="tech-card">
-        <div class="tech-title">MACD</div>
-        <div class="macd-row"><span class="macd-key">Signal</span><span id="macdSignal">--</span></div>
-        <div class="macd-row"><span class="macd-key">MACD Line</span><span class="macd-val" id="macdLine">--</span></div>
-        <div class="macd-row"><span class="macd-key">Signal Line</span><span class="macd-val" id="macdSig">--</span></div>
-        <div class="macd-row"><span class="macd-key">Histogram</span><span class="macd-val" id="macdHist">--</span></div>
+
+      <!-- EMA + MACD -->
+      <div class="modal-data-card">
+        <div class="modal-data-title">Trend</div>
+        <div class="modal-data-row"><span class="modal-data-key">EMA 20</span><span class="modal-data-val" id="techEMA20">--</span></div>
+        <div class="modal-data-row"><span class="modal-data-key">EMA 50</span><span class="modal-data-val" id="techEMA50">--</span></div>
+        <div class="modal-data-row"><span class="modal-data-key">EMA 200</span><span class="modal-data-val" id="techEMA200">--</span></div>
+        <div class="modal-data-row"><span class="modal-data-key">MACD</span><span id="macdSignal">--</span></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;margin-top:6px;color:var(--muted)" id="emaTrend">--</div>
       </div>
-      <div class="tech-card">
-        <div class="tech-title">EMA Levels</div>
-        <div class="macd-row"><span class="macd-key">EMA 20</span><span class="macd-val" id="techEMA20">--</span></div>
-        <div class="macd-row"><span class="macd-key">EMA 50</span><span class="macd-val" id="techEMA50">--</span></div>
-        <div class="macd-row"><span class="macd-key">EMA 200</span><span class="macd-val" id="techEMA200">--</span></div>
-        <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)" id="emaTrend">--</div>
+
+      <!-- Fundamentals -->
+      <div class="modal-data-card">
+        <div class="modal-data-title">Fundamentals</div>
+        <div class="modal-data-row"><span class="modal-data-key">PEG Ratio</span><span class="modal-data-val" id="mPEG">--</span></div>
+        <div class="modal-data-row"><span class="modal-data-key">P/B Ratio</span><span class="modal-data-val" id="mPB">--</span></div>
+        <div class="modal-data-row"><span class="modal-data-key">ROE</span><span class="modal-data-val" id="mROE">--</span></div>
+        <div class="modal-data-row"><span class="modal-data-key">Debt/Equity</span><span class="modal-data-val" id="mDE">--</span></div>
+        <div class="modal-data-row"><span class="modal-data-key">Rev Growth</span><span class="modal-data-val" id="mRevGrowth">--</span></div>
       </div>
-      <div class="tech-card">
-        <div class="tech-title">Bollinger Bands</div>
-        <div class="macd-row"><span class="macd-key">Upper Band</span><span class="macd-val" id="bbUpper">--</span></div>
-        <div class="macd-row"><span class="macd-key">Middle Band</span><span class="macd-val" id="bbMiddle">--</span></div>
-        <div class="macd-row"><span class="macd-key">Lower Band</span><span class="macd-val" id="bbLower">--</span></div>
-        <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:10px" id="bbLabel">--</div>
-      </div>
-      <div class="tech-card">
-        <div class="tech-title">ADX — Trend Strength</div>
-        <div class="rsi-big" id="adxBig" style="font-size:22px">--</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:6px" id="adxLabel">--</div>
-        <div style="margin-top:10px;height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden">
-          <div id="adxBar" style="height:100%;border-radius:3px;background:var(--green);width:0%;transition:width .8s"></div>
+
+    </div>
+
+    <!-- Analyst target + earnings -->
+    <div class="modal-data-grid" style="border-top:none">
+      <div class="modal-data-card">
+        <div class="modal-data-title">Analyst Target</div>
+        <div id="analystSection" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px">
+          <div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…
         </div>
-        <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px"><span>Weak &lt;20</span><span>Moderate</span><span>Strong &gt;25</span></div>
       </div>
-      <div class="tech-card">
-        <div class="tech-title">Stochastic</div>
-        <div class="macd-row"><span class="macd-key">%K (Slow)</span><span class="macd-val" id="stochK">--</span></div>
-        <div class="macd-row"><span class="macd-key">%D (Signal)</span><span class="macd-val" id="stochD">--</span></div>
-        <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:10px" id="stochLabel">--</div>
+      <div class="modal-data-card">
+        <div class="modal-data-title">Earnings</div>
+        <div class="modal-data-row"><span class="modal-data-key">Next Date</span><span class="modal-data-val" id="earnDate" style="color:var(--amber)">--</span></div>
+        <div class="modal-data-row"><span class="modal-data-key">EPS TTM</span><span class="modal-data-val" id="earnEPS">--</span></div>
+        <div class="modal-data-row"><span class="modal-data-key">EPS Growth</span><span class="modal-data-val" id="earnGrowth">--</span></div>
       </div>
-    </div>
-    <div class="detail-section-header">Earnings</div>
-    <div class="earnings-strip">
-      <div class="earnings-card"><div class="earnings-lbl">Next Earnings Date</div><div class="earnings-val" id="earnDate" style="color:var(--amber)">--</div><div class="earnings-sub" id="earnCountdown">--</div></div>
-      <div class="earnings-card"><div class="earnings-lbl">EPS dil TTM</div><div class="earnings-val" id="earnEPS">--</div><div class="earnings-sub" id="earnEPSSub">--</div></div>
-      <div class="earnings-card"><div class="earnings-lbl">EPS Growth YoY</div><div class="earnings-val" id="earnGrowth">--</div><div class="earnings-sub">vs prior year</div></div>
-    </div>
-    <div class="detail-section-header">Analyst Price Targets</div>
-    <div id="analystSection">
-      <div style="padding:20px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;display:flex;align-items:center;gap:8px">
-        <div class="loader" style="width:14px;height:14px;border-width:2px;margin:0"></div> Loading analyst data...
+      <div class="modal-data-card">
+        <div class="modal-data-title">Insider / Congress</div>
+        <div id="modalInsiderSection" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">
+          <div style="display:flex;align-items:center;gap:8px"><div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…</div>
+        </div>
       </div>
     </div>
 
-    <!-- ── INSIDER TRANSACTIONS ── -->
-    <div class="detail-section-header" style="display:flex;align-items:center;justify-content:space-between">
-      <span>Insider Transactions</span>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--green)">SEC Form 3/4/5</span>
-    </div>
-    <div id="modalInsiderSection" style="padding:4px 20px 12px">
-      <div style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;display:flex;align-items:center;gap:8px;padding:8px 0">
-        <div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…
-      </div>
-    </div>
-
-    <!-- ── CONGRESSIONAL TRADES ── -->
-    <div class="detail-section-header" style="display:flex;align-items:center;justify-content:space-between">
-      <span>Congressional Trades</span>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#a78bfa">STOCK Act</span>
-    </div>
-    <div id="modalCongressSection" style="padding:4px 20px 12px">
-      <div style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;display:flex;align-items:center;gap:8px;padding:8px 0">
-        <div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…
-      </div>
-    </div>
-
-    <div class="detail-section-header">Latest News</div>
+    <!-- News -->
+    <div class="modal-section-label">Latest News</div>
     <div id="newsContainer">
       <div class="news-loading"><div class="loader" style="width:20px;height:20px;border-width:2px;display:block;margin:0 auto 8px"></div>Loading news...</div>
     </div>
@@ -1396,7 +1399,7 @@ function renderDashTop5(data) {
       <div class="top5-score ${sc}">${d.score}</div>
     </div>`;
   }).join('')
-  + (allWeak ? `<div style="padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">⚠ Broad market weakness — scores suppressed</div>` : '')
+  + (allWeak ? `<div style="padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">Broad market weakness — scores suppressed</div>` : '')
   + (isCached && !allWeak ? `<div style="padding:8px 18px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">Last scan · Refreshing…</div>` : '');
 
   // Draw sparklines from stored chart data
@@ -2393,17 +2396,17 @@ function openChart(ticker){
   const sigEl=document.getElementById('modalSignal');
   sigEl.textContent=s.signal.label;
   const sigStyles={breakout:'background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.25)',momentum:'background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.2)',watch:'background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.25)',weak:'background:rgba(255,77,109,.08);color:var(--red);border:1px solid rgba(255,77,109,.2)'};
-  sigEl.style.cssText=`font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;${sigStyles[s.signal.cls]}`;
-  const fmtV=v=>!v?'--':v>=1e12?(v/1e12).toFixed(2)+'T':v>=1e9?(v/1e9).toFixed(2)+'B':v>=1e6?(v/1e6).toFixed(2)+'M':(v/1e3).toFixed(0)+'K';
+  sigEl.style.cssText=`font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;${sigStyles[s.signal.cls]}`;
+
+  // Stats strip
   document.getElementById('mPrice').textContent='$'+s.price.toFixed(2);
   const extEl=document.getElementById('mExtPrice');
-  if(s.extPrice){const ec=((s.extPrice-s.price)/s.price)*100;extEl.innerHTML=`<span class="ext-price ${s.extSession}">${s.extSession==='pre'?'PRE-MARKET':'AFTER-HOURS'} $${s.extPrice.toFixed(2)} ${ec>=0?'+':''}${ec.toFixed(2)}%</span>`;}else extEl.innerHTML='';
+  if(s.extPrice){const ec=((s.extPrice-s.price)/s.price)*100;extEl.innerHTML=`<span class="ext-price ${s.extSession}">${s.extSession==='pre'?'PRE':'AH'} $${s.extPrice.toFixed(2)} ${ec>=0?'+':''}${ec.toFixed(2)}%</span>`;}else extEl.innerHTML='';
   const mch=document.getElementById('mChange');mch.textContent=`${s.change>=0?'+':''}${s.change.toFixed(2)}%`;mch.style.color=s.change>=0?'var(--green)':'var(--red)';
   document.getElementById('mMktCap').textContent=s.marketCap?(s.marketCap>=1000?(s.marketCap/1000).toFixed(1)+'T':s.marketCap.toFixed(1)+'B'):'--';
-  document.getElementById('mVolume').textContent=fmtV(s.volume);
-  document.getElementById('mAvgVol').textContent=fmtV(s.avgVolume);
   document.getElementById('mPE').textContent=s.pe&&s.pe>0&&s.pe<999?s.pe.toFixed(1):'--';
   const epsEl=document.getElementById('mEPS');epsEl.textContent=s.eps!=null?(s.eps>=0?'+':'')+s.eps.toFixed(2):'--';epsEl.style.color=s.eps>0?'var(--green)':s.eps<0?'var(--red)':'var(--muted)';
+  const dyEl=document.getElementById('mDivYield');dyEl.textContent=s.divYield!=null?(s.divYield*100).toFixed(2)+'%':'--';
   const sc=getScoreClass(s.score);const scoreEl=document.getElementById('mScore');scoreEl.textContent=s.score+'/100';scoreEl.style.color=sc==='high'?'var(--green)':sc==='mid'?'var(--amber)':'var(--red)';
   document.getElementById('mLow52').textContent=s.low52w?'$'+s.low52w.toFixed(2):'--';
   document.getElementById('mHigh52').textContent=s.high52w?'$'+s.high52w.toFixed(2):'--';
@@ -2474,18 +2477,20 @@ function openChart(ticker){
   const ac=[s.emaAbove20,s.emaAbove50,s.emaAbove200].filter(Boolean).length;
   const etel=document.getElementById('emaTrend');etel.textContent=s.ema20?(ac===3?'Price above all EMAs — long-term uptrend':ac===0?'Price below all EMAs — downtrend':ac>=2?'Above most EMAs — cautious bullish':'Below most EMAs — mixed'):'No EMA data';etel.style.color=ac>=2?'var(--green)':ac===0?'var(--red)':'var(--amber)';
   document.getElementById('bbUpper').textContent=fp(s.bbUpper);document.getElementById('bbMiddle').textContent=fp(s.bbMiddle);document.getElementById('bbLower').textContent=fp(s.bbLower);
-  const bbl=document.getElementById('bbLabel');if(s.bbPos!=null){const bt=s.bbPos>=80?'Near upper band — overbought':s.bbPos<=20?'Near lower band — potential bounce':s.bbPos>=50?'Above midline — bullish':'Below midline';bbl.textContent=bt;bbl.style.color=s.bbPos>=80?'var(--red)':s.bbPos<=20?'var(--amber)':s.bbPos>=50?'var(--green)':'var(--muted)';}else{bbl.textContent='No data';bbl.style.color='var(--muted)';}
-  const ab=document.getElementById('adxBig');ab.textContent=s.adx!=null?s.adx.toFixed(1):'--';const ac2=s.adx>=25?'var(--green)':s.adx>=20?'var(--amber)':'var(--muted)';ab.style.color=ac2;document.getElementById('adxLabel').textContent=s.adx!=null?(s.adx>=25?'Strong trend — momentum is real':s.adx>=20?'Moderate trend forming':'Weak trend — may be choppy'):'--';document.getElementById('adxLabel').style.color=ac2;document.getElementById('adxBar').style.width=s.adx!=null?Math.min(100,s.adx*2)+'%':'0%';document.getElementById('adxBar').style.background=ac2;
-  const sk=document.getElementById('stochK');sk.textContent=s.stochK!=null?s.stochK.toFixed(1):'--';sk.style.color=s.stochK>=80?'var(--red)':s.stochK<=20?'var(--amber)':'var(--green)';
-  const sd=document.getElementById('stochD');sd.textContent=s.stochD!=null?s.stochD.toFixed(1):'--';sd.style.color=s.stochD>=80?'var(--red)':s.stochD<=20?'var(--amber)':'var(--green)';
-  const slel=document.getElementById('stochLabel');if(s.stochK!=null){slel.textContent=s.stochK>=80?'Overbought (>80)':s.stochK<=20?'Oversold (<20) — watch for reversal':s.stochK>s.stochD?'%K above %D — bullish':'%K below %D — bearish';slel.style.color=s.stochK>=80?'var(--red)':s.stochK<=20?'var(--amber)':s.stochK>s.stochD?'var(--green)':'var(--muted)';}else{slel.textContent='No data';slel.style.color='var(--muted)';}
-  const earEPS=document.getElementById('earnEPS');earEPS.textContent=s.eps!=null?(s.eps>=0?'+':'')+s.eps.toFixed(2):'--';earEPS.style.color=s.eps>0?'var(--green)':s.eps<0?'var(--red)':'var(--muted)';document.getElementById('earnEPSSub').textContent='Diluted TTM';
+  // Fundamentals panel
+  const pegEl=document.getElementById('mPEG');pegEl.textContent=s.peg!=null?s.peg.toFixed(2):'--';pegEl.style.color=s.peg!=null?(s.peg<1?'var(--green)':s.peg<2?'var(--amber)':'var(--red)'):'var(--muted)';
+  const pbEl=document.getElementById('mPB');pbEl.textContent=s.pb!=null?s.pb.toFixed(2):'--';pbEl.style.color=s.pb!=null?(s.pb<1.5?'var(--green)':s.pb<3?'var(--amber)':'var(--red)'):'var(--muted)';
+  const roeEl=document.getElementById('mROE');roeEl.textContent=s.roe!=null?(s.roe*100).toFixed(1)+'%':'--';roeEl.style.color=s.roe!=null?(s.roe>0.15?'var(--green)':s.roe>0.05?'var(--amber)':'var(--red)'):'var(--muted)';
+  const deEl=document.getElementById('mDE');deEl.textContent=s.debtToEquity!=null?s.debtToEquity.toFixed(2):'--';deEl.style.color=s.debtToEquity!=null?(s.debtToEquity<0.5?'var(--green)':s.debtToEquity<1.5?'var(--amber)':'var(--red)'):'var(--muted)';
+  const rgEl=document.getElementById('mRevGrowth');rgEl.textContent=s.revenueGrowth!=null?(s.revenueGrowth*100).toFixed(1)+'%':'--';rgEl.style.color=s.revenueGrowth!=null?(s.revenueGrowth>0.10?'var(--green)':s.revenueGrowth>0?'var(--amber)':'var(--red)'):'var(--muted)';
+
+  // Earnings panel
+  const earEPS=document.getElementById('earnEPS');earEPS.textContent=s.eps!=null?(s.eps>=0?'+':'')+s.eps.toFixed(2):'--';earEPS.style.color=s.eps>0?'var(--green)':s.eps<0?'var(--red)':'var(--muted)';
   const egEl=document.getElementById('earnGrowth');egEl.textContent=s.epsGrowth!=null?(s.epsGrowth>=0?'+':'')+(s.epsGrowth*100).toFixed(1)+'%':'--';egEl.style.color=s.epsGrowth>0?'var(--green)':s.epsGrowth<0?'var(--red)':'var(--muted)';
   fetchEarningsDate(s.ticker);
-  document.getElementById('newsContainer').innerHTML='<div class="news-loading"><div class="loader" style="width:20px;height:20px;border-width:2px;display:block;margin:0 auto 8px"></div>Loading news...</div>';
-  document.getElementById('analystSection').innerHTML='<div style="padding:20px;color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:11px;display:flex;align-items:center;gap:8px"><div class="loader" style="width:14px;height:14px;border-width:2px;margin:0"></div> Loading analyst data...</div>';
-  document.getElementById('modalInsiderSection').innerHTML='<div style="color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:11px;display:flex;align-items:center;gap:8px;padding:8px 0"><div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…</div>';
-  document.getElementById('modalCongressSection').innerHTML='<div style="color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:11px;display:flex;align-items:center;gap:8px;padding:8px 0"><div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…</div>';
+  document.getElementById('newsContainer').innerHTML='<div style="padding:20px 24px;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px"><div class="loader" style="width:14px;height:14px;border-width:2px;margin:0"></div>Loading news...</div>';
+  document.getElementById('analystSection').innerHTML='<div style="display:flex;align-items:center;gap:8px;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--muted)"><div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…</div>';
+  document.getElementById('modalInsiderSection').innerHTML='<div style="display:flex;align-items:center;gap:8px;font-family:\'JetBrains Mono\',monospace;font-size:10px;color:var(--muted)"><div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…</div>';
   fetchNews(s.ticker);fetchAndRenderAnalyst(s.ticker,s.price);
   loadModalInsider(s.ticker);
   loadTVChart(ticker,currentInterval);
@@ -2504,23 +2509,33 @@ async function fetchEarningsDate(ticker){
 
 async function fetchAndRenderAnalyst(ticker,currentPrice){
   try{const a=await fetchAnalystTargets(ticker);const el=document.getElementById('analystSection');const total=(a.strongBuy||0)+(a.buy||0)+(a.hold||0)+(a.sell||0)+(a.strongSell||0);
-  if(!total){el.innerHTML='<div style="padding:16px 20px;color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:11px">No analyst coverage data</div>';return;}
-  const pct=v=>total?Math.round(((v||0)/total)*100):0;
-  const rows=[{label:'Strong Buy',val:a.strongBuy,color:'var(--green)'},{label:'Buy',val:a.buy,color:'#4ade80'},{label:'Hold',val:a.hold,color:'var(--amber)'},{label:'Sell',val:a.sell,color:'var(--red)'},{label:'Strong Sell',val:a.strongSell,color:'#fb7185'}];
+  if(!total){el.innerHTML='<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:var(--muted)">No coverage</div>';return;}
   const bullish=(a.strongBuy||0)+(a.buy||0),bearish=(a.sell||0)+(a.strongSell||0);
-  const sent=bullish/total>=0.6?{label:'BULLISH',color:'var(--green)'}:bearish/total>=0.4?{label:'BEARISH',color:'var(--red)'}:{label:'NEUTRAL',color:'var(--amber)'};
+  const sent=bullish/total>=0.6?{label:'Bullish',color:'var(--green)'}:bearish/total>=0.4?{label:'Bearish',color:'var(--red)'}:{label:'Neutral',color:'var(--amber)'};
   const hasPT=a.avgTarget!=null&&a.avgTarget>0;
   const upside=hasPT&&currentPrice?(((a.avgTarget-currentPrice)/currentPrice)*100):null;
   const uc=upside!=null?(upside>=0?'var(--green)':'var(--red)'):'var(--muted)';
-  el.innerHTML=`<div style="padding:20px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><div><div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:${sent.color}">${sent.label}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px">${total} analyst ratings${a.period?' · '+a.period:''}</div></div><div style="display:flex;gap:20px"><div style="text-align:center"><div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--green)">${bullish}</div><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">BUY</div></div><div style="text-align:center"><div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--amber)">${a.hold||0}</div><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">HOLD</div></div><div style="text-align:center"><div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--red)">${bearish}</div><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">SELL</div></div></div></div><div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:14px">${rows.map(r=>`<div style="width:${pct(r.val)}%;background:${r.color}" title="${r.label}: ${r.val}"></div>`).join('')}</div><div style="display:flex;flex-direction:column;gap:7px">${rows.map(r=>`<div style="display:grid;grid-template-columns:100px 1fr 36px;align-items:center;gap:10px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">${r.label}</div><div style="height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden"><div style="height:100%;width:${pct(r.val)}%;background:${r.color};border-radius:2px"></div></div><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${r.color};font-weight:700;text-align:right">${r.val||0}</div></div>`).join('')}</div></div>${hasPT?`<div style="padding:16px 20px;border-top:1px solid rgba(255,255,255,.07)"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Avg Analyst Target</div><div style="display:flex;align-items:baseline;gap:10px"><div style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700">$${a.avgTarget.toFixed(2)}</div>${upside!=null?`<div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:${uc}">${upside>=0?'+':''}${upside.toFixed(1)}%</div>`:''}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:3px">${a.numAnalysts?a.numAnalysts+' analysts':''}</div></div>`:''}`;
-  }catch(e){document.getElementById('analystSection').innerHTML='<div style="padding:16px 20px;color:var(--muted);font-family:\'JetBrains Mono\',monospace;font-size:11px">Analyst data unavailable</div>';}
+  el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:${sent.color}">${sent.label}</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px">${total} analysts · Buy ${bullish} / Hold ${a.hold||0} / Sell ${bearish}</div>
+    </div>
+    ${hasPT?`<div style="text-align:right"><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:#fff">$${a.avgTarget.toFixed(2)}</div>${upside!=null?`<div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:${uc};font-weight:700">${upside>=0?'+':''}${upside.toFixed(1)}% upside</div>`:''}
+    </div>`:''}
+  </div>
+  <div style="display:flex;height:5px;border-radius:3px;overflow:hidden;margin-top:10px;gap:1px">
+    <div style="width:${Math.round(bullish/total*100)}%;background:var(--green);border-radius:2px"></div>
+    <div style="width:${Math.round((a.hold||0)/total*100)}%;background:var(--amber)"></div>
+    <div style="width:${Math.round(bearish/total*100)}%;background:var(--red);border-radius:2px"></div>
+  </div>`;
+  }catch(e){document.getElementById('analystSection').innerHTML='<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:var(--muted)">Unavailable</div>';}
 }
 
 async function fetchNews(ticker){
   try{const to=new Date().toISOString().slice(0,10);const from=new Date(Date.now()-30*24*60*60*1000).toISOString().slice(0,10);const d=await finnhubFetch('company-news',{symbol:ticker,from,to});
-  if(!d||!d.length){document.getElementById('newsContainer').innerHTML='<div class="news-loading" style="color:var(--muted)">No recent news found</div>';return;}
-  document.getElementById('newsContainer').innerHTML=d.slice(0,6).map(n=>{const ago=timeAgoMs(new Date(n.datetime*1000));return`<a class="news-item" href="${n.url}" target="_blank" rel="noopener"><div class="news-dot"></div><div><div class="news-title">${n.headline}</div><div class="news-meta"><span class="news-src">${n.source}</span><span>${ago}</span></div></div></a>`;}).join('');}
-  catch(e){document.getElementById('newsContainer').innerHTML='<div class="news-loading" style="color:var(--muted)">News unavailable</div>';}
+  if(!d||!d.length){document.getElementById('newsContainer').innerHTML='<div style="padding:16px 24px;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--muted)">No recent news found</div>';return;}
+  document.getElementById('newsContainer').innerHTML=d.slice(0,5).map(n=>{const ago=timeAgoMs(new Date(n.datetime*1000));return`<a class="modal-news-item" href="${n.url}" target="_blank" rel="noopener"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;color:var(--green);margin-bottom:3px">${n.source} · ${ago}</div><div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:rgba(255,255,255,.78);line-height:1.4">${n.headline}</div></a>`;}).join('');}
+  catch(e){document.getElementById('newsContainer').innerHTML='<div style="padding:16px 24px;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--muted)">News unavailable</div>';}
 }
 function timeAgoMs(date){const s=Math.floor((Date.now()-date)/1000);if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
 </script>
@@ -3322,7 +3337,7 @@ async function loadCongressTrades() {
   } catch(e) {
     document.getElementById('sm-grid').innerHTML =
       `<div class="sm-empty-state" style="grid-column:1/-1">
-        <div class="sm-empty-icon">⚠</div>
+        <div class="sm-empty-icon"></div>
         <div class="sm-empty-text">Failed to load</div>
         <div class="sm-empty-sub">${e.message}</div>
       </div>`;
@@ -3404,7 +3419,7 @@ function smRender() {
   if (!rest.length && !featured) {
     document.getElementById('sm-grid').innerHTML =
       `<div class="sm-empty-state" style="grid-column:1/-1">
-        <div class="sm-empty-icon">🔍</div>
+        <div class="sm-empty-icon"></div>
         <div class="sm-empty-text">No trades match</div>
         <div class="sm-empty-sub">Try a different filter or search</div>
       </div>`;
@@ -3484,7 +3499,7 @@ async function loadInsiders() {
   } catch(e) {
     document.getElementById('ins-grid').innerHTML =
       `<div class="sm-empty-state">
-        <div class="sm-empty-icon">⚠</div>
+        <div class="sm-empty-icon"></div>
         <div class="sm-empty-text">Failed to load</div>
         <div class="sm-empty-sub">${e.message}</div>
       </div>`;
@@ -3583,52 +3598,38 @@ function insRender() {
 
 // ── Modal insider + congress ───────────────────────────────
 async function loadModalInsider(ticker) {
-  const el  = document.getElementById('modalInsiderSection');
-  const cel = document.getElementById('modalCongressSection');
-  if (!el && !cel) return;
-  const loading = () => `<div style="color:rgba(255,255,255,.25);font-family:'JetBrains Mono',monospace;font-size:11px;padding:10px 0;opacity:.6">Loading…</div>`;
-  if (el)  el.innerHTML  = loading();
-  if (cel) cel.innerHTML = loading();
+  const el = document.getElementById('modalInsiderSection');
+  if (!el) return;
   try {
     const [iRes, cRes] = await Promise.all([
       fetch(`${PROXY}/insider?symbol=${ticker}`,  { signal: AbortSignal.timeout(10000) }),
       fetch(`${PROXY}/congress?symbol=${ticker}`, { signal: AbortSignal.timeout(10000) }),
     ]);
-    const iData = iRes.ok  ? (await iRes.json()).data  : [];
-    const cData = cRes.ok  ? (await cRes.json()).data  : [];
-
-    if (el) {
-      const txs = (iData||[]).slice(0, 6);
-      el.innerHTML = txs.length ? txs.map(t => {
-        const buy = t.transactionCode==='P', sell = t.transactionCode==='S';
-        const col = buy?'var(--green)':sell?'var(--red)':'var(--amber)';
-        const val = (t.share&&t.price)?'$'+(t.share*t.price).toLocaleString(undefined,{maximumFractionDigits:0}):'—';
-        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-          <span style="color:${col};font-weight:700;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:64px">${buy?'▲ BUY':sell?'▼ SELL':'◆ OTHER'}</span>
-          <span style="font-size:12px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.name||'—'}</span>
-          <span style="font-size:10px;color:rgba(255,255,255,.3)">${t.officerTitle||''}</span>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${col}">${val}</span>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.3)">${t.transactionDate||'—'}</span>
-        </div>`;
-      }).join('') : '<div style="color:rgba(255,255,255,.2);font-size:12px;padding:10px 0">No recent insider transactions</div>';
-    }
-    if (cel) {
-      const trades = (cData||[]).slice(0,5);
-      cel.innerHTML = trades.length ? trades.map(t => {
-        const buy = /purchase|buy/i.test(t.transactionType||'');
-        const col = buy?'var(--green)':'var(--red)';
-        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-          <span style="color:${col};font-weight:700;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:64px">${buy?'▲ BUY':'▼ SELL'}</span>
-          <span style="font-size:12px;font-weight:600;flex:1">${t.name||'—'}</span>
-          <span style="font-size:10px;color:rgba(255,255,255,.3)">${t.chamber||''}</span>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.35)">${t.amount||'—'}</span>
-          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.3)">${t.transactionDate||'—'}</span>
-        </div>`;
-      }).join('') : '<div style="color:rgba(255,255,255,.2);font-size:12px;padding:10px 0">No recent congressional trades</div>';
-    }
+    const iData = iRes.ok ? (await iRes.json()).data : [];
+    const cData = cRes.ok ? (await cRes.json()).data : [];
+    const txs    = (iData||[]).slice(0, 3);
+    const trades = (cData||[]).slice(0, 2);
+    const allEmpty = !txs.length && !trades.length;
+    if (allEmpty) { el.innerHTML='<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:rgba(255,255,255,.25)">No recent activity</div>'; return; }
+    const row = (col, label, name, role, val, date) =>
+      `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+        <span style="color:${col};font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;min-width:42px">${label}</span>
+        <span style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:${col}">${val}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.25)">${date}</span>
+      </div>`;
+    const insiderRows = txs.map(t => {
+      const buy = t.transactionCode==='P'; const col = buy?'var(--green)':'var(--red)';
+      const val = (t.share&&t.price)?'$'+(t.share*t.price/1000).toFixed(0)+'k':'—';
+      return row(col, buy?'▲ BUY':'▼ SELL', t.name||'—', t.officerTitle||'', val, t.transactionDate||'—');
+    }).join('');
+    const congressRows = trades.map(t => {
+      const buy = /purchase|buy/i.test(t.transactionType||''); const col = buy?'var(--green)':'var(--red)';
+      return row(col, buy?'▲ BUY':'▼ SELL', (t.name||'—')+' ★', t.chamber||'', t.amount||'—', t.transactionDate||'—');
+    }).join('');
+    el.innerHTML = insiderRows + congressRows;
   } catch(e) {
-    if (el)  el.innerHTML  = '<div style="color:rgba(255,255,255,.2);font-size:11px;padding:8px 0">Unavailable</div>';
-    if (cel) cel.innerHTML = '<div style="color:rgba(255,255,255,.2);font-size:11px;padding:8px 0">Unavailable</div>';
+    el.innerHTML = '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:rgba(255,255,255,.25)">Unavailable</div>';
   }
 }
 </script>
