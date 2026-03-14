@@ -143,7 +143,7 @@ body{
 .card-head{padding:14px 20px;border-bottom:1px solid var(--glass-border);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.38);display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03)}
 .card-head-link{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--green);cursor:pointer;text-decoration:none;border:none;background:none}
 .card-head-link:hover{text-decoration:underline}
-.top5-row{display:grid;grid-template-columns:28px 200px 28px 90px 90px 70px 42px;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .12s}
+.top5-row{display:grid;grid-template-columns:28px 1fr 28px 80px 80px 62px 38px;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .12s}
 .top5-row:hover{background:rgba(255,255,255,.04)}
 .top5-row:last-child{border-bottom:none}
 @media(max-width:800px){.top5-row{grid-template-columns:24px 1fr 28px auto auto 42px}}
@@ -569,7 +569,7 @@ tbody tr{animation:fadeIn .25s ease both}
           <div class="fng-num" id="d-fng">--</div>
           <div class="fng-lbl" id="d-fng-lbl">Loading…</div>
         </div>
-        <svg id="fngGaugeSvg" width="100" height="54" viewBox="0 0 104 54"></svg>
+        <svg id="fngGaugeSvg" width="110" height="62" viewBox="0 0 110 62"></svg>
       </div>
       <!-- SPY -->
       <div class="stats-bar-item">
@@ -609,30 +609,30 @@ tbody tr{animation:fadeIn .25s ease both}
       </div>
     </div>
 
-    <!-- Top picks -->
-    <div class="g-card" style="margin-bottom:16px">
-      <div class="card-head">
-        Top Picks &amp; Portfolio Snapshots
-        <button class="card-head-link" onclick="switchTab('screener')">Open Screener →</button>
-      </div>
-      <div style="display:grid;grid-template-columns:28px 200px 28px 90px 90px 70px 42px;align-items:center;gap:8px;padding:7px 20px 6px;border-bottom:1px solid rgba(255,255,255,.06)">
-        <div></div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Ticker</div>
-        <div></div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:right">Price</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:center">30D Chart</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:right">% Change</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:center">Score</div>
-      </div>
-      <div id="dashTop5">
-        <div style="padding:20px 18px;display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">
-          <div class="loader" style="width:14px;height:14px;border-width:2px;margin:0"></div> Scanning for top picks…
+    <!-- Top picks + News side by side -->
+    <div class="dash-grid-mid">
+      <!-- Top picks -->
+      <div class="g-card">
+        <div class="card-head">
+          Top Picks &amp; Portfolio Snapshots
+          <button class="card-head-link" onclick="switchTab('screener')">Open Screener →</button>
+        </div>
+        <div style="display:grid;grid-template-columns:28px 1fr 28px 80px 80px 62px 38px;align-items:center;gap:8px;padding:7px 20px 6px;border-bottom:1px solid rgba(255,255,255,.06)">
+          <div></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Ticker</div>
+          <div></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:right">Price</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:center">Chart</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:right">Chg%</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:center">Score</div>
+        </div>
+        <div id="dashTop5">
+          <div style="padding:20px 18px;display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">
+            <div class="loader" style="width:14px;height:14px;border-width:2px;margin:0"></div> Scanning for top picks…
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- News + events -->
-    <div class="dash-grid-mid">
       <!-- Latest headlines -->
       <div class="g-card">
         <div class="card-head">
@@ -645,8 +645,9 @@ tbody tr{animation:fadeIn .25s ease both}
           </div>
         </div>
       </div>
+    </div>
 
-    <!-- Today's calendar events -->
+    <!-- Economic calendar full width -->
     <div class="g-card" style="margin-bottom:20px">
       <div class="card-head">
         Today's Economic Events
@@ -1318,45 +1319,52 @@ function drawSparkline(svgEl, closes, color, w=90, h=40) {
 function drawDashFngGauge(score) {
   const el = document.getElementById('fngGaugeSvg');
   if (!el) return;
-  const col = getFngColor(score);
   const pct = Math.max(0, Math.min(1, score / 100));
-  // Semicircle: left = -180deg (0), right = 0deg (100)
-  // In SVG coords: centre at (52,48), radius 36
-  const cx = 52, cy = 48, r = 36;
+  const col = getFngColor(score);
+  // Canvas: 110 wide, 62 tall. Arc centre at (55, 58), radius 44
+  const cx = 55, cy = 58, r = 44, stroke = 8;
   const toRad = d => d * Math.PI / 180;
-  const pt = (deg, radius) => ({
-    x: cx + radius * Math.cos(toRad(deg)),
-    y: cy + radius * Math.sin(toRad(deg))
+  const pt = (deg, rad) => ({
+    x: +(cx + rad * Math.cos(toRad(deg))).toFixed(2),
+    y: +(cy + rad * Math.sin(toRad(deg))).toFixed(2)
   });
-  // Track (full grey arc -180→0)
-  const ts = pt(-180, r), te = pt(0, r);
-  const trackPath = `M${ts.x.toFixed(2)},${ts.y.toFixed(2)} A${r},${r} 0 0 1 ${te.x.toFixed(2)},${te.y.toFixed(2)}`;
-  // Filled arc (-180 → angle)
-  const angleDeg = -180 + pct * 180;
-  const fs = pt(-180, r), fe = pt(angleDeg, r);
-  const large = pct > 0.5 ? 1 : 0;
-  const fillPath = `M${fs.x.toFixed(2)},${fs.y.toFixed(2)} A${r},${r} 0 ${large} 1 ${fe.x.toFixed(2)},${fe.y.toFixed(2)}`;
-  // Needle
-  const nTip = pt(angleDeg, r - 8);
-  // Colored zones background
-  const zones = [
-    { from:-180, to:-108, col:'#ef4444' },
-    { from:-108, to:-36,  col:'#f97316' },
-    { from:-36,  to:36,   col:'#eab308' },
-    { from:36,   to:108,  col:'#84cc16' },
-    { from:108,  to:180,  col:'#22c55e' },
-  ];
-  const zonePaths = zones.map(z => {
-    const s2 = pt(z.from, r), e2 = pt(z.to, r);
-    const lg = (z.to - z.from) > 180 ? 1 : 0;
-    return `<path d="M${s2.x.toFixed(2)},${s2.y.toFixed(2)} A${r},${r} 0 ${lg} 1 ${e2.x.toFixed(2)},${e2.y.toFixed(2)}" fill="none" stroke="${z.col}" stroke-width="7" stroke-linecap="butt" opacity=".25"/>`;
+  // Arc runs from -180° to 0° (left to right across top)
+  const startDeg = -180, endDeg = 0;
+  const needleDeg = startDeg + pct * 180;
+
+  // Track arc
+  const t1 = pt(startDeg, r), t2 = pt(endDeg, r);
+  const track = `M${t1.x},${t1.y} A${r},${r} 0 0,1 ${t2.x},${t2.y}`;
+
+  // Filled arc with gradient — draw as 5 coloured segments fading left→right
+  const segColors = ['#ef4444','#f97316','#eab308','#84cc16','#22c55e'];
+  const segPaths = segColors.map((c, i) => {
+    const fromDeg = -180 + i * 36;
+    const toDeg   = -180 + (i + 1) * 36;
+    const s = pt(fromDeg, r), e = pt(toDeg, r);
+    // Only draw up to the needle
+    const segEndPct = (i + 1) / 5;
+    const opacity = pct >= segEndPct ? 1 : pct > i/5 ? (pct - i/5) * 5 : 0;
+    if (opacity <= 0) return '';
+    // Clip to needle position
+    const clippedToDeg = Math.min(toDeg, needleDeg);
+    if (clippedToDeg <= fromDeg) return '';
+    const ec = pt(clippedToDeg, r);
+    const lg = (clippedToDeg - fromDeg) > 180 ? 1 : 0;
+    return `<path d="M${s.x},${s.y} A${r},${r} 0 ${lg},1 ${ec.x},${ec.y}" fill="none" stroke="${c}" stroke-width="${stroke}" stroke-linecap="butt" opacity="${opacity}"/>`;
   }).join('');
+
+  // Needle — thin line from centre pivot outward
+  const needleTip = pt(needleDeg, r - 6);
+  const needleBase1 = pt(needleDeg + 90, 5);
+  const needleBase2 = pt(needleDeg - 90, 5);
+
   el.innerHTML = `
-    ${zonePaths}
-    <path d="${trackPath}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="7" stroke-linecap="round"/>
-    <path d="${fillPath}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round"/>
-    <line x1="${cx}" y1="${cy}" x2="${nTip.x.toFixed(2)}" y2="${nTip.y.toFixed(2)}" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linecap="round"/>
-    <circle cx="${cx}" cy="${cy}" r="4" fill="${col}" stroke="rgba(0,0,0,.4)" stroke-width="1"/>`;
+    <path d="${track}" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="${stroke}" stroke-linecap="round"/>
+    ${segPaths}
+    <line x1="${cx}" y1="${cy}" x2="${needleTip.x}" y2="${needleTip.y}" stroke="rgba(255,255,255,.95)" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="4" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+    <circle cx="${cx}" cy="${cy}" r="2" fill="${col}"/>`;
 }
 
 // ── Dashboard top 5 picks ──
