@@ -2427,122 +2427,132 @@ function loadTVChart(ticker,interval){
 function setChartInterval(interval){currentInterval=interval;document.querySelectorAll('.interval-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');if(currentTicker)loadTVChart(currentTicker,interval);}
 
 function openChart(ticker){
-  const s=allResults.find(x=>x.ticker===ticker);if(!s)return;
-  currentTicker=ticker;
-  document.getElementById('modalTicker').textContent=s.ticker;
-  document.getElementById('modalName').textContent=s.name;
-  const sigEl=document.getElementById('modalSignal');
-  sigEl.textContent=s.signal.label;
-  const sigStyles={breakout:'background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.25)',momentum:'background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.2)',watch:'background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.25)',weak:'background:rgba(255,77,109,.08);color:var(--red);border:1px solid rgba(255,77,109,.2)'};
-  sigEl.style.cssText=`font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;${sigStyles[s.signal.cls]}`;
+  const s = allResults.find(x=>x.ticker===ticker) || dashboardResults.find(x=>x.ticker===ticker);
+  if(!s) return;
+  currentTicker = ticker;
+
+  // Header
+  document.getElementById('modalTicker').textContent = s.ticker;
+  document.getElementById('modalName').textContent = s.name;
+  const sigEl = document.getElementById('modalSignal');
+  sigEl.textContent = s.signal.label;
+  const sigStyles = {
+    breakout: 'background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.25)',
+    momentum: 'background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.2)',
+    watch:    'background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.25)',
+    weak:     'background:rgba(255,77,109,.08);color:var(--red);border:1px solid rgba(255,77,109,.2)',
+  };
+  sigEl.style.cssText = `font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;${sigStyles[s.signal.cls]}`;
 
   // Stats strip
-  document.getElementById('mPrice').textContent='$'+s.price.toFixed(2);
-  const extEl=document.getElementById('mExtPrice');
-  if(s.extPrice){const ec=((s.extPrice-s.price)/s.price)*100;extEl.innerHTML=`<span class="ext-price ${s.extSession}">${s.extSession==='pre'?'PRE':'AH'} $${s.extPrice.toFixed(2)} ${ec>=0?'+':''}${ec.toFixed(2)}%</span>`;}else extEl.innerHTML='';
-  const mch=document.getElementById('mChange');mch.textContent=`${s.change>=0?'+':''}${s.change.toFixed(2)}%`;mch.style.color=s.change>=0?'var(--green)':'var(--red)';
-  document.getElementById('mMktCap').textContent=s.marketCap?(s.marketCap>=1000?(s.marketCap/1000).toFixed(1)+'T':s.marketCap.toFixed(1)+'B'):'--';
-  document.getElementById('mPE').textContent=s.pe&&s.pe>0&&s.pe<999?s.pe.toFixed(1):'--';
-  const epsEl=document.getElementById('mEPS');epsEl.textContent=s.eps!=null?(s.eps>=0?'+':'')+s.eps.toFixed(2):'--';epsEl.style.color=s.eps>0?'var(--green)':s.eps<0?'var(--red)':'var(--muted)';
-  const dyEl=document.getElementById('mDivYield');dyEl.textContent=s.divYield!=null?(s.divYield*100).toFixed(2)+'%':'--';
-  const sc=getScoreClass(s.score);const scoreEl=document.getElementById('mScore');scoreEl.textContent=s.score+'/100';scoreEl.style.color=sc==='high'?'var(--green)':sc==='mid'?'var(--amber)':'var(--red)';
-  document.getElementById('mLow52').textContent=s.low52w?'$'+s.low52w.toFixed(2):'--';
-  document.getElementById('mHigh52').textContent=s.high52w?'$'+s.high52w.toFixed(2):'--';
-  if(s.pos52w!=null){const pct=Math.max(2,Math.min(98,s.pos52w));document.getElementById('rangeDot').style.left=pct+'%';document.getElementById('m52wPct').textContent=`At ${s.pos52w.toFixed(0)}% of 52-week range`;}
-  const scoreColor=sc==='high'?'var(--green)':sc==='mid'?'var(--amber)':'var(--red)';
-  const circleEl=document.getElementById('scoreCircle');circleEl.style.border=`3px solid ${scoreColor}`;circleEl.style.boxShadow=`0 0 20px ${scoreColor}33`;
-  document.getElementById('scoreCircleNum').textContent=s.score;document.getElementById('scoreCircleNum').style.color=scoreColor;
-  document.getElementById('scoreSignalLabel').textContent=s.signal.label;document.getElementById('scoreSignalLabel').style.color=scoreColor;
+  document.getElementById('mPrice').textContent = '$'+s.price.toFixed(2);
+  const extEl = document.getElementById('mExtPrice');
+  if(s.extPrice){ const ec=((s.extPrice-s.price)/s.price)*100; extEl.innerHTML=`<span class="ext-price ${s.extSession}">${s.extSession==='pre'?'PRE':'AH'} $${s.extPrice.toFixed(2)} ${ec>=0?'+':''}${ec.toFixed(2)}%</span>`; } else extEl.innerHTML='';
+  const mch = document.getElementById('mChange'); mch.textContent=`${s.change>=0?'+':''}${s.change.toFixed(2)}%`; mch.style.color=s.change>=0?'var(--green)':'var(--red)';
+  document.getElementById('mMktCap').textContent = s.marketCap?(s.marketCap>=1000?(s.marketCap/1000).toFixed(1)+'T':s.marketCap.toFixed(1)+'B'):'--';
+  document.getElementById('mPE').textContent = s.pe&&s.pe>0&&s.pe<999?s.pe.toFixed(1):'--';
+  const epsEl = document.getElementById('mEPS'); epsEl.textContent=s.eps!=null?(s.eps>=0?'+':'')+s.eps.toFixed(2):'--'; epsEl.style.color=s.eps>0?'var(--green)':s.eps<0?'var(--red)':'var(--muted)';
+  document.getElementById('mDivYield').textContent = s.divYield!=null?(s.divYield*100).toFixed(2)+'%':'--';
+  const sc = getScoreClass(s.score);
+  const scoreColor = sc==='high'?'var(--green)':sc==='mid'?'var(--amber)':'var(--red)';
+  const scoreEl = document.getElementById('mScore'); scoreEl.textContent=s.score+'/100'; scoreEl.style.color=scoreColor;
 
-  // Build factor breakdown using the same functions as calculateScore
+  // 52W range bar
+  document.getElementById('mLow52').textContent = s.low52w?'$'+s.low52w.toFixed(2):'--';
+  document.getElementById('mHigh52').textContent = s.high52w?'$'+s.high52w.toFixed(2):'--';
+  if(s.pos52w!=null){ const pct=Math.max(2,Math.min(98,s.pos52w)); document.getElementById('rangeDot').style.left=pct+'%'; document.getElementById('m52wPct').textContent=`At ${s.pos52w.toFixed(0)}% of 52-week range`; }
+
+  // Score circle
+  const circleEl = document.getElementById('scoreCircle'); circleEl.style.border=`3px solid ${scoreColor}`; circleEl.style.boxShadow=`0 0 20px ${scoreColor}33`;
+  document.getElementById('scoreCircleNum').textContent=s.score; document.getElementById('scoreCircleNum').style.color=scoreColor;
+  document.getElementById('scoreSignalLabel').textContent=s.signal.label; document.getElementById('scoreSignalLabel').style.color=scoreColor;
+
+  // Factor breakdown bars
   const w = ALGO_WEIGHTS[activePresetKey] || ALGO_WEIGHTS['default'];
   const totalW = Object.values(w).reduce((a,b)=>a+b,0);
   const support = calcSupportLevels(s.closes||[], s.highs||[], s.lows||[]);
   const factorScores = {
-    'Support Proximity': { raw: support.proximity??0, w: w.support_proximity||0,
-      val: support.proximity!=null ? `${(support.proximity*100).toFixed(0)}% close` : '--',
-      detail: support.nearestLevel ? `Nearest: $${support.nearestLevel.toFixed(2)} (${((support.distPct||0)*100).toFixed(1)}% away)` : 'No level found' },
-    'Support Strength':  { raw: support.strength??0, w: w.support_strength||0,
-      val: support.strength!=null ? `${(support.strength*100).toFixed(0)}% strong` : '--',
-      detail: 'Daily + weekly swing low quality' },
-    'RSI Oversold':      { raw: rsiOversoldScore(s.rsi), w: w.rsi_oversold||0,
-      val: s.rsi!=null ? s.rsi.toFixed(1) : '--',
-      detail: s.rsi!=null?(s.rsi<30?'Oversold ✓':s.rsi<40?'Approaching oversold':'Not oversold'):'No data' },
-    'PEG Ratio':         { raw: pegScore(s.peg), w: w.peg_ratio||0,
-      val: s.peg!=null ? s.peg.toFixed(2) : '--',
-      detail: s.peg!=null?(s.peg<1?'Undervalued vs growth ✓':s.peg<2?'Fair value':'Overvalued'):'No data' },
-    'P/E vs Sector':     { raw: peScore(s.pe, s.sector), w: w.pe_vs_sector||0,
-      val: s.pe&&s.pe>0 ? s.pe.toFixed(1) : '--',
-      detail: s.sector||'' },
-    'P/B Ratio':         { raw: pbScore(s.pb), w: w.pb_ratio||0,
-      val: s.pb!=null ? s.pb.toFixed(2) : '--',
-      detail: s.pb!=null?(s.pb<1.5?'Below book value ✓':s.pb<3?'Fair':'Premium'):'No data' },
-    'ROE':               { raw: roeScore(s.roe), w: w.roe||0,
-      val: s.roe!=null ? (s.roe*100).toFixed(1)+'%' : '--',
-      detail: s.roe!=null?(s.roe>0.20?'High quality ✓':s.roe>0.10?'Decent':'Low return'):'No data' },
-    'Debt / Equity':     { raw: debtScore(s.debtToEquity), w: w.debt_equity||0,
-      val: s.debtToEquity!=null ? s.debtToEquity.toFixed(2) : '--',
-      detail: s.debtToEquity!=null?(s.debtToEquity<0.5?'Low debt ✓':s.debtToEquity<1.5?'Moderate':'High debt'):'No data' },
-    'Revenue Growth':    { raw: revenueGrowthScore(s.revenueGrowth), w: w.revenue_growth||0,
-      val: s.revenueGrowth!=null ? (s.revenueGrowth*100).toFixed(1)+'%' : '--',
-      detail: s.revenueGrowth!=null?(s.revenueGrowth>0.15?'Strong growth ✓':s.revenueGrowth>0?'Growing':'Declining'):'No data' },
-    'Analyst Upside':    { raw: analystUpsideScore(s.price, s.analystTarget), w: w.analyst_upside||0,
-      val: s.analystTarget!=null ? '$'+s.analystTarget.toFixed(2) : '--',
-      detail: s.analystTarget&&s.price ? `${(((s.analystTarget-s.price)/s.price)*100).toFixed(1)}% upside` : 'No target' },
+    'Support Proximity': { raw: support.proximity??0, w: w.support_proximity||0, val: support.proximity!=null?`${(support.proximity*100).toFixed(0)}% close`:'--', detail: support.nearestLevel?`Nearest: $${support.nearestLevel.toFixed(2)} (${((support.distPct||0)*100).toFixed(1)}% away)`:'No level found' },
+    'Support Strength':  { raw: support.strength??0,  w: w.support_strength||0,  val: support.strength!=null?`${(support.strength*100).toFixed(0)}% strong`:'--', detail:'Daily + weekly swing low quality' },
+    'RSI Oversold':      { raw: rsiOversoldScore(s.rsi), w: w.rsi_oversold||0, val: s.rsi!=null?s.rsi.toFixed(1):'--', detail: s.rsi!=null?(s.rsi<30?'Oversold ✓':s.rsi<40?'Approaching':'Not oversold'):'No data' },
+    'PEG Ratio':         { raw: pegScore(s.peg),   w: w.peg_ratio||0,   val: s.peg!=null?s.peg.toFixed(2):'--',            detail: s.peg!=null?(s.peg<1?'Undervalued ✓':s.peg<2?'Fair':'Overvalued'):'No data' },
+    'P/E vs Sector':     { raw: peScore(s.pe,s.sector), w: w.pe_vs_sector||0, val: s.pe&&s.pe>0?s.pe.toFixed(1):'--',      detail: s.sector||'' },
+    'P/B Ratio':         { raw: pbScore(s.pb),     w: w.pb_ratio||0,     val: s.pb!=null?s.pb.toFixed(2):'--',              detail: s.pb!=null?(s.pb<1.5?'Below book ✓':s.pb<3?'Fair':'Premium'):'No data' },
+    'ROE':               { raw: roeScore(s.roe),   w: w.roe||0,          val: s.roe!=null?(s.roe*100).toFixed(1)+'%':'--',  detail: s.roe!=null?(s.roe>0.20?'High quality ✓':s.roe>0.10?'Decent':'Low'):'No data' },
+    'Debt / Equity':     { raw: debtScore(s.debtToEquity), w: w.debt_equity||0, val: s.debtToEquity!=null?s.debtToEquity.toFixed(2):'--', detail: s.debtToEquity!=null?(s.debtToEquity<0.5?'Low debt ✓':s.debtToEquity<1.5?'Moderate':'High'):'No data' },
+    'Revenue Growth':    { raw: revenueGrowthScore(s.revenueGrowth), w: w.revenue_growth||0, val: s.revenueGrowth!=null?(s.revenueGrowth*100).toFixed(1)+'%':'--', detail: s.revenueGrowth!=null?(s.revenueGrowth>0.15?'Strong ✓':s.revenueGrowth>0?'Growing':'Declining'):'No data' },
+    'Analyst Upside':    { raw: analystUpsideScore(s.price,s.analystTarget), w: w.analyst_upside||0, val: s.analystTarget!=null?'$'+s.analystTarget.toFixed(2):'--', detail: s.analystTarget&&s.price?`${(((s.analystTarget-s.price)/s.price)*100).toFixed(1)}% upside`:'No target' },
   };
+  document.getElementById('scoreBars').innerHTML = Object.entries(factorScores).map(([label,f])=>{
+    const contribution = ((f.w/totalW)*f.raw*100).toFixed(1);
+    const pct = Math.round(f.raw*100);
+    const c = f.raw>0.6?'var(--green)':f.raw>0.3?'var(--amber)':'var(--red)';
+    return `<div class="score-bar-row"><div class="score-bar-lbl" title="${f.detail}">${label}</div><div class="score-bar-track"><div class="score-bar-fill" style="width:${pct}%;background:${c}"></div></div><div class="score-bar-val" style="color:${c}">${f.val}</div><div class="score-bar-pts" style="color:${c}">+${contribution}</div></div>`;
+  }).join('')+`<div style="margin-top:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,.07);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">Preset: <span style="color:rgba(255,255,255,.4)">${activePresetKey}</span> · Score = <span style="color:${scoreColor}">${s.score}/100</span>${support.levels?.length?' · Support: '+support.levels.map(l=>'$'+l.toFixed(2)).join(', '):''}</div>`;
 
-  document.getElementById('scoreBars').innerHTML = Object.entries(factorScores).map(([label, f]) => {
-    const contribution = ((f.w / totalW) * f.raw * 100).toFixed(1);
-    const pct = Math.round(f.raw * 100);
-    const c = f.raw > 0.6 ? 'var(--green)' : f.raw > 0.3 ? 'var(--amber)' : 'var(--red)';
-    return `<div class="score-bar-row">
-      <div class="score-bar-lbl" title="${f.detail}">${label}</div>
-      <div class="score-bar-track"><div class="score-bar-fill" style="width:${pct}%;background:${c}"></div></div>
-      <div class="score-bar-val" style="color:${c};font-size:10px">${f.val}</div>
-      <div class="score-bar-pts" style="color:${c}">+${contribution}</div>
-    </div>`;
-  }).join('') + `<div style="margin-top:6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">
-    Preset: <span style="color:rgba(255,255,255,.5)">${activePresetKey}</span> · Weighted score = <span style="color:${scoreColor}">${s.score}/100</span>
-    ${support.levels?.length ? ` · Support levels: ${support.levels.map(l=>'$'+l.toFixed(2)).join(', ')}` : ''}
-  </div>`;
+  // RSI indicator
+  if(s.rsi!=null){
+    const rp=Math.max(2,Math.min(98,s.rsi));
+    const rc=s.rsi<20?'var(--green)':s.rsi<30?'var(--amber)':s.rsi>=70?'var(--red)':'var(--muted)';
+    const rm=document.getElementById('rsiMarker'); rm.style.left=rp+'%'; rm.style.background=rc; rm.style.boxShadow=`0 0 8px ${rc}`;
+    document.getElementById('rsiBig').textContent=s.rsi.toFixed(1); document.getElementById('rsiBig').style.color=rc;
+    const rl=s.rsi<20?'Extreme Oversold — high conviction buy':s.rsi<30?'Oversold — strong buy signal':s.rsi<40?'Approaching oversold — watch':s.rsi>=70?'Overbought — wait for pullback':'Neutral';
+    document.getElementById('rsiLabel').textContent=rl; document.getElementById('rsiLabel').style.color=rc;
+  }
 
-  if(s.rsi!=null){const rp=Math.max(2,Math.min(98,s.rsi));const rc=s.rsi<20?'var(--green)':s.rsi<30?'var(--amber)':s.rsi>=70?'var(--red)':'var(--muted)';const rm=document.getElementById('rsiMarker');rm.style.left=rp+'%';rm.style.background=rc;rm.style.boxShadow=`0 0 8px ${rc}`;document.getElementById('rsiBig').textContent=s.rsi.toFixed(1);document.getElementById('rsiBig').style.color=rc;const rl=s.rsi<20?'Extreme Oversold — high conviction buy':s.rsi<30?'Oversold ✓ — strong buy signal':s.rsi<40?'Approaching oversold — watch':s.rsi>=70?'Overbought — wait for pullback':'Neutral';document.getElementById('rsiLabel').textContent=rl;document.getElementById('rsiLabel').style.color=rc;}
-  if(s.macd){document.getElementById('macdSignal').innerHTML=s.macd.bullish?'<span class="bull-badge">Bullish Crossover</span>':'<span class="bear-badge">Bearish Crossover</span>';document.getElementById('macdLine').textContent=s.macd.macd?.toFixed(3)??'--';document.getElementById('macdLine').style.color=s.macd.macd>0?'var(--green)':'var(--red)';document.getElementById('macdSig').textContent=s.macd.signal?.toFixed(3)??'--';document.getElementById('macdHist').textContent=(s.macd.hist>0?'+':'')+s.macd.hist?.toFixed(3)??'--';document.getElementById('macdHist').style.color=s.macd.hist>0?'var(--green)':'var(--red)';}
-  const fp=v=>v?'$'+v.toFixed(2):'--';
-  const e20el=document.getElementById('techEMA20');e20el.textContent=fp(s.ema20);e20el.style.color=s.ema20?(s.emaAbove20?'var(--green)':'var(--red)'):'var(--muted)';
-  const e50el=document.getElementById('techEMA50');e50el.textContent=fp(s.ema50);e50el.style.color=s.ema50?(s.emaAbove50?'var(--green)':'var(--red)'):'var(--muted)';
-  const e200el=document.getElementById('techEMA200');e200el.textContent=fp(s.ema200);e200el.style.color=s.ema200?(s.emaAbove200?'var(--green)':'var(--red)'):'var(--muted)';
-  const ac=[s.emaAbove20,s.emaAbove50,s.emaAbove200].filter(Boolean).length;
-  const etel=document.getElementById('emaTrend');etel.textContent=s.ema20?(ac===3?'Price above all EMAs — long-term uptrend':ac===0?'Price below all EMAs — downtrend':ac>=2?'Above most EMAs — cautious bullish':'Below most EMAs — mixed'):'No EMA data';etel.style.color=ac>=2?'var(--green)':ac===0?'var(--red)':'var(--amber)';
-  document.getElementById('bbUpper').textContent=fp(s.bbUpper);document.getElementById('bbMiddle').textContent=fp(s.bbMiddle);document.getElementById('bbLower').textContent=fp(s.bbLower);
+  // MACD (single badge only — no macdLine/macdSig/macdHist in new modal)
+  const macdEl = document.getElementById('macdSignal');
+  if(macdEl){ macdEl.innerHTML=s.macd?(s.macd.bullish?'<span class="bull-badge">Bullish Crossover</span>':'<span class="bear-badge">Bearish Crossover</span>'):'--'; }
+
+  // EMA trend
+  const fp = v=>v?'$'+v.toFixed(2):'--';
+  const e20el=document.getElementById('techEMA20'); e20el.textContent=fp(s.ema20); e20el.style.color=s.ema20?(s.emaAbove20?'var(--green)':'var(--red)'):'var(--muted)';
+  const e50el=document.getElementById('techEMA50'); e50el.textContent=fp(s.ema50); e50el.style.color=s.ema50?(s.emaAbove50?'var(--green)':'var(--red)'):'var(--muted)';
+  const e200el=document.getElementById('techEMA200'); e200el.textContent=fp(s.ema200); e200el.style.color=s.ema200?(s.emaAbove200?'var(--green)':'var(--red)'):'var(--muted)';
+  const aboveCount=[s.emaAbove20,s.emaAbove50,s.emaAbove200].filter(Boolean).length;
+  const etel=document.getElementById('emaTrend'); etel.textContent=s.ema20?(aboveCount===3?'Above all EMAs — uptrend':aboveCount===0?'Below all EMAs — downtrend':aboveCount>=2?'Mostly above — cautious bullish':'Mostly below — mixed'):'No EMA data'; etel.style.color=aboveCount>=2?'var(--green)':aboveCount===0?'var(--red)':'var(--amber)';
+
   // Fundamentals panel
-  const pegEl=document.getElementById('mPEG');pegEl.textContent=s.peg!=null?s.peg.toFixed(2):'--';pegEl.style.color=s.peg!=null?(s.peg<1?'var(--green)':s.peg<2?'var(--amber)':'var(--red)'):'var(--muted)';
-  const pbEl=document.getElementById('mPB');pbEl.textContent=s.pb!=null?s.pb.toFixed(2):'--';pbEl.style.color=s.pb!=null?(s.pb<1.5?'var(--green)':s.pb<3?'var(--amber)':'var(--red)'):'var(--muted)';
-  const roeEl=document.getElementById('mROE');roeEl.textContent=s.roe!=null?(s.roe*100).toFixed(1)+'%':'--';roeEl.style.color=s.roe!=null?(s.roe>0.15?'var(--green)':s.roe>0.05?'var(--amber)':'var(--red)'):'var(--muted)';
-  const deEl=document.getElementById('mDE');deEl.textContent=s.debtToEquity!=null?s.debtToEquity.toFixed(2):'--';deEl.style.color=s.debtToEquity!=null?(s.debtToEquity<0.5?'var(--green)':s.debtToEquity<1.5?'var(--amber)':'var(--red)'):'var(--muted)';
-  const rgEl=document.getElementById('mRevGrowth');rgEl.textContent=s.revenueGrowth!=null?(s.revenueGrowth*100).toFixed(1)+'%':'--';rgEl.style.color=s.revenueGrowth!=null?(s.revenueGrowth>0.10?'var(--green)':s.revenueGrowth>0?'var(--amber)':'var(--red)'):'var(--muted)';
+  const pegEl=document.getElementById('mPEG'); if(pegEl){pegEl.textContent=s.peg!=null?s.peg.toFixed(2):'--'; pegEl.style.color=s.peg!=null?(s.peg<1?'var(--green)':s.peg<2?'var(--amber)':'var(--red)'):'var(--muted)';}
+  const pbEl=document.getElementById('mPB'); if(pbEl){pbEl.textContent=s.pb!=null?s.pb.toFixed(2):'--'; pbEl.style.color=s.pb!=null?(s.pb<1.5?'var(--green)':s.pb<3?'var(--amber)':'var(--red)'):'var(--muted)';}
+  const roeEl=document.getElementById('mROE'); if(roeEl){roeEl.textContent=s.roe!=null?(s.roe*100).toFixed(1)+'%':'--'; roeEl.style.color=s.roe!=null?(s.roe>0.15?'var(--green)':s.roe>0.05?'var(--amber)':'var(--red)'):'var(--muted)';}
+  const deEl=document.getElementById('mDE'); if(deEl){deEl.textContent=s.debtToEquity!=null?s.debtToEquity.toFixed(2):'--'; deEl.style.color=s.debtToEquity!=null?(s.debtToEquity<0.5?'var(--green)':s.debtToEquity<1.5?'var(--amber)':'var(--red)'):'var(--muted)';}
+  const rgEl=document.getElementById('mRevGrowth'); if(rgEl){rgEl.textContent=s.revenueGrowth!=null?(s.revenueGrowth*100).toFixed(1)+'%':'--'; rgEl.style.color=s.revenueGrowth!=null?(s.revenueGrowth>0.10?'var(--green)':s.revenueGrowth>0?'var(--amber)':'var(--red)'):'var(--muted)';}
 
   // Earnings panel
-  const earEPS=document.getElementById('earnEPS');earEPS.textContent=s.eps!=null?(s.eps>=0?'+':'')+s.eps.toFixed(2):'--';earEPS.style.color=s.eps>0?'var(--green)':s.eps<0?'var(--red)':'var(--muted)';
-  const egEl=document.getElementById('earnGrowth');egEl.textContent=s.epsGrowth!=null?(s.epsGrowth>=0?'+':'')+(s.epsGrowth*100).toFixed(1)+'%':'--';egEl.style.color=s.epsGrowth>0?'var(--green)':s.epsGrowth<0?'var(--red)':'var(--muted)';
+  const earEPS=document.getElementById('earnEPS'); if(earEPS){earEPS.textContent=s.eps!=null?(s.eps>=0?'+':'')+s.eps.toFixed(2):'--'; earEPS.style.color=s.eps>0?'var(--green)':s.eps<0?'var(--red)':'var(--muted)';}
+  const egEl=document.getElementById('earnGrowth'); if(egEl){egEl.textContent=s.epsGrowth!=null?(s.epsGrowth>=0?'+':'')+(s.epsGrowth*100).toFixed(1)+'%':'--'; egEl.style.color=s.epsGrowth>0?'var(--green)':s.epsGrowth<0?'var(--red)':'var(--muted)';}
   fetchEarningsDate(s.ticker);
+
+  // Reset async sections
   document.getElementById('newsContainer').innerHTML='<div style="padding:20px 24px;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px"><div class="loader" style="width:14px;height:14px;border-width:2px;margin:0"></div>Loading news...</div>';
   document.getElementById('analystSection').innerHTML='<div style="display:flex;align-items:center;gap:8px;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--muted)"><div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…</div>';
   document.getElementById('modalInsiderSection').innerHTML='<div style="display:flex;align-items:center;gap:8px;font-family:\'JetBrains Mono\',monospace;font-size:10px;color:var(--muted)"><div class="loader" style="width:12px;height:12px;border-width:2px;margin:0"></div> Loading…</div>';
-  fetchNews(s.ticker);fetchAndRenderAnalyst(s.ticker,s.price);
+
+  fetchNews(s.ticker);
+  fetchAndRenderAnalyst(s.ticker, s.price);
   loadModalInsider(s.ticker);
-  loadTVChart(ticker,currentInterval);
+  loadTVChart(ticker, currentInterval);
   document.getElementById('modalOverlay').classList.add('open');
-  document.body.style.overflow='hidden';
+  document.body.style.overflow = 'hidden';
 }
 
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
 function closeModalOutside(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
 
 async function fetchEarningsDate(ticker){
-  try{const d=await twelveFetch('earnings',{symbol:ticker,outputsize:4});if(!d?.earnings?.length){document.getElementById('earnDate').textContent='--';document.getElementById('earnCountdown').textContent='Not available';return;}
-  const upcoming=d.earnings.filter(e=>new Date(e.date)>=new Date()).sort((a,b)=>new Date(a.date)-new Date(b.date));const next=upcoming[0]||d.earnings[0];
-  if(next?.date){const dt=new Date(next.date);document.getElementById('earnDate').textContent=dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});const days=Math.round((dt-new Date())/(1000*60*60*24));document.getElementById('earnCountdown').textContent=days>0?`${days} days away`:days===0?'Today!':'Last reported';}}catch(e){document.getElementById('earnDate').textContent='--';}
+  try{
+    const d=await twelveFetch('earnings',{symbol:ticker,outputsize:4});
+    if(!d?.earnings?.length){document.getElementById('earnDate').textContent='--';return;}
+    const upcoming=d.earnings.filter(e=>new Date(e.date)>=new Date()).sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const next=upcoming[0]||d.earnings[0];
+    if(next?.date){
+      const dt=new Date(next.date);
+      const days=Math.round((dt-new Date())/(1000*60*60*24));
+      const label=days>0?`${dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} (${days}d)`:days===0?'Today!':'Last reported';
+      document.getElementById('earnDate').textContent=label;
+    }
+  }catch(e){document.getElementById('earnDate').textContent='--';}
 }
 
 async function fetchAndRenderAnalyst(ticker,currentPrice){
