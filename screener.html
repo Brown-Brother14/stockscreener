@@ -733,17 +733,17 @@ tbody tr{animation:fadeIn .25s ease both}
     <!-- Filter row -->
     <div class="filter-row">
       <button class="btn-outline active" onclick="filterBy('all',this)">All</button>
-      <button class="btn-outline" onclick="filterBy('breakout',this)">🟢 Breakout</button>
-      <button class="btn-outline" onclick="filterBy('momentum',this)">🔵 Momentum</button>
+      <button class="btn-outline" onclick="filterBy('breakout',this)">🟢 Strong Buy</button>
+      <button class="btn-outline" onclick="filterBy('momentum',this)">🔵 Buy</button>
       <button class="btn-outline" onclick="filterBy('top',this)">⭐ Top 5</button>
-      <button class="btn-outline" onclick="filterBy('weak',this)">🔴 Weak</button>
+      <button class="btn-outline" onclick="filterBy('weak',this)">🔴 Avoid</button>
     </div>
 
     <!-- Stats strip -->
     <div class="stats-strip">
       <div class="stats-strip-item"><div class="stats-strip-label">Scanned</div><div class="stats-strip-val" id="totalScanned">--</div></div>
-      <div class="stats-strip-item"><div class="stats-strip-label">Breakouts</div><div class="stats-strip-val green" id="breakoutCount">--</div></div>
-      <div class="stats-strip-item"><div class="stats-strip-label">Bullish MACD</div><div class="stats-strip-val amber" id="bullishCount">--</div></div>
+      <div class="stats-strip-item"><div class="stats-strip-label">Strong Buy</div><div class="stats-strip-val green" id="breakoutCount">--</div></div>
+      <div class="stats-strip-item"><div class="stats-strip-label">Buy</div><div class="stats-strip-val amber" id="bullishCount">--</div></div>
       <div class="stats-strip-item"><div class="stats-strip-label">Avg Score</div><div class="stats-strip-val" id="avgScore">--</div></div>
       <div class="stats-strip-item"><div class="stats-strip-label">Top Pick</div><div class="stats-strip-val green" id="topPick">--</div></div>
     </div>
@@ -1500,6 +1500,7 @@ function toggleColumns() {
 function activatePreset(name, btn) {
   document.querySelectorAll('.preset-pill').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
+  activePresetKey = name;
   loadPreset(name);
 }
 
@@ -1729,10 +1730,14 @@ async function fetchAllTechnicals(ticker) {
   const bb      = calcBollinger(closes);
   const adx     = calcADX(highs, lows, closes);
   const stoch   = calcStoch(highs, lows, closes);
-  return { rsi, macd, ema20, ema50, ema200,
+  return {
+    rsi, macd, ema20, ema50, ema200,
     bbUpper: bb?.upper||null, bbMiddle: bb?.middle||null, bbLower: bb?.lower||null,
     adx, stochK: stoch?.k||null, stochD: stoch?.d||null, volume,
-    closes: closes.slice(-60) };
+    closes: closes.slice(-520),   // 2yr daily for support detection
+    highs:  highs.slice(-520),
+    lows:   lows.slice(-520),
+  };
 }
 
 // ── fetchQuote — uses YF (real-time, pre/after market) ──────
@@ -1791,20 +1796,30 @@ async function fetchFinancials(ticker) {
   const quotes = await yfQuote(ticker);
   const q = quotes[0];
   if (!q) return null;
+  // PEG = trailingPE / epsGrowth (annualised)
+  const pe       = q.trailingPE ?? null;
+  const growth   = q.earningsGrowth ?? q.revenueGrowth ?? null;
+  const peg      = (pe && growth && growth > 0) ? pe / (growth * 100) : null;
   return {
-    pe:            q.trailingPE          ?? null,
-    forwardPE:     q.forwardPE           ?? null,
-    eps:           q.epsTrailingTwelveMonths ?? null,
-    epsGrowth:     q.earningsGrowth      ?? null,
-    high52w:       q.fiftyTwoWeekHigh    ?? null,
-    low52w:        q.fiftyTwoWeekLow     ?? null,
-    ema50:         q.fiftyDayAverage     ?? null,  // free from YF!
-    ema200:        q.twoHundredDayAverage?? null,  // free from YF!
-    avgVolume:     q.averageVolume       ?? null,
-    beta:          q.beta                ?? null,
-    divYield:      q.dividendYield       ?? null,
-    revenueGrowth: q.revenueGrowth       ?? null,
-    priceToBook:   q.priceToBook         ?? null,
+    pe,
+    peg,
+    forwardPE:     q.forwardPE                   ?? null,
+    pb:            q.priceToBook                 ?? null,
+    eps:           q.epsTrailingTwelveMonths      ?? null,
+    epsGrowth:     q.earningsGrowth              ?? null,
+    high52w:       q.fiftyTwoWeekHigh            ?? null,
+    low52w:        q.fiftyTwoWeekLow             ?? null,
+    ema50:         q.fiftyDayAverage             ?? null,
+    ema200:        q.twoHundredDayAverage        ?? null,
+    avgVolume:     q.averageVolume               ?? null,
+    beta:          q.beta                        ?? null,
+    divYield:      q.dividendYield               ?? null,
+    revenueGrowth: q.revenueGrowth               ?? null,
+    priceToBook:   q.priceToBook                 ?? null,
+    roe:           q.returnOnEquity              ?? null,
+    debtToEquity:  q.debtToEquity != null ? q.debtToEquity / 100 : null,
+    analystTarget: q.targetMeanPrice             ?? null,
+    buybackYield:  null, // not available from basic quote endpoint
   };
 }
 
@@ -1891,26 +1906,314 @@ function loadPreset(name){
   runScan();
 }
 
-function calculateScore({rsi,macd,change,pe,pos52w,revenueGrowth,emaAbove20,emaAbove50,adx,bbPos}){
-  let score=50;
-  if(rsi!=null){if(rsi>=50&&rsi<=65)score+=22;else if(rsi>=40&&rsi<50)score+=10;else if(rsi>=65&&rsi<75)score+=6;else if(rsi>=75)score-=15;else if(rsi<30)score-=8;}
-  if(macd){if(macd.bullish&&macd.hist>0)score+=15;else if(macd.bullish)score+=8;else if(!macd.bullish&&macd.hist<0)score-=12;else score-=5;}
-  if(change>3)score+=10;else if(change>1)score+=6;else if(change>0)score+=3;else if(change<-3)score-=10;else if(change<-1)score-=6;else if(change<0)score-=3;
-  if(pos52w!=null){if(pos52w>=70)score+=8;else if(pos52w>=50)score+=4;else if(pos52w<20)score-=5;}
-  if(pe&&pe>0&&pe<500){if(pe<15)score+=8;else if(pe<25)score+=4;else if(pe>80)score-=4;}
-  if(revenueGrowth&&revenueGrowth>0.15)score+=5;
-  if(emaAbove20)score+=4;if(emaAbove50)score+=4;
-  if(adx!=null){if(adx>=25)score+=6;else if(adx>=20)score+=3;else score-=2;}
-  if(bbPos!=null){if(bbPos>=80)score-=5;else if(bbPos>=50)score+=3;else if(bbPos<=20)score+=5;}
-  return Math.max(0,Math.min(100,Math.round(score)));
+// ══════════════════════════════════════════════════════════════
+//  ALGO WEIGHTS — per preset (from 1200-stock 5-year backtest)
+// ══════════════════════════════════════════════════════════════
+const ALGO_WEIGHTS = {
+  'top20':        {support_proximity:19,rsi_oversold:12,revenue_growth:10,macro_sensitivity:9,peg_ratio:8,pe_vs_sector:8,roe:6,debt_equity:6,earnings_quality:5,div_buyback_yield:5,insider_buying:4,support_strength:3,pb_ratio:3,analyst_upside:2},
+  'sp500leaders': {support_proximity:24,rsi_oversold:12,support_strength:8,debt_equity:8,macro_sensitivity:8,pb_ratio:6,roe:6,revenue_growth:6,pe_vs_sector:5,peg_ratio:4,earnings_quality:4,div_buyback_yield:4,insider_buying:3,analyst_upside:2},
+  'tech':         {rsi_oversold:16,roe:13,revenue_growth:11,macro_sensitivity:10,peg_ratio:9,support_proximity:7,debt_equity:6,support_strength:5,pb_ratio:5,earnings_quality:5,div_buyback_yield:4,pe_vs_sector:3,analyst_upside:2,insider_buying:1},
+  'finance':      {rsi_oversold:15,roe:12,revenue_growth:10,peg_ratio:8,pe_vs_sector:8,support_proximity:7,debt_equity:7,macro_sensitivity:7,support_strength:5,pb_ratio:5,earnings_quality:5,insider_buying:5,div_buyback_yield:5,analyst_upside:1},
+  'healthcare':   {support_proximity:23,rsi_oversold:12,roe:12,macro_sensitivity:9,peg_ratio:8,revenue_growth:8,pb_ratio:5,debt_equity:5,insider_buying:5,div_buyback_yield:5,support_strength:3,earnings_quality:3,analyst_upside:2,pe_vs_sector:1},
+  'energy':       {roe:16,macro_sensitivity:12,rsi_oversold:10,revenue_growth:10,support_proximity:9,support_strength:9,debt_equity:9,pb_ratio:6,earnings_quality:4,div_buyback_yield:4,peg_ratio:3,pe_vs_sector:3,analyst_upside:3,insider_buying:2},
+  'consumer':     {support_proximity:12,revenue_growth:12,macro_sensitivity:11,peg_ratio:10,pe_vs_sector:10,debt_equity:8,support_strength:6,rsi_oversold:6,pb_ratio:6,roe:6,earnings_quality:6,insider_buying:5,div_buyback_yield:2,analyst_upside:2},
+  'industrial':   {support_proximity:19,rsi_oversold:12,revenue_growth:10,macro_sensitivity:9,peg_ratio:8,pe_vs_sector:8,roe:6,support_strength:5,pb_ratio:5,debt_equity:5,insider_buying:5,div_buyback_yield:5,earnings_quality:2,analyst_upside:2},
+  'materials':    {support_proximity:13,rsi_oversold:13,revenue_growth:13,macro_sensitivity:12,pe_vs_sector:10,roe:8,support_strength:6,insider_buying:5,peg_ratio:4,earnings_quality:4,div_buyback_yield:4,debt_equity:3,analyst_upside:3,pb_ratio:2},
+  'utilities':    {support_proximity:24,rsi_oversold:12,roe:10,peg_ratio:8,support_strength:7,debt_equity:7,insider_buying:7,macro_sensitivity:7,pe_vs_sector:6,earnings_quality:5,pb_ratio:3,revenue_growth:2,div_buyback_yield:1,analyst_upside:1},
+  'realestate':   {roe:13,support_proximity:11,peg_ratio:11,rsi_oversold:9,pe_vs_sector:9,support_strength:7,insider_buying:7,debt_equity:6,revenue_growth:6,div_buyback_yield:6,pb_ratio:5,earnings_quality:5,macro_sensitivity:3,analyst_upside:1},
+  'communication':{support_proximity:19,revenue_growth:11,macro_sensitivity:11,peg_ratio:9,pe_vs_sector:9,roe:8,insider_buying:8,rsi_oversold:6,debt_equity:6,pb_ratio:4,div_buyback_yield:4,support_strength:2,earnings_quality:2,analyst_upside:2},
+  'ai':           {support_proximity:24,rsi_oversold:10,roe:10,macro_sensitivity:10,peg_ratio:8,revenue_growth:8,support_strength:5,pe_vs_sector:5,earnings_quality:5,div_buyback_yield:5,insider_buying:4,debt_equity:3,analyst_upside:2,pb_ratio:1},
+  'ev':           {support_proximity:16,revenue_growth:12,macro_sensitivity:11,pe_vs_sector:9,insider_buying:8,peg_ratio:6,div_buyback_yield:6,support_strength:5,pb_ratio:5,roe:5,debt_equity:5,earnings_quality:5,rsi_oversold:4,analyst_upside:2},
+  'cyber':        {roe:15,support_proximity:12,peg_ratio:12,rsi_oversold:10,revenue_growth:10,insider_buying:8,div_buyback_yield:7,support_strength:6,earnings_quality:6,macro_sensitivity:5,pb_ratio:4,pe_vs_sector:3,debt_equity:2,analyst_upside:2},
+  'crypto':       {rsi_oversold:16,roe:10,macro_sensitivity:10,pe_vs_sector:9,support_proximity:7,support_strength:7,insider_buying:7,revenue_growth:6,div_buyback_yield:6,pb_ratio:5,earnings_quality:5,peg_ratio:4,debt_equity:3,analyst_upside:2},
+  'biotech':      {support_proximity:18,roe:13,rsi_oversold:11,peg_ratio:11,revenue_growth:11,macro_sensitivity:10,support_strength:7,pb_ratio:5,pe_vs_sector:4,debt_equity:3,div_buyback_yield:2,analyst_upside:2,earnings_quality:1,insider_buying:1},
+  'war':          {rsi_oversold:13,revenue_growth:11,roe:10,macro_sensitivity:10,pe_vs_sector:9,support_proximity:7,debt_equity:7,insider_buying:6,div_buyback_yield:6,pb_ratio:5,support_strength:4,peg_ratio:4,earnings_quality:4,analyst_upside:2},
+  // fallback for any unlisted preset
+  'default':      {support_proximity:22,rsi_oversold:16,pe_vs_sector:9,revenue_growth:9,support_strength:7,debt_equity:7,macro_sensitivity:7,pb_ratio:5,peg_ratio:4,earnings_quality:4,roe:3,insider_buying:3,analyst_upside:2,div_buyback_yield:1},
+};
+
+// Track active preset for scoring
+let activePresetKey = 'top20';
+
+function getActiveWeights() {
+  return ALGO_WEIGHTS[activePresetKey] || ALGO_WEIGHTS['default'];
 }
-function getSignal(score,macd){
-  if(score>=78&&macd?.bullish)return{label:'Breakout',cls:'breakout'};
-  if(score>=68)return{label:'Momentum',cls:'momentum'};
-  if(score>=55)return{label:'Watch',cls:'watch'};
-  return{label:'Weak',cls:'weak'};
+
+// ── Support level detection (daily + weekly swing lows) ──────────────────────
+function calcSupportLevels(closes, highs, lows) {
+  if (!closes || closes.length < 30) return { proximity: null, strength: null, levels: [] };
+
+  const n = closes.length;
+  const current = closes[n - 1];
+
+  // Daily swing lows (past ~1 year = 252 bars)
+  const dailyWindow = closes.slice(-252);
+  const dailyLows   = lows  ? lows.slice(-252)  : dailyWindow;
+  const swingLowsD  = [];
+  for (let i = 2; i < dailyWindow.length - 2; i++) {
+    const l = dailyLows[i];
+    if (l < dailyLows[i-1] && l < dailyLows[i-2] && l < dailyLows[i+1] && l < dailyLows[i+2]) {
+      swingLowsD.push({ price: l, type: 'daily', idx: i });
+    }
+  }
+
+  // Weekly proxy (every 5 bars, past 2 years = 520 bars)
+  const weeklyCloses = closes.filter((_, i) => i % 5 === 0).slice(-104);
+  const weeklyLows   = lows ? lows.filter((_, i) => i % 5 === 0).slice(-104) : weeklyCloses;
+  const swingLowsW   = [];
+  for (let i = 2; i < weeklyCloses.length - 2; i++) {
+    const l = weeklyLows[i];
+    if (l < weeklyLows[i-1] && l < weeklyLows[i+1]) {
+      swingLowsW.push({ price: l, type: 'weekly' });
+    }
+  }
+
+  // Volume-weighted round number clusters
+  const roundLevels = [];
+  const magnitude = Math.pow(10, Math.floor(Math.log10(current)) - 1);
+  for (let m = 1; m <= 20; m++) {
+    const lvl = Math.round(current / (magnitude * m)) * (magnitude * m);
+    if (lvl < current * 1.15 && lvl > current * 0.7) {
+      roundLevels.push({ price: lvl, type: 'round' });
+    }
+  }
+
+  const allLows = [...swingLowsD, ...swingLowsW, ...roundLevels];
+
+  // Find the strongest support zone below current price
+  const below = allLows.filter(l => l.price <= current * 1.05 && l.price >= current * 0.5);
+  if (!below.length) return { proximity: 0, strength: 0, levels: [] };
+
+  // Cluster nearby levels (within 2%)
+  const clusters = [];
+  below.forEach(l => {
+    const existing = clusters.find(c => Math.abs(c.price - l.price) / c.price < 0.025);
+    if (existing) {
+      existing.count++;
+      existing.hasWeekly = existing.hasWeekly || l.type === 'weekly';
+      existing.price     = (existing.price * (existing.count - 1) + l.price) / existing.count;
+    } else {
+      clusters.push({ price: l.price, count: 1, hasWeekly: l.type === 'weekly' });
+    }
+  });
+
+  // Sort by strength (weekly confirmation + touch count)
+  clusters.sort((a, b) => {
+    const scoreA = a.count + (a.hasWeekly ? 2 : 0);
+    const scoreB = b.count + (b.hasWeekly ? 2 : 0);
+    return scoreB - scoreA;
+  });
+
+  const strongest = clusters[0];
+  const distPct   = (current - strongest.price) / current;
+
+  // Proximity score: 0-1 (within 1% = 1.0, within 10% = 0.0)
+  const proximity = Math.max(0, 1 - distPct / 0.10);
+
+  // Strength score: 0-1 based on cluster quality
+  const touchScore   = Math.min(strongest.count / 5, 1);
+  const weeklyBonus  = strongest.hasWeekly ? 0.3 : 0;
+  const strength     = Math.min(1, touchScore + weeklyBonus);
+
+  return {
+    proximity,
+    strength,
+    levels: clusters.slice(0, 3).map(c => c.price),
+    nearestLevel: strongest.price,
+    distPct,
+  };
 }
-function getScoreClass(s){return s>=70?'high':s>=50?'mid':'low';}
+
+// ── RSI oversold score (0-1) ──────────────────────────────────────────────────
+function rsiOversoldScore(rsi) {
+  if (rsi == null) return 0;
+  if (rsi < 20)        return 1.0;   // extreme oversold
+  if (rsi < 25)        return 0.85;
+  if (rsi < 30)        return 0.70;  // classic oversold
+  if (rsi < 35)        return 0.45;
+  if (rsi < 40)        return 0.25;
+  if (rsi < 50)        return 0.10;
+  return 0;
+}
+
+// ── Valuation scores (0-1 each) ───────────────────────────────────────────────
+function peScore(pe, sector) {
+  if (!pe || pe <= 0 || pe > 1000) return 0;
+  // Sector-adjusted fair P/E ranges
+  const fairPE = {
+    'Technology':10, 'Finance':12, 'Healthcare':15, 'Energy':10,
+    'Consumer':18, 'Industrials':16, 'Materials':12, 'Utilities':16,
+    'Real Estate':20, 'Communication':14,
+  };
+  const fair = fairPE[sector] || 15;
+  if (pe < fair * 0.6) return 1.0;
+  if (pe < fair * 0.8) return 0.8;
+  if (pe < fair)       return 0.6;
+  if (pe < fair * 1.3) return 0.3;
+  if (pe < fair * 1.8) return 0.1;
+  return 0;
+}
+
+function pegScore(peg) {
+  if (!peg || peg <= 0) return 0;
+  if (peg < 0.5) return 1.0;
+  if (peg < 1.0) return 0.85;
+  if (peg < 1.5) return 0.60;
+  if (peg < 2.0) return 0.35;
+  if (peg < 3.0) return 0.10;
+  return 0;
+}
+
+function pbScore(pb) {
+  if (!pb || pb <= 0) return 0;
+  if (pb < 1.0) return 1.0;
+  if (pb < 1.5) return 0.80;
+  if (pb < 2.5) return 0.55;
+  if (pb < 4.0) return 0.30;
+  if (pb < 6.0) return 0.10;
+  return 0;
+}
+
+function analystUpsideScore(price, targetPrice) {
+  if (!price || !targetPrice) return 0;
+  const upside = (targetPrice - price) / price;
+  if (upside > 0.40) return 1.0;
+  if (upside > 0.25) return 0.75;
+  if (upside > 0.15) return 0.50;
+  if (upside > 0.05) return 0.25;
+  if (upside > 0)    return 0.10;
+  return 0;
+}
+
+// ── Quality/health scores (0-1) ───────────────────────────────────────────────
+function roeScore(roe) {
+  if (roe == null) return 0;
+  if (roe > 0.30) return 1.0;
+  if (roe > 0.20) return 0.80;
+  if (roe > 0.15) return 0.60;
+  if (roe > 0.10) return 0.40;
+  if (roe > 0.05) return 0.20;
+  return 0;
+}
+
+function debtScore(debtToEquity) {
+  if (debtToEquity == null) return 0.5; // neutral if unknown
+  if (debtToEquity < 0.3)  return 1.0;
+  if (debtToEquity < 0.6)  return 0.80;
+  if (debtToEquity < 1.0)  return 0.60;
+  if (debtToEquity < 1.5)  return 0.35;
+  if (debtToEquity < 2.5)  return 0.15;
+  return 0;
+}
+
+function revenueGrowthScore(growth) {
+  if (growth == null) return 0;
+  if (growth > 0.30) return 1.0;
+  if (growth > 0.20) return 0.80;
+  if (growth > 0.10) return 0.60;
+  if (growth > 0.05) return 0.40;
+  if (growth > 0)    return 0.20;
+  return 0;
+}
+
+function divBuybackScore(divYield, buybackYield) {
+  const total = (divYield || 0) + (buybackYield || 0);
+  if (total > 0.08) return 1.0;
+  if (total > 0.05) return 0.75;
+  if (total > 0.03) return 0.50;
+  if (total > 0.01) return 0.25;
+  return 0;
+}
+
+function earningsQualityScore(accruals, epsGrowth) {
+  // Proxy: consistent EPS growth + low accruals = high quality
+  let s = 0.5;
+  if (epsGrowth != null) {
+    if (epsGrowth > 0.20) s += 0.3;
+    else if (epsGrowth > 0.10) s += 0.15;
+    else if (epsGrowth < -0.10) s -= 0.25;
+  }
+  return Math.max(0, Math.min(1, s));
+}
+
+// ── Macro sensitivity score (0-1) ─────────────────────────────────────────────
+function macroSensitivityScore(beta, sector) {
+  // Simplified: score based on beta relative to sector norms
+  // In risk-on environment (current): moderate-high beta is good
+  if (beta == null) return 0.5;
+  if (beta >= 1.0 && beta <= 1.5) return 0.80;
+  if (beta >= 0.8 && beta < 1.0)  return 0.70;
+  if (beta >= 1.5 && beta < 2.0)  return 0.55;
+  if (beta < 0.5)                  return 0.40;
+  return 0.30;
+}
+
+// ── MAIN SCORE FUNCTION ───────────────────────────────────────────────────────
+function calculateScore({
+  // Technical
+  rsi, closes, highs, lows,
+  // Valuation
+  pe, peg, pb, analystTarget, price,
+  // Quality
+  roe, debtToEquity, epsGrowth,
+  // Growth
+  revenueGrowth,
+  // Shareholder return
+  divYield, buybackYield,
+  // Macro
+  beta,
+  // Meta
+  sector, presetKey,
+}) {
+  const w = ALGO_WEIGHTS[presetKey] || ALGO_WEIGHTS['default'];
+  const totalW = Object.values(w).reduce((a, b) => a + b, 0);
+
+  // Compute individual factor scores (0-1)
+  const support = calcSupportLevels(closes, highs, lows);
+  const factors = {
+    support_proximity: support.proximity ?? 0,
+    support_strength:  support.strength  ?? 0,
+    rsi_oversold:      rsiOversoldScore(rsi),
+    peg_ratio:         pegScore(peg),
+    pe_vs_sector:      peScore(pe, sector),
+    pb_ratio:          pbScore(pb),
+    roe:               roeScore(roe),
+    debt_equity:       debtScore(debtToEquity),
+    revenue_growth:    revenueGrowthScore(revenueGrowth),
+    div_buyback_yield: divBuybackScore(divYield, buybackYield),
+    earnings_quality:  earningsQualityScore(null, epsGrowth),
+    insider_buying:    0.5, // placeholder — would need Form 4 data
+    analyst_upside:    analystUpsideScore(price, analystTarget),
+    macro_sensitivity: macroSensitivityScore(beta, sector),
+  };
+
+  // Weighted sum → 0-100
+  let raw = 0;
+  for (const [f, score] of Object.entries(factors)) {
+    raw += (w[f] || 0) * score;
+  }
+  const normalized = Math.round((raw / totalW) * 100);
+
+  // Combo bonus: oversold RSI at strong support = extra conviction
+  let bonus = 0;
+  if (factors.rsi_oversold > 0.65 && factors.support_proximity > 0.65) {
+    bonus = 6; // strong combo signal
+  } else if (factors.rsi_oversold > 0.45 && factors.support_proximity > 0.45) {
+    bonus = 3;
+  }
+
+  // Penalties: above 200 EMA = safety check (ema200 checked separately)
+  return Math.max(0, Math.min(100, normalized + bonus));
+}
+
+function getSignal(score) {
+  if (score >= 72) return { label: 'Strong Buy', cls: 'breakout' };
+  if (score >= 58) return { label: 'Buy',        cls: 'momentum' };
+  if (score >= 42) return { label: 'Watch',      cls: 'watch'    };
+  return               { label: 'Avoid',      cls: 'weak'     };
+}
+
+function getScoreClass(s) { return s >= 70 ? 'high' : s >= 50 ? 'mid' : 'low'; }
 
 let allResults=[], currentFilter='all', sortField='score', sortDir=-1;
 let fhWS=null, fhReconnectTimer=null, fhSubscribed=new Set(), _fallbackInterval=null;
@@ -1944,10 +2247,17 @@ async function runScan(){
       const rsi=tech.rsi??null,macd=tech.macd??null;
       const ext=await fetchExtendedHours(ticker).catch(()=>null);
       const pe=financials?.pe||null;
+      const peg=financials?.peg||null;
+      const pb=financials?.pb||null;
+      const roe=financials?.roe||null;
+      const debtToEquity=financials?.debtToEquity||null;
+      const analystTarget=financials?.analystTarget||null;
+      const divYield=financials?.divYield||null;
       const high52w=financials?.high52w||null,low52w=financials?.low52w||null;
       const pos52w=(high52w&&low52w)?((quote.price-low52w)/(high52w-low52w))*100:null;
       const revenueGrowth=financials?.revenueGrowth||null;
       const name=profile?.name||ticker;
+      const sector=profile?.sector||'';
       const marketCap=profile?.marketCap?profile.marketCap/1000:null;
       const volume=tech?.volume||financials?.avgVolume||null;
       const avgVolume=financials?.avgVolume||null;
@@ -1956,12 +2266,18 @@ async function runScan(){
       const emaAbove200=tech?.ema200&&quote.price>tech.ema200;
       let bbPos=null;
       if(tech?.bbUpper&&tech?.bbLower)bbPos=((quote.price-tech.bbLower)/(tech.bbUpper-tech.bbLower))*100;
-      const score=calculateScore({rsi,macd,change:quote.change,pe,pos52w,revenueGrowth,emaAbove20,emaAbove50,adx:tech?.adx,bbPos});
-      const signal=getSignal(score,macd);
+      const score=calculateScore({
+        rsi,closes:tech?.closes||[],highs:tech?.highs||[],lows:tech?.lows||[],
+        pe,peg,pb,analystTarget,price:quote.price,
+        roe,debtToEquity,epsGrowth:financials?.epsGrowth||null,
+        revenueGrowth,divYield,buybackYield:null,
+        beta:financials?.beta||null,sector,presetKey:activePresetKey,
+      });
+      const signal=getSignal(score);
       if(signal.cls==='breakout')breakouts++;
-      if(macd?.bullish)bullishMACD++;
+      if(signal.cls==='momentum')bullishMACD++;
       totalScore+=score;
-      allResults.push({ticker,name,industry:profile?.industry||'',sector:profile?.sector||'',price:quote.price,change:quote.change,prevClose:quote.prevClose||null,volume,avgVolume,marketCap,score,signal,rsi,macd,pe,eps:financials?.eps||null,epsGrowth:financials?.epsGrowth||null,divYield:financials?.divYield||null,pos52w,high52w,low52w,revenueGrowth,ema20:tech?.ema20||null,ema50:tech?.ema50||null,ema200:tech?.ema200||null,emaAbove20,emaAbove50,emaAbove200,bbUpper:tech?.bbUpper||null,bbMiddle:tech?.bbMiddle||null,bbLower:tech?.bbLower||null,bbPos,adx:tech?.adx||null,stochK:tech?.stochK||null,stochD:tech?.stochD||null,extPrice:ext?.extPrice||null,extSession:ext?.session||null,extTime:ext?.extTime||null,closes:tech?.closes||[]});
+      allResults.push({ticker,name,industry:profile?.industry||'',sector,price:quote.price,change:quote.change,prevClose:quote.prevClose||null,volume,avgVolume,marketCap,score,signal,rsi,macd,pe,peg,pb,roe,debtToEquity,analystTarget,eps:financials?.eps||null,epsGrowth:financials?.epsGrowth||null,divYield,pos52w,high52w,low52w,revenueGrowth,ema20:tech?.ema20||null,ema50:tech?.ema50||null,ema200:tech?.ema200||null,emaAbove20,emaAbove50,emaAbove200,bbUpper:tech?.bbUpper||null,bbMiddle:tech?.bbMiddle||null,bbLower:tech?.bbLower||null,bbPos,adx:tech?.adx||null,stochK:tech?.stochK||null,stochD:tech?.stochD||null,extPrice:ext?.extPrice||null,extSession:ext?.session||null,extTime:ext?.extTime||null,closes:tech?.closes||[],highs:tech?.highs||[],lows:tech?.lows||[]});
       debouncedRenderDashTop5();
       document.getElementById('totalScanned').textContent=allResults.length;
       document.getElementById('breakoutCount').textContent=breakouts;
@@ -2097,26 +2413,66 @@ function openChart(ticker){
   document.getElementById('scoreCircleNum').textContent=s.score;document.getElementById('scoreCircleNum').style.color=scoreColor;
   document.getElementById('scoreSignalLabel').textContent=s.signal.label;document.getElementById('scoreSignalLabel').style.color=scoreColor;
 
-  const rsiPts=s.rsi!=null?(s.rsi>=50&&s.rsi<=65?22:s.rsi>=40&&s.rsi<50?10:s.rsi>=65&&s.rsi<75?6:s.rsi>=75?-15:s.rsi<30?-8:0):null;
-  const macdPts=s.macd?(s.macd.bullish&&s.macd.hist>0?15:s.macd.bullish?8:!s.macd.bullish&&s.macd.hist<0?-12:-5):null;
-  const changePts=s.change>3?10:s.change>1?6:s.change>0?3:s.change<-3?-10:s.change<-1?-6:-3;
-  const w52Pts=s.pos52w!=null?(s.pos52w>=70?8:s.pos52w>=50?4:s.pos52w<20?-5:0):null;
-  const pePts=s.pe&&s.pe>0&&s.pe<500?(s.pe<15?8:s.pe<25?4:s.pe>80?-4:0):null;
-  const revPts=s.revenueGrowth&&s.revenueGrowth>0.15?5:0;
-  const emaPts=(s.emaAbove20?4:0)+(s.emaAbove50?4:0);
-  const adxPts=s.adx!=null?(s.adx>=25?6:s.adx>=20?3:-2):null;
-  const bbPts=s.bbPos!=null?(s.bbPos>=80?-5:s.bbPos>=50?3:s.bbPos<=20?5:0):null;
-  const bars=[{label:'RSI',val:s.rsi!=null?s.rsi.toFixed(1):'--',pts:rsiPts,pct:s.rsi!=null?s.rsi:0},{label:'MACD',val:s.macd?(s.macd.bullish?'Bullish':'Bearish'):'--',pts:macdPts,pct:s.macd?(s.macd.bullish?90:30):0},{label:'Price Chg',val:(s.change>=0?'+':'')+s.change.toFixed(2)+'%',pts:changePts,pct:Math.min(100,Math.abs(s.change)*15)},{label:'52W Pos',val:s.pos52w!=null?s.pos52w.toFixed(0)+'%':'--',pts:w52Pts,pct:s.pos52w??0},{label:'P/E',val:s.pe&&s.pe>0?s.pe.toFixed(1):'--',pts:pePts,pct:s.pe&&s.pe>0?Math.max(5,100-s.pe):0},{label:'Rev Growth',val:s.revenueGrowth!=null?(s.revenueGrowth*100).toFixed(0)+'%':'--',pts:revPts,pct:s.revenueGrowth!=null?Math.min(100,s.revenueGrowth*200):0},{label:'EMA Trend',val:s.ema20?`${[s.emaAbove20,s.emaAbove50,s.emaAbove200].filter(Boolean).length}/3 above`:'--',pts:emaPts,pct:emaPts*12.5},{label:'ADX',val:s.adx!=null?s.adx.toFixed(0):'--',pts:adxPts,pct:s.adx!=null?Math.min(100,s.adx*2):0},{label:'Bollinger',val:s.bbPos!=null?s.bbPos.toFixed(0)+'%':'--',pts:bbPts,pct:s.bbPos??0}];
-  document.getElementById('scoreBars').innerHTML=bars.map(b=>{const c=b.pts>0?'var(--green)':b.pts<0?'var(--red)':'var(--muted)';const ptsStr=b.pts!=null?(b.pts>0?'+'+b.pts:b.pts)+' pts':'--';return `<div class="score-bar-row"><div class="score-bar-lbl">${b.label}</div><div class="score-bar-track"><div class="score-bar-fill" style="width:${b.pct}%;background:${c}"></div></div><div class="score-bar-val" style="color:${c}">${b.val}</div><div class="score-bar-pts" style="color:${c}">${ptsStr}</div></div>`;}).join('')+`<div style="margin-top:6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">Base 50 + RSI ${rsiPts??0} + MACD ${macdPts??0} + Chg ${changePts} + 52W ${w52Pts??0} + P/E ${pePts??0} + Rev ${revPts} + EMA ${emaPts} + ADX ${adxPts??0} + BB ${bbPts??0} = <span style="color:${scoreColor}">${s.score}/100</span></div>`;
+  // Build factor breakdown using the same functions as calculateScore
+  const w = ALGO_WEIGHTS[activePresetKey] || ALGO_WEIGHTS['default'];
+  const totalW = Object.values(w).reduce((a,b)=>a+b,0);
+  const support = calcSupportLevels(s.closes||[], s.highs||[], s.lows||[]);
+  const factorScores = {
+    'Support Proximity': { raw: support.proximity??0, w: w.support_proximity||0,
+      val: support.proximity!=null ? `${(support.proximity*100).toFixed(0)}% close` : '--',
+      detail: support.nearestLevel ? `Nearest: $${support.nearestLevel.toFixed(2)} (${((support.distPct||0)*100).toFixed(1)}% away)` : 'No level found' },
+    'Support Strength':  { raw: support.strength??0, w: w.support_strength||0,
+      val: support.strength!=null ? `${(support.strength*100).toFixed(0)}% strong` : '--',
+      detail: 'Daily + weekly swing low quality' },
+    'RSI Oversold':      { raw: rsiOversoldScore(s.rsi), w: w.rsi_oversold||0,
+      val: s.rsi!=null ? s.rsi.toFixed(1) : '--',
+      detail: s.rsi!=null?(s.rsi<30?'Oversold ✓':s.rsi<40?'Approaching oversold':'Not oversold'):'No data' },
+    'PEG Ratio':         { raw: pegScore(s.peg), w: w.peg_ratio||0,
+      val: s.peg!=null ? s.peg.toFixed(2) : '--',
+      detail: s.peg!=null?(s.peg<1?'Undervalued vs growth ✓':s.peg<2?'Fair value':'Overvalued'):'No data' },
+    'P/E vs Sector':     { raw: peScore(s.pe, s.sector), w: w.pe_vs_sector||0,
+      val: s.pe&&s.pe>0 ? s.pe.toFixed(1) : '--',
+      detail: s.sector||'' },
+    'P/B Ratio':         { raw: pbScore(s.pb), w: w.pb_ratio||0,
+      val: s.pb!=null ? s.pb.toFixed(2) : '--',
+      detail: s.pb!=null?(s.pb<1.5?'Below book value ✓':s.pb<3?'Fair':'Premium'):'No data' },
+    'ROE':               { raw: roeScore(s.roe), w: w.roe||0,
+      val: s.roe!=null ? (s.roe*100).toFixed(1)+'%' : '--',
+      detail: s.roe!=null?(s.roe>0.20?'High quality ✓':s.roe>0.10?'Decent':'Low return'):'No data' },
+    'Debt / Equity':     { raw: debtScore(s.debtToEquity), w: w.debt_equity||0,
+      val: s.debtToEquity!=null ? s.debtToEquity.toFixed(2) : '--',
+      detail: s.debtToEquity!=null?(s.debtToEquity<0.5?'Low debt ✓':s.debtToEquity<1.5?'Moderate':'High debt'):'No data' },
+    'Revenue Growth':    { raw: revenueGrowthScore(s.revenueGrowth), w: w.revenue_growth||0,
+      val: s.revenueGrowth!=null ? (s.revenueGrowth*100).toFixed(1)+'%' : '--',
+      detail: s.revenueGrowth!=null?(s.revenueGrowth>0.15?'Strong growth ✓':s.revenueGrowth>0?'Growing':'Declining'):'No data' },
+    'Analyst Upside':    { raw: analystUpsideScore(s.price, s.analystTarget), w: w.analyst_upside||0,
+      val: s.analystTarget!=null ? '$'+s.analystTarget.toFixed(2) : '--',
+      detail: s.analystTarget&&s.price ? `${(((s.analystTarget-s.price)/s.price)*100).toFixed(1)}% upside` : 'No target' },
+  };
 
-  if(s.rsi!=null){const rp=Math.max(2,Math.min(98,s.rsi));const rc=s.rsi>=70?'var(--red)':s.rsi>=50?'var(--green)':s.rsi<30?'var(--amber)':'var(--muted)';const rm=document.getElementById('rsiMarker');rm.style.left=rp+'%';rm.style.background=rc;rm.style.boxShadow=`0 0 8px ${rc}`;document.getElementById('rsiBig').textContent=s.rsi.toFixed(1);document.getElementById('rsiBig').style.color=rc;const rl=s.rsi>=70?'Overbought':s.rsi>=50&&s.rsi<=65?'Healthy momentum (50–65)':s.rsi>=65?'Elevated — watch for reversal':s.rsi<30?'Oversold — potential bounce':'Neutral';document.getElementById('rsiLabel').textContent=rl;document.getElementById('rsiLabel').style.color=rc;}
+  document.getElementById('scoreBars').innerHTML = Object.entries(factorScores).map(([label, f]) => {
+    const contribution = ((f.w / totalW) * f.raw * 100).toFixed(1);
+    const pct = Math.round(f.raw * 100);
+    const c = f.raw > 0.6 ? 'var(--green)' : f.raw > 0.3 ? 'var(--amber)' : 'var(--red)';
+    return `<div class="score-bar-row">
+      <div class="score-bar-lbl" title="${f.detail}">${label}</div>
+      <div class="score-bar-track"><div class="score-bar-fill" style="width:${pct}%;background:${c}"></div></div>
+      <div class="score-bar-val" style="color:${c};font-size:10px">${f.val}</div>
+      <div class="score-bar-pts" style="color:${c}">+${contribution}</div>
+    </div>`;
+  }).join('') + `<div style="margin-top:6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">
+    Preset: <span style="color:rgba(255,255,255,.5)">${activePresetKey}</span> · Weighted score = <span style="color:${scoreColor}">${s.score}/100</span>
+    ${support.levels?.length ? ` · Support levels: ${support.levels.map(l=>'$'+l.toFixed(2)).join(', ')}` : ''}
+  </div>`;
+
+  if(s.rsi!=null){const rp=Math.max(2,Math.min(98,s.rsi));const rc=s.rsi<20?'var(--green)':s.rsi<30?'var(--amber)':s.rsi>=70?'var(--red)':'var(--muted)';const rm=document.getElementById('rsiMarker');rm.style.left=rp+'%';rm.style.background=rc;rm.style.boxShadow=`0 0 8px ${rc}`;document.getElementById('rsiBig').textContent=s.rsi.toFixed(1);document.getElementById('rsiBig').style.color=rc;const rl=s.rsi<20?'Extreme Oversold — high conviction buy':s.rsi<30?'Oversold ✓ — strong buy signal':s.rsi<40?'Approaching oversold — watch':s.rsi>=70?'Overbought — wait for pullback':'Neutral';document.getElementById('rsiLabel').textContent=rl;document.getElementById('rsiLabel').style.color=rc;}
   if(s.macd){document.getElementById('macdSignal').innerHTML=s.macd.bullish?'<span class="bull-badge">Bullish Crossover</span>':'<span class="bear-badge">Bearish Crossover</span>';document.getElementById('macdLine').textContent=s.macd.macd?.toFixed(3)??'--';document.getElementById('macdLine').style.color=s.macd.macd>0?'var(--green)':'var(--red)';document.getElementById('macdSig').textContent=s.macd.signal?.toFixed(3)??'--';document.getElementById('macdHist').textContent=(s.macd.hist>0?'+':'')+s.macd.hist?.toFixed(3)??'--';document.getElementById('macdHist').style.color=s.macd.hist>0?'var(--green)':'var(--red)';}
   const fp=v=>v?'$'+v.toFixed(2):'--';
   const e20el=document.getElementById('techEMA20');e20el.textContent=fp(s.ema20);e20el.style.color=s.ema20?(s.emaAbove20?'var(--green)':'var(--red)'):'var(--muted)';
   const e50el=document.getElementById('techEMA50');e50el.textContent=fp(s.ema50);e50el.style.color=s.ema50?(s.emaAbove50?'var(--green)':'var(--red)'):'var(--muted)';
   const e200el=document.getElementById('techEMA200');e200el.textContent=fp(s.ema200);e200el.style.color=s.ema200?(s.emaAbove200?'var(--green)':'var(--red)'):'var(--muted)';
   const ac=[s.emaAbove20,s.emaAbove50,s.emaAbove200].filter(Boolean).length;
-  const etel=document.getElementById('emaTrend');etel.textContent=s.ema20?(ac===3?'Price above all EMAs — strong uptrend':ac===0?'Price below all EMAs — downtrend':ac>=2?'Above most EMAs':'Below most EMAs — mixed'):'No EMA data';etel.style.color=ac>=2?'var(--green)':ac===0?'var(--red)':'var(--amber)';
+  const etel=document.getElementById('emaTrend');etel.textContent=s.ema20?(ac===3?'Price above all EMAs — long-term uptrend':ac===0?'Price below all EMAs — downtrend':ac>=2?'Above most EMAs — cautious bullish':'Below most EMAs — mixed'):'No EMA data';etel.style.color=ac>=2?'var(--green)':ac===0?'var(--red)':'var(--amber)';
   document.getElementById('bbUpper').textContent=fp(s.bbUpper);document.getElementById('bbMiddle').textContent=fp(s.bbMiddle);document.getElementById('bbLower').textContent=fp(s.bbLower);
   const bbl=document.getElementById('bbLabel');if(s.bbPos!=null){const bt=s.bbPos>=80?'Near upper band — overbought':s.bbPos<=20?'Near lower band — potential bounce':s.bbPos>=50?'Above midline — bullish':'Below midline';bbl.textContent=bt;bbl.style.color=s.bbPos>=80?'var(--red)':s.bbPos<=20?'var(--amber)':s.bbPos>=50?'var(--green)':'var(--muted)';}else{bbl.textContent='No data';bbl.style.color='var(--muted)';}
   const ab=document.getElementById('adxBig');ab.textContent=s.adx!=null?s.adx.toFixed(1):'--';const ac2=s.adx>=25?'var(--green)':s.adx>=20?'var(--amber)':'var(--muted)';ab.style.color=ac2;document.getElementById('adxLabel').textContent=s.adx!=null?(s.adx>=25?'Strong trend — momentum is real':s.adx>=20?'Moderate trend forming':'Weak trend — may be choppy'):'--';document.getElementById('adxLabel').style.color=ac2;document.getElementById('adxBar').style.width=s.adx!=null?Math.min(100,s.adx*2)+'%':'0%';document.getElementById('adxBar').style.background=ac2;
@@ -2604,9 +2960,23 @@ async function runBackgroundTopScan() {
       const emaAbove50 = ema50  && price > ema50;
       const emaAbove200= ema200 && price > ema200;
       const pe            = q.trailingPE ?? null;
+      const growth        = q.earningsGrowth ?? q.revenueGrowth ?? null;
+      const peg           = (pe && growth && growth > 0) ? pe / (growth * 100) : null;
+      const pb            = q.priceToBook ?? null;
+      const roe           = q.returnOnEquity ?? null;
+      const debtToEquity  = q.debtToEquity != null ? q.debtToEquity / 100 : null;
       const revenueGrowth = q.revenueGrowth ?? null;
-      const score  = calculateScore({rsi,macd,change,pe,pos52w,revenueGrowth,emaAbove20,emaAbove50,adx,bbPos});
-      const signal = getSignal(score, macd);
+      const chartCloses   = chart ? chart.closes.filter(v=>v!=null).slice(-520) : [];
+      const chartHighs    = chart ? chart.highs.filter(v=>v!=null).slice(-520)  : [];
+      const chartLows     = chart ? chart.lows.filter(v=>v!=null).slice(-520)   : [];
+      const score  = calculateScore({
+        rsi, closes:chartCloses, highs:chartHighs, lows:chartLows,
+        pe, peg, pb, analystTarget:q.targetMeanPrice||null, price,
+        roe, debtToEquity, epsGrowth:q.earningsGrowth??null,
+        revenueGrowth, divYield:q.dividendYield??null, buybackYield:null,
+        beta:q.beta??null, sector:q.sector||'', presetKey:'top20',
+      });
+      const signal = getSignal(score);
       results.push({
         ticker, score, signal,
         name:       q.longName || q.shortName || ticker,
@@ -2615,7 +2985,8 @@ async function runBackgroundTopScan() {
         price, change, prevClose: q.regularMarketPreviousClose ?? null, volume,
         avgVolume:  q.averageVolume     || null,
         marketCap:  q.marketCap ? q.marketCap/1e9 : null,
-        rsi, macd, pe,
+        rsi, macd, pe, peg, pb, roe, debtToEquity,
+        analystTarget: q.targetMeanPrice ?? null,
         forwardPE:  q.forwardPE          ?? null,
         eps:        q.epsTrailingTwelveMonths ?? null,
         epsGrowth:  q.earningsGrowth     ?? null,
@@ -2628,7 +2999,9 @@ async function runBackgroundTopScan() {
         extPrice:   q.preMarketPrice || q.postMarketPrice || null,
         extSession: q.preMarketPrice ? 'pre' : q.postMarketPrice ? 'after' : null,
         extTime:    null,
-        closes:     chart ? chart.closes.filter(v=>v!=null).slice(-60) : [],
+        closes:     chartCloses,
+        highs:      chartHighs,
+        lows:       chartLows,
       });
     }
     renderDashTop5(results);
@@ -2640,7 +3013,7 @@ async function runBackgroundTopScan() {
   renderDashTop5();
   renderTable();
   const br2 = results.filter(r=>r.signal.cls==='breakout').length;
-  const bm2 = results.filter(r=>r.macd&&r.macd.bullish).length;
+  const bm2 = results.filter(r=>r.signal.cls==='momentum').length;
   const avg2 = Math.round(results.reduce((s,r)=>s+r.score,0)/results.length);
   const top2 = [...results].sort((a,b)=>b.score-a.score)[0];
   document.getElementById('totalScanned').textContent = results.length;
@@ -2845,7 +3218,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         screenerAutoLoaded = true;
         // Update stats strip
         const br = allResults.filter(r=>r.signal.cls==='breakout').length;
-        const bm = allResults.filter(r=>r.macd&&r.macd.bullish).length;
+        const bm = allResults.filter(r=>r.signal.cls==='momentum').length;
         const avg = Math.round(allResults.reduce((s,r)=>s+r.score,0)/allResults.length);
         const top = [...allResults].sort((a,b)=>b.score-a.score)[0];
         document.getElementById('totalScanned').textContent = allResults.length;
@@ -2874,7 +3247,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       document.getElementById('clickHint').style.display='block';
       screenerAutoLoaded = true;
       const br = allResults.filter(r=>r.signal.cls==='breakout').length;
-      const bm = allResults.filter(r=>r.macd&&r.macd.bullish).length;
+      const bm = allResults.filter(r=>r.signal.cls==='momentum').length;
       const avg = Math.round(allResults.reduce((s,r)=>s+r.score,0)/allResults.length);
       const top = [...allResults].sort((a,b)=>b.score-a.score)[0];
       document.getElementById('totalScanned').textContent = allResults.length;
