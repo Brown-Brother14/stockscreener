@@ -48,16 +48,16 @@ body{
 }
 
 /* ── SITE NAV ── */
-#siteNav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(5,5,6,.75);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;border-bottom:1px solid var(--glass-border)}
-.nav-logo{display:flex;align-items:center;gap:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;color:#fff;text-decoration:none;letter-spacing:-.3px}
+#siteNav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:200;background:rgba(12,12,15,.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 8px 0 16px;height:52px;border-radius:100px;border:1px solid rgba(255,255,255,.12);box-shadow:0 8px 40px rgba(0,0,0,.5);white-space:nowrap}
+.nav-logo{display:flex;align-items:center;gap:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;color:#fff;text-decoration:none;letter-spacing:-.3px;padding-right:4px}
 .nav-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(0,230,118,.7)}
 .nav-links{display:flex;align-items:center;gap:2px}
 .nav-link{font-family:'Inter',sans-serif;font-size:13px;color:var(--muted2);text-decoration:none;padding:6px 14px;border-radius:8px;transition:color .2s,background .2s}
 .nav-link:hover{color:#fff;background:rgba(255,255,255,.06)}
 .nav-link.active{color:#fff;background:rgba(255,255,255,.08)}
-.nav-cta{background:#fff;color:#000;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;padding:8px 20px;border-radius:10px;text-decoration:none;transition:all .2s}
+.nav-cta{background:#fff;color:#000;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;padding:8px 18px;border-radius:100px;text-decoration:none;transition:all .2s;display:flex;align-items:center;gap:4px}
 .nav-cta:hover{background:rgba(255,255,255,.85)}
-@media(max-width:700px){#siteNav{padding:0 20px}.nav-links{display:none}}
+@media(max-width:700px){#siteNav{top:12px;padding:0 8px 0 14px;max-width:calc(100vw - 32px)}.nav-links{display:none}}
 
 /* ── TAB PANELS ── */
 .tab-panel{display:none;min-height:100vh;padding:80px 0 120px}
@@ -485,7 +485,7 @@ tbody tr{animation:fadeIn .25s ease both}
 <!-- SITE NAV -->
 <nav id="siteNav">
   <a class="nav-logo" href="index.html">
-    <span class="nav-dot"></span>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="12" width="4" height="10" rx="1" fill="#00e676"/><rect x="10" y="7" width="4" height="15" rx="1" fill="#00e676" opacity=".8"/><rect x="18" y="2" width="4" height="20" rx="1" fill="#00e676" opacity=".6"/></svg>
     AlgoScreen Pro
   </a>
   <div class="nav-links">
@@ -494,7 +494,7 @@ tbody tr{animation:fadeIn .25s ease both}
     <a href="portfolio.html" class="nav-link">Portfolio</a>
     <a href="about.html" class="nav-link">About</a>
   </div>
-  <a href="screener.html" class="nav-cta">Launch App</a>
+  <a href="screener.html" class="nav-cta">Open App ↗</a>
 </nav>
 
 <!-- ═══════════════ DASHBOARD TAB ═══════════════ -->
