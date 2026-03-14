@@ -1985,7 +1985,7 @@ async function runScan(){
     renderDashTop5();
     // Cache full results locally and share to worker
     const manualTs = Date.now();
-    try{ localStorage.setItem('algoscreen_scandata', JSON.stringify({results:allResults, ts:manualTs})); }catch(e){}
+    try{ localStorage.setItem('algoscreen_scandata', JSON.stringify({results:allResults, ts:manualTs, date:new Date(manualTs).toISOString().slice(0,10)})); }catch(e){}
     fetch(`${PROXY}/scandata`,{
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({results: allResults})
@@ -2521,7 +2521,7 @@ async function refreshLivePrices(results) {
   // Save updated prices back to local cache
   try {
     const ts = JSON.parse(localStorage.getItem('algoscreen_scandata') || '{}').ts || Date.now();
-    localStorage.setItem('algoscreen_scandata', JSON.stringify({ results, ts }));
+    const _sd=new Date(ts).toISOString().slice(0,10); localStorage.setItem('algoscreen_scandata', JSON.stringify({ results, ts, date:_sd }));
   } catch(e) {}
 }
 
@@ -2652,7 +2652,7 @@ async function runBackgroundTopScan() {
 
   const now = Date.now();
   // Save full results locally
-  try{ localStorage.setItem('algoscreen_scandata', JSON.stringify({results, ts: now})); }catch(e){}
+  try{ localStorage.setItem('algoscreen_scandata', JSON.stringify({results, ts: now, date:new Date(now).toISOString().slice(0,10)})); }catch(e){}
 
   // POST full results to shared worker — every future visitor gets this instantly
   fetch(`${PROXY}/scandata`, {
@@ -2867,6 +2867,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     // Only replace if shared data is newer or we had nothing
     const localTs = (() => { try{ const c=localStorage.getItem('algoscreen_scandata'); return c?JSON.parse(c).ts:0; }catch(e){return 0;} })();
     if(d.ts > localTs || !allResults.length){
+      window._lastWorkerTs = d.ts;
       allResults = d.results;
       renderDashTop5();
       renderTable();
@@ -2881,7 +2882,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       document.getElementById('bullishCount').textContent = bm;
       document.getElementById('avgScore').textContent = avg;
       document.getElementById('topPick').textContent = top ? top.ticker : '--';
-      document.getElementById('lastUpdated').textContent = `Scores from ${age} · Refreshing prices…`;
+      document.getElementById('lastUpdated').textContent = `Scores updated ${age} · next refresh in ${Math.max(0,30-Math.round((Date.now()-d.ts)/60000))}m · refreshing prices…`;
       try{ localStorage.setItem('algoscreen_scandata', JSON.stringify({results:d.results,ts:d.ts})); }catch(e){}
 
       // ── Refresh live prices in batches of 8 ──────────────────────────────
@@ -2893,10 +2894,19 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(el){ const old=el.querySelector('.top5-age-label'); if(old) old.textContent='Scores from '+age+' · prices live'; }
   }).catch(()=>{});
 
-  // 3. Run fresh background scan in background — posts full results when done
+  // 3. Run fresh background scan only if we have no same-day data
   setTimeout(()=>{
     if(!screenerAutoLoaded) screenerAutoLoaded = true;
-    runBackgroundTopScan();
+    const cachedRaw = (() => { try{ return JSON.parse(localStorage.getItem('algoscreen_scandata')||'{}'); }catch(e){return {};} })();
+    const cachedTs = cachedRaw.ts || 0;
+    const workerTs = window._lastWorkerTs || 0;
+    const freshestTs = Math.max(cachedTs, workerTs);
+    const ageMs = Date.now() - freshestTs;
+    const THIRTY_MINS = 30 * 60 * 1000;
+    const hasRecent = freshestTs > 0 && ageMs < THIRTY_MINS;
+    if(!hasRecent || !allResults.length){
+      runBackgroundTopScan();
+    }
   }, 1200);
 });
 </script>
