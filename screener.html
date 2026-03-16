@@ -3836,10 +3836,19 @@ window.addEventListener('AlgoAuthReady', async () => {
   }
 
   // ── Build profile dropdown in nav ────────────────────────
-  const user     = await AlgoAuth.getUser();
-  const name     = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
-  const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-  const avatar   = user?.user_metadata?.avatar_url;
+  const user      = await AlgoAuth.getUser();
+  const name      = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const firstName = name.split(' ')[0];
+  const initials  = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  const avatar    = user?.user_metadata?.avatar_url;
+
+  // ── Update greeting with first name ──────────────────────
+  const greetingEl = document.getElementById('dashGreeting');
+  if (greetingEl) {
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    greetingEl.textContent = `${greet}, ${firstName} — here's the market`;
+  }
 
   document.getElementById('navProfileArea').innerHTML = `
     <div class="nav-dropdown-wrap" id="navProfileWrap">
