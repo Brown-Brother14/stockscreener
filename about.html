@@ -270,7 +270,7 @@ footer{border-top:1px solid var(--glass-border);padding:24px 0;background:rgba(1
         <span class="section-eye">The product</span>
         <h2 class="section-h">What is AlgoScreen Pro?</h2>
         <p class="section-p">AlgoScreen Pro is a market screener built for swing traders. It pulls live data from multiple sources, runs a scoring algorithm across 9 technical and fundamental factors, and surfaces the clearest setups — all in one place.</p>
-        <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.22);letter-spacing:.5px;margin-top:14px">No subscriptions · No login · No paywall</p>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.22);letter-spacing:.5px;margin-top:14px">No subscriptions · Free forever · Live data</p>
       </div>
       <div>
         <p class="section-p">Swing trading is about catching moves over days or weeks. AlgoScreen focuses on setups where multiple signals agree simultaneously — RSI in the bullish zone, EMA trend pointing up, ADX confirming a strong trend.</p>
@@ -407,9 +407,9 @@ footer{border-top:1px solid var(--glass-border);padding:24px 0;background:rgba(1
     </a>
     <div class="f-links">
       <a href="index.html" class="f-link">Home</a>
-      <a href="portfolio.html" class="f-link">Portfolio</a>
       <a href="about.html" class="f-link">About</a>
       <a href="screener.html" class="f-link" id="footerScreenerLink" style="display:none">Screener</a>
+      <a href="portfolio.html" class="f-link" id="footerPortfolioLink" style="display:none">Portfolio</a>
     </div>
     <div class="f-copy">Not financial advice · Data: Finnhub, Yahoo Finance, CNN Business · © 2025 AlgoScreen Pro</div>
   </div>
@@ -467,8 +467,9 @@ window.addEventListener('AlgoAuthReady', async () => {
     document.getElementById('ctaBtn').textContent = 'Open Screener ↗';
     document.getElementById('ctaSubText').textContent = 'Find your next setup in under 30 seconds.';
 
-    // Footer: show screener link
+    // Footer: show screener + portfolio links
     document.getElementById('footerScreenerLink').style.display = '';
+    document.getElementById('footerPortfolioLink').style.display = '';
 
   } else {
     // Nav: sign up CTA only
