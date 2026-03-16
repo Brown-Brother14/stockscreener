@@ -79,7 +79,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:cen
   box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 8px 32px rgba(0,0,0,.5);
   background-image:linear-gradient(180deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.01) 100%);
 }
-.nav-logo{display:flex;align-items:center;gap:10px;padding:6px 16px 6px 10px;margin-right:6px;border-right:1px solid rgba(255,255,255,.1);text-decoration:none}
+.nav-logo{display:flex;align-items:center;gap:10px;padding:6px 16px 6px 10px;margin-right:6px;border-right:1px solid rgba(255,255,255,.1);cursor:default}
 .nav-logo-text{font-family:'Plus Jakarta Sans', system-ui, sans-serif;font-size:16px;font-weight:700;letter-spacing:-.3px;color:#fff}
 .nav-link{font-size:15px;color:var(--muted2);text-decoration:none;padding:7px 16px;border-radius:30px;transition:all .2s;white-space:nowrap}
 .nav-link:hover{color:#fff;background:rgba(255,255,255,.08);box-shadow:0 0 18px rgba(255,255,255,.06)}
@@ -683,7 +683,7 @@ footer{border-top:1px solid var(--glass-border);padding:36px 60px;display:flex;a
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="index.html" class="nav-logo">
+    <div class="nav-logo">
       <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
         <rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(255,255,255,.3)"/>
         <rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(255,255,255,.6)"/>
@@ -693,9 +693,9 @@ footer{border-top:1px solid var(--glass-border);padding:36px 60px;display:flex;a
         <circle cx="17" cy="6" r="2" fill="#00e676"/>
       </svg>
       <span class="nav-logo-text">AlgoScreen Pro</span>
-    </a>
-    <a href="index.html" class="nav-link active sm">Home</a>
-    <a href="about.html" class="nav-link">About</a>
+    
+    <a href="index.html" class="nav-link active sm">Home
+    <a href="about.html" class="nav-link">About
     <!-- injected by auth JS -->
     <div id="navAuthArea"></div>
   </div>
@@ -707,8 +707,8 @@ footer{border-top:1px solid var(--glass-border);padding:36px 60px;display:flex;a
   <h1 class="hero-title">Ready to trade<br><span class="dim">with conviction?</span></h1>
   <p class="hero-sub">AlgoScreen Pro gives retail swing traders the same tools hedge funds pay thousands for — completely free.</p>
   <div class="hero-btns">
-    <a href="auth.html" class="btn-w" id="heroCtaBtn">Get Started Free ↗</a>
-    <a href="about.html" class="btn-o">How it works</a>
+    <a href="auth.html" class="btn-w" id="heroCtaBtn">Get Started Free ↗
+    <a href="about.html" class="btn-o">How it works
   </div>
 </section>
 
@@ -1005,7 +1005,7 @@ footer{border-top:1px solid var(--glass-border);padding:36px 60px;display:flex;a
         </div>
         <div class="gate-title">Create a free account to access the screener</div>
         <div class="gate-sub">Sign up in 30 seconds to unlock live AlgoScores, breakout signals, and full screening across 500+ stocks.</div>
-        <a href="auth.html" class="gate-btn">Sign Up Free ↗</a>
+        <a href="auth.html" class="gate-btn">Sign Up Free ↗
       </div>
     </div>
   </div>
@@ -1027,8 +1027,8 @@ footer{border-top:1px solid var(--glass-border);padding:36px 60px;display:flex;a
   <h2 class="cta-h rev d1">Start screening.<br><span class="dim">It's free.</span></h2>
   <p class="cta-p rev d2" id="ctaSubText">Sign up in 30 seconds. No credit card. No catch.</p>
   <div class="rev d3" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
-    <a href="auth.html" class="btn-w" id="ctaMainBtn">Sign Up Free ↗</a>
-    <a href="about.html" class="btn-o">How AlgoScore works</a>
+    <a href="auth.html" class="btn-w" id="ctaMainBtn">Sign Up Free ↗
+    <a href="about.html" class="btn-o">How AlgoScore works
   </div>
 </section>
 
@@ -1037,12 +1037,12 @@ footer{border-top:1px solid var(--glass-border);padding:36px 60px;display:flex;a
   <a href="index.html" class="f-logo">
     <svg width="16" height="16" viewBox="0 0 28 28" fill="none"><rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(255,255,255,.3)"/><rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(255,255,255,.55)"/><rect x="15" y="7" width="4" height="18" rx="1" fill="#fff"/><rect x="21" y="13" width="4" height="12" rx="1" fill="rgba(255,255,255,.55)"/><polyline points="5,15 11,10 17,6 23,12" stroke="#00e676" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="17" cy="6" r="2" fill="#00e676"/></svg>
     AlgoScreen Pro
-  </a>
+  
   <div class="f-links">
-    <a href="index.html" class="f-link">Home</a>
-    <a href="about.html" class="f-link">About</a>
-    <a href="screener.html" class="f-link" id="footerScreenerLink" style="display:none">Screener</a>
-    <a href="portfolio.html" class="f-link" id="footerPortfolioLink" style="display:none">Portfolio</a>
+    <a href="index.html" class="f-link">Home
+    <a href="about.html" class="f-link">About
+    <a href="screener.html" class="f-link" id="footerScreenerLink" style="display:none">Screener
+    <a href="portfolio.html" class="f-link" id="footerPortfolioLink" style="display:none">Portfolio
   </div>
   <div class="f-copy">Not financial advice · Data: Finnhub, Yahoo Finance, CNN Business · © 2025 AlgoScreen Pro</div>
 </footer>
