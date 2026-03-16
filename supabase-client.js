@@ -111,7 +111,7 @@ async function signInWithGoogle() {
   await client.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin + '/index.html',
+      redirectTo: 'https://brown-brother14.github.io/stockscreener/index.html',
     },
   });
 }
@@ -123,7 +123,7 @@ async function signInWithGoogle() {
 async function sendPasswordReset(email) {
   const client = getClient();
   const { error } = await client.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/auth.html?mode=reset',
+    redirectTo: 'https://brown-brother14.github.io/stockscreener/auth.html?mode=reset',
   });
   return { error };
 }
