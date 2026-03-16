@@ -60,7 +60,7 @@ body{
 }
 .nav-logo{display:flex;align-items:center;gap:10px;padding:6px 16px 6px 10px;margin-right:6px;border-right:1px solid rgba(255,255,255,.1);cursor:default}
 .nav-logo-text{font-family:'Plus Jakarta Sans', system-ui, sans-serif;font-size:16px;font-weight:700;letter-spacing:-.3px;color:#fff}
-.nav-link{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:15px;color:var(--muted2);text-decoration:none;padding:7px 16px;border-radius:30px;transition:all .2s;white-space:nowrap}
+.nav-link{font-size:15px;color:var(--muted2);text-decoration:none;padding:7px 16px;border-radius:30px;transition:all .2s;white-space:nowrap}
 .nav-link:hover{color:#fff;background:rgba(255,255,255,.08);box-shadow:0 0 18px rgba(255,255,255,.06)}
 .nav-link.active{color:#fff}
 .nav-cta{
@@ -597,9 +597,10 @@ tbody tr{animation:fadeIn .25s ease both}
         <circle cx="17" cy="6" r="2" fill="#00e676"/>
       </svg>
       <span class="nav-logo-text">AlgoScreen Pro</span>
+    </div>
     
-    <a href="screener.html" class="nav-link active sm">Screener
-    <a href="portfolio.html" class="nav-link">Portfolio
+    <a href="screener.html" class="nav-link active sm">Screener</a>
+    <a href="portfolio.html" class="nav-link">Portfolio</a>
     <!-- profile dropdown injected by auth JS -->
     <div id="navProfileArea"></div>
   </div>
@@ -3854,14 +3855,14 @@ window.addEventListener('AlgoAuthReady', async () => {
     <div class="nav-dropdown-wrap" id="navProfileWrap">
       <a href="#" class="nav-avatar" id="navAvatar" onclick="toggleNavDropdown(event)">
         ${avatar ? `<img src="${avatar}" alt="Avatar">` : `<span>${initials}</span>`}
-      
+      </a>
       <div class="nav-dropdown" id="navDropdown">
         <div class="nav-dropdown-name">${name}</div>
         <div class="nav-dropdown-divider"></div>
         <a href="settings.html" class="nav-dropdown-item">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
           Settings
-        
+        </a>
         <div class="nav-dropdown-divider"></div>
         <button class="nav-dropdown-item danger" onclick="AlgoAuth.signOut()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
