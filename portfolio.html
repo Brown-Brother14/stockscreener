@@ -363,7 +363,7 @@ footer{border-top:1px solid var(--glass-border);padding:36px 60px;display:flex;a
       Sign Up Free
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
     </a>
-    <a href="index.html" class="btn-o">Back to home</a>
+    <a href="index.html" class="btn-o" id="backBtn">Back to home</a>
   </div>
 
 </main>
@@ -435,7 +435,9 @@ window.addEventListener('AlgoAuthReady', async () => {
         </div>
       </div>`;
 
-    // CTA: already logged in — send to screener
+    // Back button: go to screener when logged in
+    document.getElementById('backBtn').href = 'screener.html';
+    document.getElementById('backBtn').textContent = 'Back to Screener';
     const ctaBtn = document.getElementById('ctaBtn');
     ctaBtn.href = 'screener.html';
     ctaBtn.innerHTML = `Use the Screener now
