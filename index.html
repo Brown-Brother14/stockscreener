@@ -1056,7 +1056,9 @@ window.addEventListener('AlgoAuthReady', async () => {
   const navArea  = document.getElementById('navAuthArea');
 
   if (loggedIn) {
-    const user     = await AlgoAuth.getUser();
+    window.location.replace('screener.html');
+    return;
+  }
     const name     = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
     const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
     const avatar   = user?.user_metadata?.avatar_url;
