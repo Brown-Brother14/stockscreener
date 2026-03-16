@@ -72,6 +72,19 @@ body{
 }
 .nav-cta:hover{opacity:1 !important;box-shadow:0 0 32px rgba(255,255,255,.18),0 1px 0 rgba(255,255,255,.8) inset;transform:translateY(-1px)}
 @media(max-width:700px){.nav-inner{padding:5px 7px}.nav-link:not(.sm){display:none}.nav-logo{border-right:none}}
+/* Profile avatar + dropdown */
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.05));border:1px solid var(--glass-border-hi);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;cursor:pointer;margin-left:4px;text-decoration:none;transition:border-color .2s;overflow:hidden;}
+.nav-avatar:hover{border-color:rgba(255,255,255,.4);}
+.nav-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+.nav-dropdown-wrap{position:relative;display:inline-block;}
+.nav-dropdown{position:absolute;top:calc(100% + 10px);right:0;background:rgba(14,15,18,.95);border:1px solid var(--glass-border-hi);border-radius:14px;padding:6px;min-width:180px;backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);box-shadow:0 16px 48px rgba(0,0,0,.6);display:none;z-index:300;}
+.nav-dropdown.open{display:block;}
+.nav-dropdown-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:rgba(255,255,255,.58);text-decoration:none;cursor:pointer;transition:all .15s;background:none;border:none;width:100%;text-align:left;font-family:'Inter',sans-serif;}
+.nav-dropdown-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+.nav-dropdown-item.danger{color:rgba(255,77,109,.8);}
+.nav-dropdown-item.danger:hover{background:rgba(255,77,109,.08);color:#ff4d6d;}
+.nav-dropdown-divider{height:1px;background:rgba(255,255,255,.09);margin:4px 0;}
+.nav-dropdown-name{padding:10px 12px 6px;font-size:12px;color:rgba(255,255,255,.36);font-weight:500;font-family:'Inter',sans-serif;}
 
 /* ── TAB PANELS ── */
 .tab-panel{display:none;min-height:100vh;padding:100px 0 120px}
@@ -585,11 +598,10 @@ tbody tr{animation:fadeIn .25s ease both}
       </svg>
       <span class="nav-logo-text">AlgoScreen Pro</span>
     </a>
-    <a href="index.html" class="nav-link sm">Home</a>
     <a href="screener.html" class="nav-link active sm">Screener</a>
     <a href="portfolio.html" class="nav-link">Portfolio</a>
-    <a href="about.html" class="nav-link">About</a>
-    <a href="screener.html" class="nav-cta">Open App ↗</a>
+    <!-- profile dropdown injected by auth JS -->
+    <div id="navProfileArea"></div>
   </div>
 </nav>
 
@@ -3805,6 +3817,140 @@ async function loadModalInsider(ticker) {
   } catch(e) {
     el.innerHTML = '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:rgba(255,255,255,.25)">Unavailable</div>';
   }
+}
+
+<script src="supabase-client.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════
+//  AUTH GUARD — must be logged in to view screener
+//  Runs as soon as AlgoAuthReady fires (Supabase SDK loaded)
+// ══════════════════════════════════════════════════════════════
+window.addEventListener('AlgoAuthReady', async () => {
+  const loggedIn = await AlgoAuth.isLoggedIn();
+
+  // Hard redirect — nothing renders for logged-out users
+  if (!loggedIn) {
+    window.location.replace('auth.html');
+    return;
+  }
+
+  // ── Build profile dropdown in nav ────────────────────────
+  const user     = await AlgoAuth.getUser();
+  const name     = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  const avatar   = user?.user_metadata?.avatar_url;
+
+  document.getElementById('navProfileArea').innerHTML = `
+    <div class="nav-dropdown-wrap" id="navProfileWrap">
+      <a href="#" class="nav-avatar" id="navAvatar" onclick="toggleNavDropdown(event)">
+        ${avatar ? `<img src="${avatar}" alt="Avatar">` : `<span>${initials}</span>`}
+      </a>
+      <div class="nav-dropdown" id="navDropdown">
+        <div class="nav-dropdown-name">${name}</div>
+        <div class="nav-dropdown-divider"></div>
+        <a href="settings.html" class="nav-dropdown-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          Settings
+        </a>
+        <div class="nav-dropdown-divider"></div>
+        <button class="nav-dropdown-item danger" onclick="AlgoAuth.signOut()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>`;
+
+  // ── Load user's saved screener presets ───────────────────
+  loadUserPresets();
+});
+
+// ── Nav dropdown toggle ────────────────────────────────────
+function toggleNavDropdown(e) {
+  e.preventDefault();
+  document.getElementById('navDropdown').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('navProfileWrap');
+  if (wrap && !wrap.contains(e.target)) {
+    const dd = document.getElementById('navDropdown');
+    if (dd) dd.classList.remove('open');
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+//  SCREENER PRESET PERSISTENCE
+//  Saves/loads user's custom filter presets via Supabase
+// ══════════════════════════════════════════════════════════════
+
+async function loadUserPresets() {
+  const presets = await AlgoAuth.getScreenerPresets();
+  if (!presets.length) return;
+
+  // Find the preset pill container — look for the existing preset bar
+  const presetContainer = document.querySelector('.preset-pills') || document.querySelector('[id*="preset"]');
+  if (!presetContainer) return;
+
+  // Append saved presets as pills
+  presets.forEach(p => {
+    const existing = presetContainer.querySelector(`[data-preset-id="${p.id}"]`);
+    if (existing) return;
+    const pill = document.createElement('button');
+    pill.className = 'preset-pill saved-preset';
+    pill.dataset.presetId = p.id;
+    pill.innerHTML = `
+      <span>${p.name}</span>
+      <span onclick="deleteUserPreset('${p.id}', event)" style="margin-left:6px;opacity:.4;font-size:10px;transition:opacity .15s" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=.4">✕</span>`;
+    pill.addEventListener('click', () => {
+      if (window.applyFilters && p.filters) {
+        applyFilters(p.filters);
+      }
+    });
+    presetContainer.appendChild(pill);
+  });
+}
+
+async function saveCurrentPreset() {
+  const name = prompt('Name this preset:');
+  if (!name?.trim()) return;
+
+  // Collect current active filters — grab whatever filter state the screener exposes
+  const filters = collectCurrentFilters();
+  const { error } = await AlgoAuth.saveScreenerPreset(name.trim(), filters);
+  if (error) { alert('Failed to save preset.'); return; }
+
+  // Reload presets to show the new one
+  loadUserPresets();
+}
+
+async function deleteUserPreset(id, e) {
+  e.stopPropagation();
+  const { error } = await AlgoAuth.deleteScreenerPreset(id);
+  if (error) return;
+  const pill = document.querySelector(`[data-preset-id="${id}"]`);
+  if (pill) pill.remove();
+}
+
+// Collect current filter state from the screener UI
+function collectCurrentFilters() {
+  const filters = {};
+  document.querySelectorAll('[data-filter]').forEach(el => {
+    filters[el.dataset.filter] = el.value || el.dataset.value || '';
+  });
+  // Also capture active preset key if available
+  if (window.activePresetKey) filters._preset = window.activePresetKey;
+  return filters;
+}
+
+// Apply a saved filter config back to the screener
+function applyFilters(filters) {
+  if (filters._preset && window.activatePreset) {
+    activatePreset(filters._preset, null);
+  }
+  Object.entries(filters).forEach(([key, val]) => {
+    if (key.startsWith('_')) return;
+    const el = document.querySelector(`[data-filter="${key}"]`);
+    if (el) el.value = val;
+  });
 }
 </script>
 </body>
