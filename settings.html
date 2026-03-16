@@ -381,10 +381,8 @@ footer{border-top:1px solid var(--glass-border);padding:32px 0;}
       </svg>
       <span class="nav-logo-text">AlgoScreen Pro</span>
     </a>
-    <a href="index.html" class="nav-link sm">Home</a>
-    <a href="screener.html" class="nav-link sm" id="navScreener">Screener</a>
+    <a href="screener.html" class="nav-link sm">Screener</a>
     <a href="portfolio.html" class="nav-link">Portfolio</a>
-    <a href="about.html" class="nav-link">About</a>
 
     <!-- Profile dropdown -->
     <div class="nav-dropdown-wrap" id="navProfileWrap">
@@ -425,17 +423,32 @@ footer{border-top:1px solid var(--glass-border);padding:32px 0;}
     </div>
 
     <div class="profile-row">
-      <div class="profile-avatar-lg" id="profileAvatar">?</div>
+      <div style="position:relative;flex-shrink:0;">
+        <div class="profile-avatar-lg" id="profileAvatar">?</div>
+        <!-- Upload button overlay -->
+        <label for="avatarInput" style="
+          position:absolute;bottom:0;right:0;
+          width:22px;height:22px;border-radius:50%;
+          background:rgba(255,255,255,.15);
+          border:1px solid var(--glass-border-hi);
+          display:flex;align-items:center;justify-content:center;
+          cursor:pointer;transition:background .2s;
+        " title="Change photo" onmouseenter="this.style.background='rgba(255,255,255,.28)'" onmouseleave="this.style.background='rgba(255,255,255,.15)'">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </label>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
+      </div>
       <div class="profile-meta">
         <div class="profile-name" id="profileName">Loading…</div>
         <div class="profile-email" id="profileEmail">—</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px" id="avatarStatus"></div>
       </div>
     </div>
 
     <div class="fields-row">
       <div class="field">
         <label>Display Name</label>
-        <input type="text" id="settingsName" placeholder="Your name">
+        <input type="text" id="settingsName" placeholder="Your name" oninput="checkProfileDirty()">
       </div>
       <div class="field">
         <label>Email Address</label>
@@ -445,7 +458,7 @@ footer{border-top:1px solid var(--glass-border);padding:32px 0;}
     </div>
 
     <div class="btn-row">
-      <button class="btn-primary" id="saveProfileBtn" onclick="saveProfile()">Save Changes</button>
+      <button class="btn-primary" id="saveProfileBtn" onclick="saveProfile()" disabled style="opacity:.35;cursor:not-allowed;transform:none;">Save Changes</button>
     </div>
   </div>
 
@@ -478,56 +491,6 @@ footer{border-top:1px solid var(--glass-border);padding:32px 0;}
     </div>
   </div>
 
-  <!-- ══════════ PREFERENCES ══════════ -->
-  <div class="settings-section">
-    <div class="section-title">
-      <div class="section-title-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
-      </div>
-      Preferences
-    </div>
-
-    <div class="pref-row">
-      <div>
-        <div class="pref-label">Default Chart Type</div>
-        <div class="pref-desc">How price charts render by default</div>
-      </div>
-      <select class="pref-select" id="prefChartType">
-        <option value="candlestick">Candlestick</option>
-        <option value="line">Line</option>
-      </select>
-    </div>
-
-    <div class="pref-row">
-      <div>
-        <div class="pref-label">Default Timeframe</div>
-        <div class="pref-desc">Starting range for charts and screener</div>
-      </div>
-      <select class="pref-select" id="prefTimeframe">
-        <option value="1D">1 Day</option>
-        <option value="1W">1 Week</option>
-        <option value="1M">1 Month</option>
-        <option value="3M">3 Months</option>
-        <option value="1Y" selected>1 Year</option>
-      </select>
-    </div>
-
-    <div class="pref-row">
-      <div>
-        <div class="pref-label">Screener Row Density</div>
-        <div class="pref-desc">How compact the screener table appears</div>
-      </div>
-      <select class="pref-select" id="prefDensity">
-        <option value="comfortable" selected>Comfortable</option>
-        <option value="compact">Compact</option>
-      </select>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn-primary" id="savePrefsBtn" onclick="savePrefs()">Save Preferences</button>
-    </div>
-  </div>
-
   <!-- ══════════ YOUR DATA ══════════ -->
   <div class="settings-section">
     <div class="section-title">
@@ -546,13 +509,13 @@ footer{border-top:1px solid var(--glass-border);padding:32px 0;}
     </div>
   </div>
 
-  <!-- ══════════ DANGER ZONE ══════════ -->
-  <div class="settings-section danger-section">
+  <!-- ══════════ ACCOUNT ══════════ -->
+  <div class="settings-section">
     <div class="section-title">
-      <div class="section-title-icon" style="background:rgba(255,77,109,.08);border-color:rgba(255,77,109,.2);">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div class="section-title-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
-      Danger Zone
+      Account
     </div>
 
     <div class="danger-row">
@@ -568,7 +531,7 @@ footer{border-top:1px solid var(--glass-border);padding:32px 0;}
         <div class="danger-label">Delete account</div>
         <div class="danger-desc">Permanently delete your account and all data</div>
       </div>
-      <button class="btn-danger" onclick="openDeleteModal()">Delete Account</button>
+      <button class="btn-secondary" style="color:var(--red);border-color:rgba(255,77,109,.2);" onclick="openDeleteModal()">Delete Account</button>
     </div>
   </div>
 
@@ -655,6 +618,7 @@ async function loadPage() {
   document.getElementById('profileEmail').textContent = email;
   document.getElementById('settingsName').value  = name;
   document.getElementById('settingsEmail').value = email;
+  _originalName = name;
 
   // Avatar
   const avatarEl = document.getElementById('profileAvatar');
@@ -682,15 +646,62 @@ async function loadPage() {
     btn.textContent  = 'Disconnect';
     btn.onclick = handleGoogleDisconnect;
   }
+}
 
-  // Load preferences
-  const prefs = await AlgoAuth.getUserPrefs();
-  if (prefs?.dashboard_layout) {
-    const p = prefs.dashboard_layout;
-    if (p.chartType)  document.getElementById('prefChartType').value = p.chartType;
-    if (p.timeframe)  document.getElementById('prefTimeframe').value = p.timeframe;
-    if (p.density)    document.getElementById('prefDensity').value   = p.density;
-  }
+// ── Avatar upload ─────────────────────────────────────────────
+async function handleAvatarUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  // Validate type and size (max 2MB)
+  if (!file.type.startsWith('image/')) { showToast('Please select an image file.', 'error'); return; }
+  if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2MB.', 'error'); return; }
+
+  const statusEl = document.getElementById('avatarStatus');
+  statusEl.textContent = 'Uploading…';
+
+  // Convert to base64 data URL for preview + store as avatar_url in user metadata
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const dataUrl = e.target.result;
+
+    // Update avatar preview immediately
+    const avatarEl = document.getElementById('profileAvatar');
+    avatarEl.innerHTML = `<img src="${dataUrl}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+
+    // Save to Supabase user metadata
+    const client = AlgoAuth.getClient();
+    const { error } = await client.auth.updateUser({
+      data: { avatar_url: dataUrl }
+    });
+
+    if (error) {
+      statusEl.textContent = 'Upload failed.';
+      showToast('Failed to save photo.', 'error');
+      return;
+    }
+
+    // Update nav avatar
+    const navAv = document.getElementById('navAvatar');
+    if (navAv) navAv.innerHTML = `<img src="${dataUrl}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+
+    statusEl.textContent = 'Photo updated.';
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+    showToast('Profile photo updated.');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Dirty check — enable save button only when name changed ──
+let _originalName = '';
+function checkProfileDirty() {
+  const current = document.getElementById('settingsName').value.trim();
+  const btn = document.getElementById('saveProfileBtn');
+  const dirty = current.length > 0 && current !== _originalName;
+  btn.disabled = !dirty;
+  btn.style.opacity = dirty ? '1' : '.35';
+  btn.style.cursor  = dirty ? 'none' : 'not-allowed';
+  btn.style.transform = 'none';
 }
 
 // ── Save profile ─────────────────────────────────────────────
@@ -716,6 +727,9 @@ async function saveProfile() {
   document.getElementById('navAvatarInitials').textContent = initials;
   document.getElementById('navDropdownName').textContent   = name;
   document.getElementById('profileAvatar').textContent     = initials;
+  // Reset dirty state
+  _originalName = name;
+  checkProfileDirty();
 
   showToast('Profile saved successfully.');
 }
