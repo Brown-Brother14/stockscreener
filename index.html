@@ -1058,59 +1058,13 @@ window.addEventListener('AlgoAuthReady', async () => {
     window.location.replace('screener.html');
     return;
   }
-    const name     = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
-    const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-    const avatar   = user?.user_metadata?.avatar_url;
 
-    // Nav: screener link + profile dropdown
-    navArea.innerHTML = `
-      <a href="screener.html" class="nav-link sm">Screener</a>
-      <div class="nav-dropdown-wrap" id="navProfileWrap">
-        <a href="#" class="nav-avatar" id="navAvatar" onclick="toggleDropdown(event)">
-          ${avatar ? `<img src="${avatar}" alt="Avatar">` : `<span>${initials}</span>`}
-        </a>
-        <div class="nav-dropdown" id="navDropdown">
-          <div class="nav-dropdown-name">${name}</div>
-          <div class="nav-dropdown-divider"></div>
-          <a href="settings.html" class="nav-dropdown-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            Settings
-          </a>
-          <div class="nav-dropdown-divider"></div>
-          <button class="nav-dropdown-item danger" onclick="AlgoAuth.signOut()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-            Sign Out
-          </button>
-        </div>
-      </div>`;
+  // Logged out — show sign up CTA in nav
+  navArea.innerHTML = `<a href="auth.html" class="nav-cta">Sign Up Free</a>`;
 
-    // Hero: update eyebrow + CTA button
-    document.getElementById('heroEye').textContent = 'Live data · your account · free forever';
-    const heroBtn = document.getElementById('heroCtaBtn');
-    heroBtn.href        = 'screener.html';
-    heroBtn.textContent = 'Open Screener ↗';
-
-    // Screener section: show live content, hide gate
-    document.getElementById('screenerLiveContent').style.display = '';
-    document.getElementById('screenerGate').style.display        = 'none';
-
-    // CTA section
-    document.getElementById('ctaSubText').textContent  = 'Find your next setup in under 60 seconds.';
-    const ctaBtn = document.getElementById('ctaMainBtn');
-    ctaBtn.href        = 'screener.html';
-    ctaBtn.textContent = 'Open Stock Screener ↗';
-
-    // Footer: show screener link
-    document.getElementById('footerScreenerLink').style.display = '';
-
-  } else {
-    // Nav: sign up CTA only
-    navArea.innerHTML = `<a href="auth.html" class="nav-cta">Sign Up Free</a>`;
-
-    // Screener section: hide live content, show gate
-    document.getElementById('screenerLiveContent').style.display = 'none';
-    document.getElementById('screenerGate').style.display        = '';
-  }
+  // Screener section: hide live content, show gate
+  document.getElementById('screenerLiveContent').style.display = 'none';
+  document.getElementById('screenerGate').style.display        = '';
 });
 
 function toggleDropdown(e) {
