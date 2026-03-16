@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — AlgoScreen Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050506;
+  --text:rgba(255,255,255,.88);
+  --muted:rgba(255,255,255,.36);
+  --muted2:rgba(255,255,255,.58);
+  --green:#00e676;
+  --green-dim:rgba(0,230,118,.12);
+  --red:#ff4d6d;
+  --red-dim:rgba(255,77,109,.1);
+  --blue:#60a5fa;
+  --amber:#fbbf24;
+  --glass:rgba(255,255,255,.04);
+  --glass-2:rgba(255,255,255,.07);
+  --glass-border:rgba(255,255,255,.09);
+  --glass-border-hi:rgba(255,255,255,.18);
+  --shine:linear-gradient(135deg,rgba(255,255,255,.07) 0%,rgba(255,255,255,.02) 50%,rgba(255,255,255,.06) 100%);
+}
+html{scroll-behavior:smooth}
+body{
+  background:#050506;color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;
+  min-height:100vh;overflow-x:hidden;cursor:none;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(45deg,rgba(255,255,255,.014) 0px,rgba(255,255,255,.014) 1px,transparent 1px,transparent 6px),
+    repeating-linear-gradient(-45deg,rgba(255,255,255,.009) 0px,rgba(255,255,255,.009) 1px,transparent 1px,transparent 6px),
+    radial-gradient(ellipse 140% 60% at 20% 50%,rgba(255,255,255,.07) 0%,transparent 50%),
+    radial-gradient(ellipse 140% 60% at 80% 50%,rgba(255,255,255,.04) 0%,transparent 45%),
+    linear-gradient(135deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0) 30%,rgba(255,255,255,.07) 45%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.07) 55%,rgba(255,255,255,0) 70%,rgba(255,255,255,0) 100%),
+    radial-gradient(ellipse 100% 80% at 50% 100%,#030304 0%,#080809 60%);
+  background-size:300px 300px,auto,auto,100% 100%,100% 100%,100% 100%,100% 100%;
+  background-attachment:fixed;
+}
+
+/* ═══ CURSOR ═══ */
+#cur{position:fixed;width:5px;height:5px;background:#fff;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .1s}
+#cur-r{position:fixed;width:26px;height:26px;border:1px solid rgba(255,255,255,.22);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .22s,height .22s,border-color .22s}
+
+/* ═══ NAV ═══ */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px 0}
+.nav-inner{display:flex;align-items:center;gap:2px;background:rgba(14,15,18,.75);border:1px solid var(--glass-border-hi);border-radius:50px;padding:7px 10px;backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 8px 32px rgba(0,0,0,.5);background-image:linear-gradient(180deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.01) 100%)}
+.nav-logo{display:flex;align-items:center;gap:10px;padding:6px 16px 6px 10px;margin-right:6px;border-right:1px solid rgba(255,255,255,.1);text-decoration:none}
+.nav-logo-text{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:16px;font-weight:700;letter-spacing:-.3px;color:#fff}
+.nav-link{font-size:15px;color:var(--muted2);text-decoration:none;padding:7px 16px;border-radius:30px;transition:all .2s;white-space:nowrap}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,.08)}
+.nav-link.active{color:#fff}
+
+/* Profile avatar in nav */
+.nav-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.05));
+  border:1px solid var(--glass-border-hi);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#fff;
+  cursor:none;margin-left:4px;text-decoration:none;
+  transition:border-color .2s;position:relative;
+}
+.nav-avatar:hover{border-color:rgba(255,255,255,.4);}
+.nav-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+
+/* Dropdown */
+.nav-dropdown-wrap{position:relative;display:inline-block;}
+.nav-dropdown{
+  position:absolute;top:calc(100% + 10px);right:0;
+  background:rgba(14,15,18,.95);
+  border:1px solid var(--glass-border-hi);
+  border-radius:14px;padding:6px;
+  min-width:180px;
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  box-shadow:0 16px 48px rgba(0,0,0,.6);
+  display:none;z-index:300;
+}
+.nav-dropdown.open{display:block;}
+.nav-dropdown-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:8px;
+  font-size:13px;color:var(--muted2);
+  text-decoration:none;cursor:none;transition:all .15s;
+  background:none;border:none;width:100%;text-align:left;
+}
+.nav-dropdown-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+.nav-dropdown-item.danger{color:rgba(255,77,109,.8);}
+.nav-dropdown-item.danger:hover{background:rgba(255,77,109,.08);color:var(--red);}
+.nav-dropdown-divider{height:1px;background:var(--glass-border);margin:4px 0;}
+.nav-dropdown-name{padding:10px 12px 6px;font-size:12px;color:var(--muted);font-weight:500;}
+
+@media(max-width:700px){.nav-inner{padding:5px 7px}.nav-link:not(.sm){display:none}.nav-logo{border-right:none}}
+
+/* ═══ PAGE LAYOUT ═══ */
+.page-wrap{
+  max-width:720px;margin:0 auto;
+  padding:120px 24px 80px;
+}
+
+/* ═══ PAGE HEADER ═══ */
+.page-header{margin-bottom:40px;}
+.page-eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  letter-spacing:2px;text-transform:uppercase;color:var(--muted);
+  margin-bottom:10px;
+}
+.page-title{
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  font-size:32px;font-weight:700;letter-spacing:-.4px;color:#fff;
+}
+
+/* ═══ SECTION CARD ═══ */
+.settings-section{
+  background:rgba(18,20,24,.75);
+  border:1px solid var(--glass-border);
+  border-radius:16px;
+  padding:28px;
+  margin-bottom:16px;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  background-image:var(--shine);
+  box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 8px 32px rgba(0,0,0,.3);
+}
+.section-title{
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  font-size:15px;font-weight:700;color:#fff;
+  margin-bottom:20px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-title-icon{
+  width:28px;height:28px;border-radius:8px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--glass-border);
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* Danger section */
+.settings-section.danger-section{
+  border-color:rgba(255,77,109,.15);
+  background:rgba(255,77,109,.03);
+}
+.settings-section.danger-section .section-title{color:var(--red);}
+
+/* ═══ PROFILE SECTION ═══ */
+.profile-row{
+  display:flex;align-items:center;gap:20px;
+  margin-bottom:24px;padding-bottom:24px;
+  border-bottom:1px solid var(--glass-border);
+}
+.profile-avatar-lg{
+  width:64px;height:64px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.04));
+  border:1px solid var(--glass-border-hi);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:700;color:#fff;
+  overflow:hidden;
+}
+.profile-avatar-lg img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.profile-meta{flex:1;min-width:0;}
+.profile-name{font-size:17px;font-weight:600;color:#fff;margin-bottom:3px;}
+.profile-email{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;}
+
+/* ═══ FORM FIELDS ═══ */
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--muted2);margin-bottom:6px;letter-spacing:.3px;text-transform:uppercase;}
+.field input,.field select{
+  width:100%;padding:10px 14px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--glass-border);
+  border-radius:10px;
+  color:var(--text);font-family:'Inter',sans-serif;font-size:14px;
+  outline:none;transition:border-color .2s,box-shadow .2s;
+  -webkit-appearance:none;
+}
+.field input:focus,.field select:focus{border-color:rgba(255,255,255,.28);box-shadow:0 0 0 3px rgba(255,255,255,.05);}
+.field input:disabled{opacity:.45;cursor:not-allowed;}
+.field select option{background:#0e0f12;color:#fff;}
+.field-hint{font-size:12px;color:var(--muted);margin-top:5px;}
+
+.fields-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:500px){.fields-row{grid-template-columns:1fr;}}
+
+/* ═══ BUTTONS ═══ */
+.btn-primary{
+  padding:10px 22px;
+  background:linear-gradient(135deg,#fff 0%,#d8d8d8 100%);
+  color:#000;border:none;border-radius:10px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;
+  cursor:none;transition:opacity .2s,transform .15s;
+  box-shadow:0 1px 0 rgba(255,255,255,.8) inset;
+}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+.btn-secondary{
+  padding:9px 18px;
+  background:rgba(255,255,255,.06);
+  color:var(--text);border:1px solid var(--glass-border-hi);border-radius:10px;
+  font-family:'Inter',sans-serif;font-size:14px;font-weight:500;
+  cursor:none;transition:background .2s,border-color .2s;
+}
+.btn-secondary:hover{background:rgba(255,255,255,.1);}
+
+.btn-danger{
+  padding:9px 18px;
+  background:rgba(255,77,109,.1);
+  color:var(--red);border:1px solid rgba(255,77,109,.2);border-radius:10px;
+  font-family:'Inter',sans-serif;font-size:14px;font-weight:500;
+  cursor:none;transition:background .2s,border-color .2s;
+}
+.btn-danger:hover{background:rgba(255,77,109,.18);border-color:rgba(255,77,109,.35);}
+
+.btn-row{display:flex;align-items:center;gap:10px;margin-top:20px;flex-wrap:wrap;}
+
+/* Spinner */
+.btn-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px;}
+.btn-secondary .btn-spinner,.btn-danger .btn-spinner{border-color:rgba(255,255,255,.1);border-top-color:#fff;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══ CONNECTED ACCOUNTS ═══ */
+.account-row{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 0;
+  border-bottom:1px solid var(--glass-border);
+}
+.account-row:last-child{border-bottom:none;padding-bottom:0;}
+.account-row:first-child{padding-top:0;}
+.account-icon{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.06);border:1px solid var(--glass-border);
+  flex-shrink:0;
+}
+.account-info{flex:1;min-width:0;}
+.account-name{font-size:14px;font-weight:500;color:#fff;margin-bottom:2px;}
+.account-status{font-size:12px;display:flex;align-items:center;gap:5px;}
+.status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.status-dot.connected{background:var(--green);box-shadow:0 0 6px rgba(0,230,118,.5);}
+.status-dot.disconnected{background:var(--muted);}
+.status-connected{color:var(--green);}
+.status-disconnected{color:var(--muted);}
+
+/* ═══ PREFERENCES ═══ */
+.pref-row{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px 0;
+  border-bottom:1px solid var(--glass-border);
+}
+.pref-row:last-child{border-bottom:none;padding-bottom:0;}
+.pref-row:first-child{padding-top:0;}
+.pref-label{font-size:14px;color:var(--text);}
+.pref-desc{font-size:12px;color:var(--muted);margin-top:2px;}
+.pref-select{
+  padding:7px 12px;min-width:130px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--glass-border);
+  border-radius:8px;color:var(--text);
+  font-family:'Inter',sans-serif;font-size:13px;
+  outline:none;cursor:none;-webkit-appearance:none;
+  transition:border-color .2s;
+}
+.pref-select:focus{border-color:rgba(255,255,255,.28);}
+.pref-select option{background:#0e0f12;}
+
+/* ═══ DATA SECTION ═══ */
+.data-row{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px 0;border-bottom:1px solid var(--glass-border);
+}
+.data-row:last-child{border-bottom:none;padding-bottom:0;}
+.data-row:first-child{padding-top:0;}
+.data-label{font-size:14px;color:var(--text);}
+.data-desc{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* ═══ DANGER ZONE ═══ */
+.danger-row{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px 0;border-bottom:1px solid rgba(255,77,109,.1);
+}
+.danger-row:last-child{border-bottom:none;padding-bottom:0;}
+.danger-row:first-child{padding-top:0;}
+.danger-label{font-size:14px;color:var(--text);}
+.danger-desc{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* ═══ TOAST ═══ */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:rgba(18,20,24,.96);border:1px solid var(--glass-border-hi);
+  border-radius:12px;padding:12px 20px;
+  font-size:14px;color:var(--text);
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 16px 48px rgba(0,0,0,.5);
+  transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .35s;
+  opacity:0;z-index:9000;pointer-events:none;white-space:nowrap;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.toast-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.toast-dot.success{background:var(--green);box-shadow:0 0 8px rgba(0,230,118,.5);}
+.toast-dot.error{background:var(--red);box-shadow:0 0 8px rgba(255,77,109,.5);}
+
+/* ═══ MODAL OVERLAY ═══ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:flex;align-items:center;justify-content:center;
+  z-index:1000;padding:24px;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+  backdrop-filter:blur(4px);
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{
+  background:rgba(18,20,24,.97);
+  border:1px solid var(--glass-border-hi);
+  border-radius:18px;padding:32px;
+  max-width:400px;width:100%;
+  box-shadow:0 32px 80px rgba(0,0,0,.6);
+  background-image:var(--shine);
+}
+.modal-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px;color:#fff;}
+.modal-body{font-size:14px;color:var(--muted2);line-height:1.6;margin-bottom:20px;}
+.modal-body strong{color:var(--red);}
+.modal-input{
+  width:100%;padding:10px 14px;margin-bottom:16px;
+  background:rgba(255,255,255,.05);border:1px solid var(--glass-border);
+  border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;
+  outline:none;transition:border-color .2s;
+}
+.modal-input:focus{border-color:rgba(255,77,109,.4);}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;}
+
+/* ═══ FOOTER ═══ */
+footer{border-top:1px solid var(--glass-border);padding:32px 0;}
+.foot-inner{max-width:720px;margin:0 auto;padding:0 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;}
+.f-logo{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted2);font-size:13px;font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;transition:color .2s;}
+.f-logo:hover{color:#fff;}
+.f-links{display:flex;gap:6px;flex-wrap:wrap;}
+.f-link{font-size:13px;color:var(--muted);text-decoration:none;padding:4px 10px;border-radius:6px;transition:all .2s;}
+.f-link:hover{color:var(--muted2);}
+.f-copy{font-size:12px;color:var(--muted);width:100%;}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cur"></div>
+<div id="cur-r"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-dot success" id="toastDot"></div>
+  <span id="toastMsg"></span>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-title">Delete your account</div>
+    <div class="modal-body">This is permanent and cannot be undone. All your watchlist, portfolio, and saved presets will be deleted.<br><br>Type <strong>DELETE</strong> below to confirm.</div>
+    <input class="modal-input" id="deleteConfirmInput" placeholder="Type DELETE to confirm" oninput="checkDeleteInput()">
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-danger" id="deleteConfirmBtn" disabled onclick="confirmDeleteAccount()">Delete Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+        <rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(255,255,255,.3)"/>
+        <rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(255,255,255,.6)"/>
+        <rect x="15" y="7" width="4" height="18" rx="1" fill="#fff"/>
+        <rect x="21" y="13" width="4" height="12" rx="1" fill="rgba(255,255,255,.6)"/>
+        <polyline points="5,15 11,10 17,6 23,12" stroke="#00e676" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="17" cy="6" r="2" fill="#00e676"/>
+      </svg>
+      <span class="nav-logo-text">AlgoScreen Pro</span>
+    </a>
+    <a href="index.html" class="nav-link sm">Home</a>
+    <a href="screener.html" class="nav-link sm" id="navScreener">Screener</a>
+    <a href="portfolio.html" class="nav-link">Portfolio</a>
+    <a href="about.html" class="nav-link">About</a>
+
+    <!-- Profile dropdown -->
+    <div class="nav-dropdown-wrap" id="navProfileWrap">
+      <a href="#" class="nav-avatar" id="navAvatar" onclick="toggleDropdown(event)">
+        <span id="navAvatarInitials">?</span>
+      </a>
+      <div class="nav-dropdown" id="navDropdown">
+        <div class="nav-dropdown-name" id="navDropdownName">Loading…</div>
+        <div class="nav-dropdown-divider"></div>
+        <a href="settings.html" class="nav-dropdown-item active">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          Settings
+        </a>
+        <div class="nav-dropdown-divider"></div>
+        <button class="nav-dropdown-item danger" onclick="AlgoAuth.signOut()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="page-eyebrow">Account</div>
+    <h1 class="page-title">Settings</h1>
+  </div>
+
+  <!-- ══════════ PROFILE ══════════ -->
+  <div class="settings-section">
+    <div class="section-title">
+      <div class="section-title-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      Profile
+    </div>
+
+    <div class="profile-row">
+      <div class="profile-avatar-lg" id="profileAvatar">?</div>
+      <div class="profile-meta">
+        <div class="profile-name" id="profileName">Loading…</div>
+        <div class="profile-email" id="profileEmail">—</div>
+      </div>
+    </div>
+
+    <div class="fields-row">
+      <div class="field">
+        <label>Display Name</label>
+        <input type="text" id="settingsName" placeholder="Your name">
+      </div>
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" id="settingsEmail" placeholder="—" disabled>
+        <div class="field-hint">Email cannot be changed.</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="saveProfileBtn" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- ══════════ CONNECTED ACCOUNTS ══════════ -->
+  <div class="settings-section">
+    <div class="section-title">
+      <div class="section-title-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+      </div>
+      Connected Accounts
+    </div>
+
+    <div class="account-row">
+      <div class="account-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+          <path d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 6.294C4.672 4.167 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+      </div>
+      <div class="account-info">
+        <div class="account-name">Google</div>
+        <div class="account-status" id="googleStatus">
+          <div class="status-dot disconnected" id="googleDot"></div>
+          <span id="googleStatusText" class="status-disconnected">Not connected</span>
+        </div>
+      </div>
+      <button class="btn-secondary" id="googleConnectBtn" onclick="handleGoogleConnect()">Connect</button>
+    </div>
+  </div>
+
+  <!-- ══════════ PREFERENCES ══════════ -->
+  <div class="settings-section">
+    <div class="section-title">
+      <div class="section-title-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      </div>
+      Preferences
+    </div>
+
+    <div class="pref-row">
+      <div>
+        <div class="pref-label">Default Chart Type</div>
+        <div class="pref-desc">How price charts render by default</div>
+      </div>
+      <select class="pref-select" id="prefChartType">
+        <option value="candlestick">Candlestick</option>
+        <option value="line">Line</option>
+      </select>
+    </div>
+
+    <div class="pref-row">
+      <div>
+        <div class="pref-label">Default Timeframe</div>
+        <div class="pref-desc">Starting range for charts and screener</div>
+      </div>
+      <select class="pref-select" id="prefTimeframe">
+        <option value="1D">1 Day</option>
+        <option value="1W">1 Week</option>
+        <option value="1M">1 Month</option>
+        <option value="3M">3 Months</option>
+        <option value="1Y" selected>1 Year</option>
+      </select>
+    </div>
+
+    <div class="pref-row">
+      <div>
+        <div class="pref-label">Screener Row Density</div>
+        <div class="pref-desc">How compact the screener table appears</div>
+      </div>
+      <select class="pref-select" id="prefDensity">
+        <option value="comfortable" selected>Comfortable</option>
+        <option value="compact">Compact</option>
+      </select>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="savePrefsBtn" onclick="savePrefs()">Save Preferences</button>
+    </div>
+  </div>
+
+  <!-- ══════════ YOUR DATA ══════════ -->
+  <div class="settings-section">
+    <div class="section-title">
+      <div class="section-title-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </div>
+      Your Data
+    </div>
+
+    <div class="data-row">
+      <div>
+        <div class="data-label">Export all data</div>
+        <div class="data-desc">Download your watchlist, portfolio and presets as JSON</div>
+      </div>
+      <button class="btn-secondary" id="exportBtn" onclick="exportData()">Export</button>
+    </div>
+  </div>
+
+  <!-- ══════════ DANGER ZONE ══════════ -->
+  <div class="settings-section danger-section">
+    <div class="section-title">
+      <div class="section-title-icon" style="background:rgba(255,77,109,.08);border-color:rgba(255,77,109,.2);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      Danger Zone
+    </div>
+
+    <div class="danger-row">
+      <div>
+        <div class="danger-label">Sign out</div>
+        <div class="danger-desc">Sign out of your account on this device</div>
+      </div>
+      <button class="btn-secondary" onclick="AlgoAuth.signOut()">Sign Out</button>
+    </div>
+
+    <div class="danger-row">
+      <div>
+        <div class="danger-label">Delete account</div>
+        <div class="danger-desc">Permanently delete your account and all data</div>
+      </div>
+      <button class="btn-danger" onclick="openDeleteModal()">Delete Account</button>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<footer>
+  <div class="foot-inner">
+    <a href="index.html" class="f-logo">
+      <svg width="16" height="16" viewBox="0 0 28 28" fill="none"><rect x="3" y="16" width="4" height="9" rx="1" fill="rgba(255,255,255,.3)"/><rect x="9" y="11" width="4" height="14" rx="1" fill="rgba(255,255,255,.55)"/><rect x="15" y="7" width="4" height="18" rx="1" fill="#fff"/><rect x="21" y="13" width="4" height="12" rx="1" fill="rgba(255,255,255,.55)"/><polyline points="5,15 11,10 17,6 23,12" stroke="#00e676" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="17" cy="6" r="2" fill="#00e676"/></svg>
+      AlgoScreen Pro
+    </a>
+    <div class="f-links">
+      <a href="index.html" class="f-link">Home</a>
+      <a href="portfolio.html" class="f-link">Portfolio</a>
+      <a href="about.html" class="f-link">About</a>
+    </div>
+    <div class="f-copy">Not financial advice · Data: Finnhub, Yahoo Finance, CNN Business · © 2025 AlgoScreen Pro</div>
+  </div>
+</footer>
+
+<script src="supabase-client.js"></script>
+<script>
+// ── Cursor ───────────────────────────────────────────────────
+const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
+let mx=-100,my=-100,rx=-100,ry=-100;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+(function animCursor(){
+  rx+=(mx-rx)*.18;ry+=(my-ry)*.18;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+  curR.style.left=rx+'px';curR.style.top=ry+'px';
+  requestAnimationFrame(animCursor);
+})();
+document.querySelectorAll('a,button,input,select').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{curR.style.width='38px';curR.style.height='38px';curR.style.borderColor='rgba(255,255,255,.45)';});
+  el.addEventListener('mouseleave',()=>{curR.style.width='26px';curR.style.height='26px';curR.style.borderColor='rgba(255,255,255,.22)';});
+});
+
+// ── Auth guard — must be logged in ──────────────────────────
+window.addEventListener('AlgoAuthReady', async () => {
+  const loggedIn = await AlgoAuth.isLoggedIn();
+  if (!loggedIn) { window.location.replace('auth.html'); return; }
+  loadPage();
+});
+
+// ── Toast ────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = 'success') {
+  const el   = document.getElementById('toast');
+  const dot  = document.getElementById('toastDot');
+  const text = document.getElementById('toastMsg');
+  dot.className  = 'toast-dot ' + type;
+  text.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ── Nav dropdown ─────────────────────────────────────────────
+function toggleDropdown(e) {
+  e.preventDefault();
+  document.getElementById('navDropdown').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('navProfileWrap');
+  if (!wrap.contains(e.target)) document.getElementById('navDropdown').classList.remove('open');
+});
+
+// ── Load page data ───────────────────────────────────────────
+async function loadPage() {
+  const user  = await AlgoAuth.getUser();
+  if (!user) return;
+
+  const name  = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+  const email = user.email || '';
+  const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+
+  // Check if Google is linked
+  const identities = user.identities || [];
+  const googleLinked = identities.some(id => id.provider === 'google');
+  const avatarUrl = user.user_metadata?.avatar_url || null;
+
+  // Profile section
+  document.getElementById('profileName').textContent  = name;
+  document.getElementById('profileEmail').textContent = email;
+  document.getElementById('settingsName').value  = name;
+  document.getElementById('settingsEmail').value = email;
+
+  // Avatar
+  const avatarEl = document.getElementById('profileAvatar');
+  if (avatarUrl) {
+    avatarEl.innerHTML = `<img src="${avatarUrl}" alt="Avatar">`;
+  } else {
+    avatarEl.textContent = initials;
+  }
+
+  // Nav avatar
+  const navAv = document.getElementById('navAvatar');
+  document.getElementById('navAvatarInitials').textContent = initials;
+  if (avatarUrl) navAv.innerHTML = `<img src="${avatarUrl}" alt="Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+
+  document.getElementById('navDropdownName').textContent = name;
+
+  // Google connected status
+  const dot  = document.getElementById('googleDot');
+  const text = document.getElementById('googleStatusText');
+  const btn  = document.getElementById('googleConnectBtn');
+  if (googleLinked) {
+    dot.className  = 'status-dot connected';
+    text.className = 'status-connected';
+    text.textContent = 'Connected';
+    btn.textContent  = 'Disconnect';
+    btn.onclick = handleGoogleDisconnect;
+  }
+
+  // Load preferences
+  const prefs = await AlgoAuth.getUserPrefs();
+  if (prefs?.dashboard_layout) {
+    const p = prefs.dashboard_layout;
+    if (p.chartType)  document.getElementById('prefChartType').value = p.chartType;
+    if (p.timeframe)  document.getElementById('prefTimeframe').value = p.timeframe;
+    if (p.density)    document.getElementById('prefDensity').value   = p.density;
+  }
+}
+
+// ── Save profile ─────────────────────────────────────────────
+async function saveProfile() {
+  const name = document.getElementById('settingsName').value.trim();
+  if (!name) { showToast('Name cannot be empty.', 'error'); return; }
+
+  const btn = document.getElementById('saveProfileBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-spinner"></span> Saving…';
+
+  const client = AlgoAuth.getClient();
+  const { error } = await client.auth.updateUser({ data: { full_name: name } });
+
+  btn.disabled = false;
+  btn.textContent = 'Save Changes';
+
+  if (error) { showToast('Failed to save. Please try again.', 'error'); return; }
+
+  // Update displayed name
+  document.getElementById('profileName').textContent = name;
+  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('navAvatarInitials').textContent = initials;
+  document.getElementById('navDropdownName').textContent   = name;
+  document.getElementById('profileAvatar').textContent     = initials;
+
+  showToast('Profile saved successfully.');
+}
+
+// ── Save preferences ─────────────────────────────────────────
+async function savePrefs() {
+  const prefs = {
+    chartType: document.getElementById('prefChartType').value,
+    timeframe: document.getElementById('prefTimeframe').value,
+    density:   document.getElementById('prefDensity').value,
+  };
+
+  const btn = document.getElementById('savePrefsBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-spinner"></span> Saving…';
+
+  const { error } = await AlgoAuth.saveUserPrefs(prefs);
+
+  btn.disabled = false;
+  btn.textContent = 'Save Preferences';
+
+  if (error) { showToast('Failed to save preferences.', 'error'); return; }
+  showToast('Preferences saved.');
+}
+
+// ── Google connect / disconnect ──────────────────────────────
+async function handleGoogleConnect() {
+  const client = AlgoAuth.getClient();
+  await client.auth.linkIdentity({ provider: 'google' });
+}
+
+async function handleGoogleDisconnect() {
+  const client = AlgoAuth.getClient();
+  const user   = await AlgoAuth.getUser();
+  const googleId = user?.identities?.find(i => i.provider === 'google')?.identity_id;
+  if (!googleId) return;
+  const { error } = await client.auth.unlinkIdentity({ provider: 'google', identity_id: googleId });
+  if (error) { showToast('Could not disconnect Google.', 'error'); return; }
+  showToast('Google disconnected.');
+  // Update UI
+  document.getElementById('googleDot').className    = 'status-dot disconnected';
+  document.getElementById('googleStatusText').className = 'status-disconnected';
+  document.getElementById('googleStatusText').textContent = 'Not connected';
+  document.getElementById('googleConnectBtn').textContent = 'Connect';
+  document.getElementById('googleConnectBtn').onclick     = handleGoogleConnect;
+}
+
+// ── Export data ──────────────────────────────────────────────
+async function exportData() {
+  const btn = document.getElementById('exportBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-spinner"></span>';
+
+  const [watchlist, portfolio, presets] = await Promise.all([
+    AlgoAuth.getWatchlist(),
+    AlgoAuth.getPortfolio(),
+    AlgoAuth.getScreenerPresets(),
+  ]);
+
+  const blob = new Blob([JSON.stringify({ watchlist, portfolio, presets }, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'algoscreenpro-data.json';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  btn.disabled = false;
+  btn.textContent = 'Export';
+  showToast('Data exported successfully.');
+}
+
+// ── Delete account modal ─────────────────────────────────────
+function openDeleteModal() {
+  document.getElementById('deleteModal').classList.add('open');
+  document.getElementById('deleteConfirmInput').value = '';
+  document.getElementById('deleteConfirmBtn').disabled = true;
+}
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+}
+function checkDeleteInput() {
+  const val = document.getElementById('deleteConfirmInput').value;
+  document.getElementById('deleteConfirmBtn').disabled = (val !== 'DELETE');
+}
+async function confirmDeleteAccount() {
+  const btn = document.getElementById('deleteConfirmBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-spinner"></span> Deleting…';
+
+  // Supabase doesn't expose admin delete on client — sign out and show message
+  // For full deletion you'd call a Cloudflare Worker endpoint that uses the service role key
+  await AlgoAuth.signOut();
+}
+
+// Close modal on overlay click
+document.getElementById('deleteModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('deleteModal')) closeDeleteModal();
+});
+</script>
+</body>
+</html>
