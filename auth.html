@@ -448,6 +448,23 @@ document.querySelectorAll('a,button,input').forEach(el => {
 
 // ── Redirect if already logged in ───────────────────────────
 window.addEventListener('AlgoAuthReady', async () => {
+
+  // Handle email confirmation token from URL (?token_hash=...&type=email)
+  const params = new URLSearchParams(window.location.search);
+  const tokenHash = params.get('token_hash');
+  const type      = params.get('type');
+
+  if (tokenHash && type) {
+    const client = AlgoAuth.getClient();
+    const { error } = await client.auth.verifyOtp({ token_hash: tokenHash, type });
+    if (!error) {
+      window.location.replace('index.html');
+      return;
+    } else {
+      showMsg('Confirmation link expired or already used. Please log in.', 'error');
+    }
+  }
+
   const loggedIn = await AlgoAuth.isLoggedIn();
   if (loggedIn) window.location.replace('index.html');
 });
