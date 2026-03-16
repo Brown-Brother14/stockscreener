@@ -266,9 +266,8 @@ footer{border-top:1px solid var(--glass-border);padding:36px 60px;display:flex;a
       </svg>
       <span class="nav-logo-text">AlgoScreen Pro</span>
     </a>
-    <a href="index.html" class="nav-link sm">Home</a>
+    <a href="screener.html" class="nav-link sm" id="navScreener" style="display:none">Screener</a>
     <a href="portfolio.html" class="nav-link active">Portfolio</a>
-    <a href="about.html" class="nav-link">About</a>
     <!-- injected by auth JS -->
     <div id="navAuthArea"></div>
   </div>
@@ -381,9 +380,8 @@ footer{border-top:1px solid var(--glass-border);padding:36px 60px;display:flex;a
     AlgoScreen Pro
   </a>
   <div class="f-links">
-    <a href="index.html" class="f-link">Home</a>
     <a href="screener.html" class="f-link" id="footerScreenerLink" style="display:none">Screener</a>
-    <a href="about.html" class="f-link">About</a>
+    <a href="portfolio.html" class="f-link">Portfolio</a>
   </div>
   <div class="f-copy">Not financial advice &nbsp;·&nbsp; © 2026 AlgoScreen Pro</div>
 </footer>
@@ -413,9 +411,11 @@ window.addEventListener('AlgoAuthReady', async () => {
     const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
     const avatar   = user?.user_metadata?.avatar_url;
 
-    // Nav: screener link + profile dropdown
+    // Show screener link
+    document.getElementById('navScreener').style.display = '';
+
+    // Nav: profile dropdown only
     navArea.innerHTML = `
-      <a href="screener.html" class="nav-link sm">Screener</a>
       <div class="nav-dropdown-wrap" id="navProfileWrap">
         <a href="#" class="nav-avatar" id="navAvatar" onclick="toggleDropdown(event)">
           ${avatar ? `<img src="${avatar}" alt="Avatar">` : `<span>${initials}</span>`}
