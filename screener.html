@@ -482,10 +482,17 @@ tbody tr{animation:fadeIn .25s ease both}
 
 /* Marquee stats bar */
 .sm-stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:14px;overflow:hidden;margin-bottom:36px}
-.sm-stat{background:#050506;padding:18px 20px}
+.sm-stat{background:#050506;padding:18px 20px;position:relative}
 .sm-stat-label{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:8px}
 .sm-stat-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;line-height:1}
 .sm-stat-val.green{color:var(--green)}.sm-stat-val.red{color:var(--red)}.sm-stat-val.white{color:#fff}
+/* Buy/sell ratio bar inside stats */
+.sm-ratio-bar-wrap{margin-top:10px}
+.sm-ratio-bar-track{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;display:flex}
+.sm-ratio-buy{height:100%;background:var(--green);border-radius:2px 0 0 2px;transition:width .8s cubic-bezier(.34,1.56,.64,1)}
+.sm-ratio-sell{height:100%;background:var(--red);border-radius:0 2px 2px 0;transition:width .8s cubic-bezier(.34,1.56,.64,1)}
+.sm-ratio-labels{display:flex;justify-content:space-between;margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:8px}
+.sm-ratio-pct-buy{color:var(--green)}.sm-ratio-pct-sell{color:var(--red)}
 
 /* Filter chips */
 .sm-chips{display:flex;align-items:center;gap:8px;margin-bottom:24px;flex-wrap:wrap}
@@ -522,15 +529,39 @@ tbody tr{animation:fadeIn .25s ease both}
 .sm-trade-card.is-buy{border-top:2px solid rgba(0,230,118,.5)}
 .sm-trade-card.is-sell{border-top:2px solid rgba(255,77,109,.5)}
 .sm-trade-card.is-other{border-top:2px solid rgba(251,191,36,.4)}
-.sm-tc-action{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.sm-tc-action{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .sm-tc-action.buy{color:var(--green)}.sm-tc-action.sell{color:var(--red)}.sm-tc-action.other{color:var(--amber)}
 .sm-tc-ticker{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
-.sm-tc-amount{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.45);margin-bottom:12px}
+.sm-tc-amount{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.45);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .sm-tc-name{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sm-tc-chamber{font-family:'Inter',sans-serif;font-size:10px;color:rgba(255,255,255,.3);margin-top:2px}
+.sm-tc-chamber{font-family:'Inter',sans-serif;font-size:10px;color:rgba(255,255,255,.3);margin-top:2px;display:flex;align-items:center;gap:6px}
 .sm-tc-date{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);margin-top:10px}
 .sm-tc-glow{position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;filter:blur(30px);opacity:.08;pointer-events:none}
 .sm-tc-glow.buy{background:var(--green)}.sm-tc-glow.sell{background:var(--red)}
+/* Card header row with avatar */
+.sm-tc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+/* Politician avatar */
+.sm-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:800;flex-shrink:0;border:1px solid rgba(255,255,255,.1);letter-spacing:-.3px}
+.sm-avatar.rep{background:rgba(255,77,109,.15);color:#ff4d6d;border-color:rgba(255,77,109,.25)}
+.sm-avatar.dem{background:rgba(96,165,250,.15);color:#60a5fa;border-color:rgba(96,165,250,.25)}
+.sm-avatar.ind{background:rgba(167,139,250,.15);color:#a78bfa;border-color:rgba(167,139,250,.25)}
+.sm-avatar.unk{background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.1)}
+/* Party badge */
+.sm-party-badge{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.3px;flex-shrink:0}
+.sm-party-badge.rep{background:rgba(255,77,109,.12);color:#ff4d6d;border:1px solid rgba(255,77,109,.2)}
+.sm-party-badge.dem{background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.2)}
+.sm-party-badge.ind{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.2)}
+/* Trade size indicator */
+.sm-size-dots{display:flex;gap:3px;align-items:center}
+.sm-size-dot{width:6px;height:6px;border-radius:50%}
+.sm-size-dot.filled.buy{background:var(--green)}.sm-size-dot.filled.sell{background:var(--red)}.sm-size-dot.filled.other{background:var(--amber)}
+.sm-size-dot.empty{background:rgba(255,255,255,.1)}
+.sm-size-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,.3);margin-left:2px}
+/* Disclosure lag badge */
+.sm-lag-badge{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;padding:2px 7px;border-radius:4px;letter-spacing:.3px;white-space:nowrap;flex-shrink:0}
+.sm-lag-badge.fast{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.18)}
+.sm-lag-badge.slow{background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.18)}
+.sm-lag-badge.late{background:rgba(255,77,109,.1);color:var(--red);border:1px solid rgba(255,77,109,.18)}
 
 /* Load more */
 .sm-load-more{width:100%;padding:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;transition:all .2s;margin-top:4px}
@@ -560,13 +591,27 @@ tbody tr{animation:fadeIn .25s ease both}
 /* Insider cards */
 .ins-section-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:10px}
 .ins-section-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
-.ins-card-new{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px 20px;display:grid;grid-template-columns:1fr auto;gap:8px 20px;cursor:default;transition:background .15s}
+.ins-card-new{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px 20px;display:grid;grid-template-columns:auto 1fr auto;gap:8px 14px;cursor:default;transition:background .15s;align-items:start}
 .ins-card-new:hover{background:rgba(255,255,255,.055)}
 .ins-card-new.is-buy{border-left:3px solid rgba(0,230,118,.55)}
 .ins-card-new.is-sell{border-left:3px solid rgba(255,77,109,.5)}
 .ins-card-new.is-other{border-left:3px solid rgba(251,191,36,.45)}
+/* Insider avatar */
+.ins-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:800;flex-shrink:0;letter-spacing:-.3px}
+.ins-avatar.ceo{background:rgba(250,204,21,.14);color:#fbbf24;border:1px solid rgba(250,204,21,.25)}
+.ins-avatar.cfo{background:rgba(96,165,250,.14);color:#60a5fa;border:1px solid rgba(96,165,250,.25)}
+.ins-avatar.dir{background:rgba(167,139,250,.14);color:#a78bfa;border:1px solid rgba(167,139,250,.25)}
+.ins-avatar.own{background:rgba(0,230,118,.14);color:var(--green);border:1px solid rgba(0,230,118,.25)}
+.ins-avatar.def{background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1)}
 .ins-card-name{font-size:14px;font-weight:700;color:rgba(255,255,255,.88)}
-.ins-card-title{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px}
+.ins-card-title-row{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
+.ins-card-title{font-size:11px;color:rgba(255,255,255,.3)}
+/* Role hierarchy badge */
+.ins-role-badge{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.3px;white-space:nowrap;flex-shrink:0}
+.ins-role-badge.ceo{background:rgba(250,204,21,.12);color:#fbbf24;border:1px solid rgba(250,204,21,.2)}
+.ins-role-badge.cfo{background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.2)}
+.ins-role-badge.dir{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.2)}
+.ins-role-badge.own{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.18)}
 .ins-card-type{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.5px}
 .ins-card-type.buy{color:var(--green)}.ins-card-type.sell{color:var(--red)}.ins-card-type.other{color:var(--amber)}
 .ins-card-value{font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;text-align:right}
@@ -1042,8 +1087,18 @@ tbody tr{animation:fadeIn .25s ease both}
           <div class="sm-stat-val red" id="sm-stat-sells">—</div>
         </div>
         <div class="sm-stat">
-          <div class="sm-stat-label">Most Active Stock</div>
+          <div class="sm-stat-label">Buy / Sell Ratio</div>
           <div class="sm-stat-val white" id="sm-stat-hot" style="font-size:18px;letter-spacing:-.5px">—</div>
+          <div class="sm-ratio-bar-wrap" id="sm-ratio-wrap" style="display:none">
+            <div class="sm-ratio-bar-track">
+              <div class="sm-ratio-buy" id="sm-ratio-buy" style="width:50%"></div>
+              <div class="sm-ratio-sell" id="sm-ratio-sell" style="width:50%"></div>
+            </div>
+            <div class="sm-ratio-labels">
+              <span class="sm-ratio-pct-buy" id="sm-ratio-buy-pct">—</span>
+              <span class="sm-ratio-pct-sell" id="sm-ratio-sell-pct">—</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -3534,13 +3589,22 @@ async function loadCongressTrades() {
 function smUpdateStats() {
   const buys  = smAllTrades.filter(isBuyTrade).length;
   const sells = smAllTrades.filter(isSellTrade).length;
-  const tc    = {};
-  smAllTrades.forEach(t => { if (t.ticker) tc[t.ticker] = (tc[t.ticker]||0)+1; });
-  const hot = Object.entries(tc).sort((a,b)=>b[1]-a[1])[0];
-  document.getElementById('sm-stat-total').textContent = smAllTrades.length;
+  const total = smAllTrades.length;
+  document.getElementById('sm-stat-total').textContent = total;
   document.getElementById('sm-stat-buys').textContent  = buys;
   document.getElementById('sm-stat-sells').textContent = sells;
-  document.getElementById('sm-stat-hot').textContent   = hot ? hot[0] : '—';
+  // Ratio bar
+  if (buys + sells > 0) {
+    const buyPct  = Math.round((buys  / (buys + sells)) * 100);
+    const sellPct = 100 - buyPct;
+    document.getElementById('sm-stat-hot').textContent       = buyPct + '% buys';
+    document.getElementById('sm-stat-hot').style.color       = buyPct > 50 ? 'var(--green)' : 'var(--red)';
+    document.getElementById('sm-ratio-buy').style.width      = buyPct  + '%';
+    document.getElementById('sm-ratio-sell').style.width     = sellPct + '%';
+    document.getElementById('sm-ratio-buy-pct').textContent  = buyPct  + '% buy';
+    document.getElementById('sm-ratio-sell-pct').textContent = sellPct + '% sell';
+    document.getElementById('sm-ratio-wrap').style.display   = '';
+  }
 }
 
 function smBuildHotPills() {
@@ -3621,13 +3685,56 @@ function smRender() {
     const actLbl   = buy ? '▲ PURCHASE' : sell ? '▼ SALE' : (t.type||'TRANSACTION').toUpperCase().slice(0,14);
     const glowCls  = buy ? 'buy' : sell ? 'sell' : '';
     const chmb     = t.chamber === 'Senate' ? 'Senate' : 'House';
+
+    // ── Avatar & party ──
+    const party    = (t.party||'').toUpperCase();
+    const isRep    = party.includes('R') && !party.includes('D');
+    const isDem    = party.includes('D') && !party.includes('R');
+    const isInd    = party.includes('I') && !isRep && !isDem;
+    const avatarCls= isRep ? 'rep' : isDem ? 'dem' : isInd ? 'ind' : 'unk';
+    const partyLbl = isRep ? 'R' : isDem ? 'D' : isInd ? 'I' : '?';
+    const name     = t.name || '—';
+    const initials = name.split(' ').filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,2) || '?';
+    const partyBadge = (isRep||isDem||isInd) ? `<span class="sm-party-badge ${avatarCls}">${isRep?'REP':isDem?'DEM':'IND'}</span>` : '';
+
+    // ── Trade size dots (S/M/L/XL) ──
+    const amtStr = (t.amount||'').replace(/[^0-9kmb\-]/gi,'').toLowerCase();
+    let sizeLevel = 1;
+    if (/\$?50[0-9,]*k|[5-9][0-9]k|[1-4][0-9]{2}k|[5-9][0-9]{2}k/i.test(t.amount||'')) sizeLevel = 2;
+    if (/\$?[1-9][0-9]{0,2}[,.]?[0-9]*m|\$?[5-9][0-9]{2}k|\$?[1-9]m/i.test(t.amount||'')) sizeLevel = 3;
+    if (/\$?[5-9][0-9]*m|\$?[1-9][0-9]+m|billion/i.test(t.amount||'')) sizeLevel = 4;
+    const sizeLbls = ['','S','M','L','XL'];
+    const sizeDotsHtml = [1,2,3,4].map(i =>
+      `<span class="sm-size-dot ${i<=sizeLevel?'filled '+actCls:'empty'}"></span>`).join('') +
+      `<span class="sm-size-label">${sizeLbls[sizeLevel]}</span>`;
+
+    // ── Disclosure lag ──
+    let lagHtml = '';
+    if (t.date && t.disclosed) {
+      try {
+        const tradeDt    = new Date(t.date);
+        const discloseDt = new Date(t.disclosed);
+        const days       = Math.round((discloseDt - tradeDt) / 86400000);
+        if (!isNaN(days) && days >= 0) {
+          const lagCls = days <= 14 ? 'fast' : days <= 35 ? 'slow' : 'late';
+          const lagTxt = days === 0 ? 'same day' : days === 1 ? '1 day' : `${days}d`;
+          lagHtml = `<span class="sm-lag-badge ${lagCls}" title="Disclosed ${days} days after trade">${lagTxt} lag</span>`;
+        }
+      } catch(e) {}
+    }
+
     return `<div class="sm-trade-card ${cardCls}" onclick="smClickTicker('${t.ticker}')">
-      <div class="sm-tc-action ${actCls}">${actLbl}</div>
-      <div class="sm-tc-ticker">${t.ticker||'—'}</div>
-      <div class="sm-tc-amount">${fmtAmount(t.amount)}</div>
-      <div class="sm-tc-name">${t.name||'—'}</div>
-      <div class="sm-tc-chamber">${chmb}${t.party?' · '+t.party:''}</div>
-      <div class="sm-tc-date">${t.date||'—'}</div>
+      <div class="sm-tc-header">
+        <div>
+          <div class="sm-tc-action ${actCls}">${actLbl} ${lagHtml}</div>
+          <div class="sm-tc-ticker">${t.ticker||'—'}</div>
+        </div>
+        <div class="sm-avatar ${avatarCls}" title="${name}">${initials}</div>
+      </div>
+      <div class="sm-tc-amount">${fmtAmount(t.amount)} <div class="sm-size-dots">${sizeDotsHtml}</div></div>
+      <div class="sm-tc-name">${name}</div>
+      <div class="sm-tc-chamber">${chmb} ${partyBadge}</div>
+      <div class="sm-tc-date">${t.date||'—'}${t.disclosed?' · disclosed '+t.disclosed:''}</div>
       ${glowCls ? `<div class="sm-tc-glow ${glowCls}"></div>` : ''}
     </div>`;
   }).join('');
@@ -3646,11 +3753,42 @@ function renderFeatured(t) {
   const actCls = buy ? 'buy' : 'sell';
   const actLbl = buy ? '▲ PURCHASE' : sell ? '▼ SALE' : (t.type||'').toUpperCase();
   const chmb   = t.chamber === 'Senate' ? 'Senate' : 'House';
+
+  // Avatar & party
+  const party    = (t.party||'').toUpperCase();
+  const isRep    = party.includes('R') && !party.includes('D');
+  const isDem    = party.includes('D') && !party.includes('R');
+  const isInd    = party.includes('I') && !isRep && !isDem;
+  const avatarCls= isRep ? 'rep' : isDem ? 'dem' : isInd ? 'ind' : 'unk';
+  const name     = t.name || '—';
+  const initials = name.split(' ').filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,2) || '?';
+  const partyBadge = (isRep||isDem||isInd)
+    ? `<span class="sm-party-badge ${avatarCls}" style="font-size:10px;padding:3px 9px">${isRep?'Republican':isDem?'Democrat':'Independent'}</span>` : '';
+
+  // Disclosure lag
+  let lagHtml = '';
+  if (t.date && t.disclosed) {
+    try {
+      const days = Math.round((new Date(t.disclosed) - new Date(t.date)) / 86400000);
+      if (!isNaN(days) && days >= 0) {
+        const lagCls = days <= 14 ? 'fast' : days <= 35 ? 'slow' : 'late';
+        lagHtml = `<span class="sm-lag-badge ${lagCls}" style="font-size:10px;padding:3px 9px">${days === 0?'same-day disclosure':days+'d disclosure lag'}</span>`;
+      }
+    } catch(e) {}
+  }
+
   wrap.innerHTML = `<div class="sm-featured ${cls}" onclick="smClickTicker('${t.ticker}')">
-    <div class="sm-featured-label">Latest highlighted trade</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="sm-featured-label">Latest highlighted trade</div>
+      <div class="sm-avatar ${avatarCls}" style="width:42px;height:42px;font-size:13px" title="${name}">${initials}</div>
+    </div>
     <div class="sm-featured-ticker">${t.ticker||'—'}</div>
-    <div class="sm-featured-action ${actCls}">${actLbl}</div>
-    <div class="sm-featured-meta">${t.name||'—'} · ${chmb}${t.party?' · '+t.party:''}</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px">
+      <div class="sm-featured-action ${actCls}">${actLbl}</div>
+      ${partyBadge}
+      ${lagHtml}
+    </div>
+    <div class="sm-featured-meta" style="margin-top:8px">${name} · ${chmb}</div>
     <div class="sm-featured-amount">${fmtAmount(t.amount)}</div>
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.25);margin-top:10px">${t.date||'—'}${t.disclosed?' · disclosed '+t.disclosed:''}</div>
     <div class="sm-featured-glow ${actCls}"></div>
@@ -3756,17 +3894,34 @@ function insRender() {
           ? '$' + (t.share * t.price).toLocaleString(undefined, { maximumFractionDigits: 0 }) : null;
         const shares  = t.share ? Number(t.share).toLocaleString() + ' shares' : null;
         const valCol  = buy ? 'var(--green)' : sell ? 'var(--red)' : 'var(--amber)';
+
+        // ── Insider avatar & role badge ──
+        const rawTitle = (t.officerTitle || t.reportingRelationship || '').toUpperCase();
+        const isCEO = /CEO|CHIEF EXEC|PRESIDENT/.test(rawTitle);
+        const isCFO = /CFO|CHIEF FIN|TREASURER/.test(rawTitle);
+        const isDir = /DIRECTOR|CHAIR/.test(rawTitle);
+        const isOwn = /10%|MAJOR|OWNER/.test(rawTitle);
+        const roleKey = isCEO ? 'ceo' : isCFO ? 'cfo' : isDir ? 'dir' : isOwn ? 'own' : 'def';
+        const roleLabel = isCEO ? 'CEO' : isCFO ? 'CFO' : isDir ? 'DIR' : isOwn ? '10%+' : null;
+        const name = t.name || '—';
+        const initials = name.split(' ').filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,2) || '?';
+        const roleBadgeHtml = roleLabel ? `<span class="ins-role-badge ${roleKey}">${roleLabel}</span>` : '';
+
         return `<div class="ins-card-new ${cardCls}">
+          <div class="ins-avatar ${roleKey}" title="${rawTitle||'Insider'}">${initials}</div>
           <div>
-            <div class="ins-card-name">${t.name||'—'}</div>
-            <div class="ins-card-title">${t.officerTitle||t.reportingRelationship||'—'}</div>
+            <div class="ins-card-name">${name}</div>
+            <div class="ins-card-title-row">
+              <span class="ins-card-title">${t.officerTitle||t.reportingRelationship||'—'}</span>
+              ${roleBadgeHtml}
+            </div>
           </div>
           <div style="text-align:right">
             <div class="ins-card-type ${typCls}">${typLbl}</div>
             <div class="ins-card-value" style="color:${valCol}">${value||shares||'—'}</div>
             <div class="ins-card-shares">${shares&&value?shares+' @ $'+Number(t.price).toFixed(2):''}</div>
           </div>
-          <div class="ins-card-date">${t.transactionDate||t.filingDate||'—'}</div>
+          <div class="ins-card-date" style="grid-column:1/-1">${t.transactionDate||t.filingDate||'—'}</div>
         </div>`;
       }).join('')}
     </div>`;
