@@ -624,6 +624,80 @@ tbody tr{animation:fadeIn .25s ease both}
 .sm-empty-text{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:700;color:rgba(255,255,255,.25);margin-bottom:6px}
 .sm-empty-sub{font-size:13px;color:rgba(255,255,255,.15)}
 .sm-loading-state{text-align:center;padding:80px 20px}
+
+/* ── #1 Cluster / pile-on alert ── */
+.sm-cluster-alert{background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(251,191,36,.04));border:1px solid rgba(251,191,36,.25);border-radius:14px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sm-cluster-alert-icon{font-size:20px;flex-shrink:0}
+.sm-cluster-alert-text{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;flex:1;min-width:160px}
+.sm-cluster-alert-pills{display:flex;gap:6px;flex-wrap:wrap}
+.sm-cluster-pill{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;background:rgba(251,191,36,.15);color:var(--amber);border:1px solid rgba(251,191,36,.25);cursor:pointer;transition:all .15s}
+.sm-cluster-pill:hover{background:rgba(251,191,36,.28);transform:translateY(-1px)}
+/* ── #2 Party breakdown 5th stat ── */
+.sm-stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:14px;overflow:hidden;margin-bottom:36px}
+@media(max-width:800px){.sm-stats-bar{grid-template-columns:repeat(3,1fr)}}
+/* ── #4 Date range + #5 Amount + Sort + Export controls ── */
+.sm-controls-row{display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.sm-ctrl-label{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.25);white-space:nowrap}
+.sm-sort-select{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:6px 12px 6px 10px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.5);cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;transition:all .15s}
+.sm-sort-select:focus,.sm-sort-select:hover{border-color:rgba(255,255,255,.18);color:#fff}
+/* ── #7 Export CSV ── */
+.sm-export-btn{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:6px 14px;border-radius:20px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);color:#60a5fa;cursor:pointer;transition:all .15s;white-space:nowrap;margin-left:auto}
+.sm-export-btn:hover{background:rgba(96,165,250,.16)}
+/* ── #3 Politician panel ── */
+.sm-panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.sm-panel-overlay.open{display:block}
+.sm-politician-panel{position:fixed;right:0;top:0;bottom:0;width:440px;max-width:100vw;background:rgba(10,11,14,.97);border-left:1px solid rgba(255,255,255,.12);z-index:501;overflow-y:auto;padding:32px 28px 60px;transform:translateX(100%);transition:transform .32s cubic-bezier(.34,1.2,.64,1)}
+.sm-politician-panel.open{transform:translateX(0)}
+.sm-panel-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:rgba(255,255,255,.5);transition:all .15s;flex-shrink:0}
+.sm-panel-close:hover{background:rgba(255,255,255,.14);color:#fff}
+.sm-panel-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:21px;font-weight:800;line-height:1.2}
+.sm-panel-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.3);margin-top:3px}
+.sm-panel-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:16px 0 20px}
+.sm-panel-stat{background:rgba(255,255,255,.04);border-radius:10px;padding:12px;text-align:center}
+.sm-panel-stat-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800}
+.sm-panel-stat-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:4px}
+.sm-panel-trade{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:13px 16px;margin-bottom:7px;cursor:pointer;transition:background .15s}
+.sm-panel-trade:hover{background:rgba(255,255,255,.06)}
+.sm-panel-trade.is-buy{border-left:3px solid rgba(0,230,118,.5)}
+.sm-panel-trade.is-sell{border-left:3px solid rgba(255,77,109,.5)}
+/* ── #14 Follow button ── */
+.sm-follow-btn{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:7px 16px;border-radius:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.55);cursor:pointer;transition:all .15s;margin-top:14px;display:inline-block}
+.sm-follow-btn:hover{background:rgba(255,255,255,.11);color:#fff}
+.sm-follow-btn.following{background:rgba(0,230,118,.1);border-color:rgba(0,230,118,.28);color:var(--green)}
+.sm-chip.follow-on{background:rgba(0,230,118,.1);border-color:rgba(0,230,118,.25);color:var(--green)}
+/* ── #8 Insider auto-feed ── */
+.ins-feed-section{margin-bottom:30px}
+.ins-feed-title{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.ins-feed-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+.ins-feed-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.ins-feed-scroll::-webkit-scrollbar{display:none}
+.ins-feed-card{flex-shrink:0;width:150px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px 15px;cursor:pointer;transition:all .2s}
+.ins-feed-card:hover{background:rgba(255,255,255,.07);transform:translateY(-2px)}
+.ins-feed-card.is-buy{border-top:2px solid rgba(0,230,118,.5)}
+.ins-feed-card.is-sell{border-top:2px solid rgba(255,77,109,.5)}
+.ins-feed-ticker{font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.5px}
+.ins-feed-type{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.5px;margin-top:4px}
+.ins-feed-type.buy{color:var(--green)}.ins-feed-type.sell{color:var(--red)}
+.ins-feed-val{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.4);margin-top:8px}
+.ins-feed-name{font-size:10px;color:rgba(255,255,255,.28);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ── #10 Conviction badge ── */
+.ins-conviction-banner{background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(251,191,36,.03));border:1px solid rgba(251,191,36,.22);border-radius:12px;padding:13px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.ins-conviction-badge{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(251,191,36,.15);color:var(--amber);border:1px solid rgba(251,191,36,.25);display:inline-flex;align-items:center;gap:3px;flex-shrink:0}
+/* ── #9 MSPR sparkline ── */
+.mspr-spark-label{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-top:14px;margin-bottom:6px}
+/* ── #12 Price delta badge ── */
+.ins-price-delta{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;display:inline-block}
+.ins-price-delta.pos{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.18)}
+.ins-price-delta.neg{background:rgba(255,77,109,.1);color:var(--red);border:1px solid rgba(255,77,109,.18)}
+/* ── #11 Option exercise section ── */
+.ins-section-divider{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.2);margin:20px 0 10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:8px}
+.ins-section-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.05)}
+/* ── #15 Modal insider mini-cards ── */
+.modal-smart-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .15s}
+.modal-smart-card:hover{background:rgba(255,255,255,.07)}
+.modal-smart-card.is-buy{border-left:2px solid rgba(0,230,118,.55)}
+.modal-smart-card.is-sell{border-left:2px solid rgba(255,77,109,.5)}
+.modal-smart-card.is-congress{border-left:2px solid rgba(251,191,36,.5)}
 </style>
 </head>
 <body>
@@ -1100,20 +1174,58 @@ tbody tr{animation:fadeIn .25s ease both}
             </div>
           </div>
         </div>
+        <div class="sm-stat">
+          <div class="sm-stat-label">Senate vs House Buys</div>
+          <div id="sm-stat-chamber" style="margin-top:8px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);margin-bottom:4px">
+              <span style="color:#a78bfa" id="sm-stat-senate-n">—</span> Senate &nbsp;·&nbsp; <span style="color:#60a5fa" id="sm-stat-house-n">—</span> House
+            </div>
+            <div class="sm-ratio-bar-track" id="sm-chamber-bar" style="display:none">
+              <div id="sm-chamber-senate" style="height:100%;background:#a78bfa;border-radius:2px 0 0 2px;transition:width .8s"></div>
+              <div id="sm-chamber-house" style="height:100%;background:#60a5fa;border-radius:0 2px 2px 0;transition:width .8s"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Filter chips -->
+      <!-- Filter chips row 1: type + chamber + following + search -->
       <div class="sm-chips">
         <button class="sm-chip active" id="sm-c-all"  onclick="smSetFilter('all',this)">All trades</button>
         <button class="sm-chip" id="sm-c-buy"  onclick="smSetFilter('buy',this)">Buys only</button>
         <button class="sm-chip" id="sm-c-sell" onclick="smSetFilter('sell',this)">Sells only</button>
         <button class="sm-chip" id="sm-c-house"   onclick="smSetChamber('House',this)">House</button>
         <button class="sm-chip" id="sm-c-senate"  onclick="smSetChamber('Senate',this)">Senate</button>
+        <button class="sm-chip" id="sm-c-following" onclick="smSetFollowingFilter(this)" style="display:none">⭐ Following</button>
         <div class="sm-search-wrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <input class="sm-search-input" id="sm-q" placeholder="Ticker or name…" oninput="smRender()">
         </div>
       </div>
+      <!-- Filter chips row 2: date + amount + sort + export -->
+      <div class="sm-controls-row">
+        <span class="sm-ctrl-label">Period:</span>
+        <button class="sm-chip active" id="sm-d-all"  onclick="smSetDateRange('all',this)">All</button>
+        <button class="sm-chip" id="sm-d-30"   onclick="smSetDateRange('30',this)">30d</button>
+        <button class="sm-chip" id="sm-d-90"   onclick="smSetDateRange('90',this)">90d</button>
+        <button class="sm-chip" id="sm-d-180"  onclick="smSetDateRange('180',this)">180d</button>
+        <span class="sm-ctrl-label" style="margin-left:6px">Min $:</span>
+        <button class="sm-chip active" id="sm-a-0"   onclick="smSetAmountMin(0,this)">Any</button>
+        <button class="sm-chip" id="sm-a-15"  onclick="smSetAmountMin(15000,this)">$15K+</button>
+        <button class="sm-chip" id="sm-a-50"  onclick="smSetAmountMin(50000,this)">$50K+</button>
+        <button class="sm-chip" id="sm-a-100" onclick="smSetAmountMin(100000,this)">$100K+</button>
+        <button class="sm-chip" id="sm-a-500" onclick="smSetAmountMin(500000,this)">$500K+</button>
+        <span class="sm-ctrl-label" style="margin-left:6px">Sort:</span>
+        <select class="sm-sort-select" id="sm-sort-sel" onchange="smSetSort(this.value)">
+          <option value="recent">Most Recent</option>
+          <option value="largest">Largest Trade</option>
+          <option value="buys">Buys First</option>
+          <option value="sells">Sells First</option>
+        </select>
+        <button class="sm-export-btn" onclick="smExportCSV()">⬇ CSV</button>
+      </div>
+
+      <!-- #6 Cluster / pile-on detection banner -->
+      <div id="sm-cluster-wrap" style="display:none"></div>
 
       <!-- Featured card -->
       <div id="sm-featured-wrap"><!-- populated by JS --></div>
@@ -1130,6 +1242,14 @@ tbody tr{animation:fadeIn .25s ease both}
 
     <!-- ══ INSIDER VIEW ══ -->
     <div id="sm-insider-view" style="display:none">
+
+      <!-- #8 Auto-feed: recent insider buys across key tickers -->
+      <div class="ins-feed-section">
+        <div class="ins-feed-title">Recent Insider Purchases</div>
+        <div class="ins-feed-scroll" id="ins-feed-wrap">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.2);padding:20px 0">Loading…</div>
+        </div>
+      </div>
 
       <!-- Ticker search -->
       <div class="ins-hero-ticker">
@@ -1153,8 +1273,14 @@ tbody tr{animation:fadeIn .25s ease both}
           <div class="mspr-track"><div class="mspr-fill" id="mspr-bar" style="width:50%"></div></div>
           <div class="mspr-range"><span>−100 Max Sell</span><span>Neutral</span><span>+100 Max Buy</span></div>
           <div class="mspr-desc">Monthly Share Purchase Ratio. Aggregates all insider buy/sell volume. Range −100 (all selling) to +100 (all buying). Strongest predictive signal 30–90 days ahead.</div>
+          <!-- #9 MSPR trend sparkline -->
+          <div class="mspr-spark-label">12-month trend</div>
+          <svg id="mspr-sparkline" width="100%" height="40" viewBox="0 0 300 40" preserveAspectRatio="none" style="display:none;overflow:visible"></svg>
         </div>
       </div>
+
+      <!-- #10 Conviction banner (hidden until data loads) -->
+      <div id="ins-conviction-wrap" style="display:none"></div>
 
       <!-- Insider grid -->
       <div id="ins-grid">
@@ -1170,6 +1296,13 @@ tbody tr{animation:fadeIn .25s ease both}
 </div>
 
 <!-- ═══════════════ BOTTOM PILL NAV ═══════════════ --><!-- ═══════════════ BOTTOM PILL NAV ═══════════════ -->
+
+<!-- #3 Politician drill-down panel -->
+<div class="sm-panel-overlay" id="sm-panel-overlay" onclick="smClosePoliticianPanel()"></div>
+<div class="sm-politician-panel" id="sm-politician-panel">
+  <!-- populated by smShowPoliticianPanel() -->
+</div>
+
 <nav id="bottomNav">
   <button class="tab-btn active" id="btn-home" onclick="switchTab('home')" title="Dashboard">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -1376,6 +1509,7 @@ function switchTab(name) {
   }
   if (name === 'smartmoney' && !smLoaded) {
     loadCongressTrades();
+    loadInsiderFeed(); // #8 pre-load insider feed in background
   }
 }
 
@@ -3545,17 +3679,38 @@ document.addEventListener('DOMContentLoaded',()=>{
 //  SMART MONEY — Showcase
 // ══════════════════════════════════════════════════════════
 
-let smAllTrades  = [];
-let smFilter     = 'all';
-let smChamber    = 'all';
-let smLoaded     = false;
-let smShowing    = 20;
-let insAllData   = [];
-let insFilter    = 'all';
+let smAllTrades      = [];
+let smFilter         = 'all';
+let smChamber        = 'all';
+let smLoaded         = false;
+let smShowing        = 20;
+let smSort           = 'recent';
+let smDateRange      = 'all';
+let smAmountMin      = 0;
+let smFollowing      = new Set();
+let smFollowingFilter= false;
+let insAllData       = [];
+let insFilter        = 'all';
+let insAutoData      = [];
+let insLivePrices    = {};
 
-const isBuyTrade  = t => /purchase|buy/i.test(t.type);
-const isSellTrade = t => /sale|sell/i.test(t.type);
+try { smFollowing = new Set(JSON.parse(localStorage.getItem('sm_following')||'[]')); } catch(e) {}
+
+const isBuyTrade  = t => /purchase|buy/i.test(t.type||t.transactionType||'');
+const isSellTrade = t => /sale|sell/i.test(t.type||t.transactionType||'');
 const fmtAmount   = v => v || '—';
+
+// Parse amount string like "$15,001 - $50,000" → lower bound number
+function parseAmountStr(s) {
+  if (!s) return 0;
+  const m = s.match(/\$?([\d,]+)/);
+  if (!m) return 0;
+  const n = parseInt(m[1].replace(/,/g,''));
+  if (/billion/i.test(s)) return n * 1e9;
+  if (/[0-9]m/i.test(s)) return n * 1e6;
+  if (/[0-9]k/i.test(s)) return n * 1e3;
+  return n;
+}
 
 // ── View switcher ──────────────────────────────────────────
 function smSetView(name, btn) {
@@ -3564,25 +3719,45 @@ function smSetView(name, btn) {
   document.getElementById('sm-congress-view').style.display = name === 'congress' ? '' : 'none';
   document.getElementById('sm-insider-view').style.display  = name === 'insider'  ? '' : 'none';
   if (name === 'congress' && !smLoaded) loadCongressTrades();
+  if (name === 'insider') loadInsiderFeed();
 }
 
-// ── Load congressional trades ──────────────────────────────
+// ── Load congressional trades — #13 localStorage 4-hour cache ──
 async function loadCongressTrades() {
   smLoaded = true;
+  // Try cache first (4h TTL)
+  try {
+    const cached = JSON.parse(localStorage.getItem('sm_congress_cache') || '{}');
+    if (cached.trades && cached.ts && (Date.now() - cached.ts) < 4 * 3600 * 1000) {
+      smAllTrades = cached.trades;
+      smUpdateStats();
+      smBuildHotPills();
+      smRender();
+      fetchCongressFresh(); // refresh in background silently
+      return;
+    }
+  } catch(e) {}
+  await fetchCongressFresh();
+}
+
+async function fetchCongressFresh() {
   try {
     const res  = await fetch(`${PROXY}/smartmoney?limit=200`, { signal: AbortSignal.timeout(20000) });
     const json = await res.json();
     smAllTrades = json.trades || [];
+    try { localStorage.setItem('sm_congress_cache', JSON.stringify({ trades: smAllTrades, ts: Date.now() })); } catch(e) {}
     smUpdateStats();
     smBuildHotPills();
     smRender();
   } catch(e) {
-    document.getElementById('sm-grid').innerHTML =
-      `<div class="sm-empty-state" style="grid-column:1/-1">
-        <div class="sm-empty-icon"></div>
-        <div class="sm-empty-text">Failed to load</div>
-        <div class="sm-empty-sub">${e.message}</div>
-      </div>`;
+    if (!smAllTrades.length) {
+      document.getElementById('sm-grid').innerHTML =
+        `<div class="sm-empty-state" style="grid-column:1/-1">
+          <div class="sm-empty-icon"></div>
+          <div class="sm-empty-text">Failed to load</div>
+          <div class="sm-empty-sub">${e.message}</div>
+        </div>`;
+    }
   }
 }
 
@@ -3604,6 +3779,17 @@ function smUpdateStats() {
     document.getElementById('sm-ratio-buy-pct').textContent  = buyPct  + '% buy';
     document.getElementById('sm-ratio-sell-pct').textContent = sellPct + '% sell';
     document.getElementById('sm-ratio-wrap').style.display   = '';
+  }
+  // #2 Senate vs House buy breakdown
+  const senateBuys = smAllTrades.filter(t => isBuyTrade(t) && t.chamber === 'Senate').length;
+  const houseBuys  = smAllTrades.filter(t => isBuyTrade(t) && t.chamber !== 'Senate').length;
+  document.getElementById('sm-stat-senate-n').textContent = senateBuys;
+  document.getElementById('sm-stat-house-n').textContent  = houseBuys;
+  if (senateBuys + houseBuys > 0) {
+    const sp = Math.round((senateBuys / (senateBuys + houseBuys)) * 100);
+    document.getElementById('sm-chamber-senate').style.width = sp + '%';
+    document.getElementById('sm-chamber-house').style.width  = (100-sp) + '%';
+    document.getElementById('sm-chamber-bar').style.display  = 'flex';
   }
 }
 
@@ -3650,18 +3836,174 @@ function smLoadMore() {
   smRender();
 }
 
+// #1 Sort
+function smSetSort(val) {
+  smSort = val;
+  smShowing = 20;
+  smRender();
+}
+
+// #4 Date range filter
+function smSetDateRange(val, btn) {
+  smDateRange = val;
+  document.querySelectorAll('#sm-d-all,#sm-d-30,#sm-d-90,#sm-d-180').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  smShowing = 20;
+  smRender();
+}
+
+// #5 Amount filter
+function smSetAmountMin(val, btn) {
+  smAmountMin = val;
+  document.querySelectorAll('#sm-a-0,#sm-a-15,#sm-a-50,#sm-a-100,#sm-a-500').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  smShowing = 20;
+  smRender();
+}
+
+// #14 Following filter toggle
+function smSetFollowingFilter(btn) {
+  smFollowingFilter = !smFollowingFilter;
+  btn.classList.toggle('follow-on', smFollowingFilter);
+  smShowing = 20;
+  smRender();
+}
+
+// #7 Export to CSV
+function smExportCSV() {
+  let data = smAllTrades.filter(t => {
+    const q = (document.getElementById('sm-q').value||'').toLowerCase().trim();
+    if (q && !t.ticker?.toLowerCase().includes(q) && !t.name?.toLowerCase().includes(q)) return false;
+    if (smFilter === 'buy' && !isBuyTrade(t)) return false;
+    if (smFilter === 'sell' && !isSellTrade(t)) return false;
+    if (smChamber !== 'all' && t.chamber !== smChamber) return false;
+    return true;
+  });
+  const rows = [['Name','Chamber','Ticker','Type','Amount','Trade Date','Disclosed']];
+  data.forEach(t => rows.push([t.name||'',t.chamber||'',t.ticker||'',t.type||'',t.amount||'',t.date||'',t.disclosed||'']));
+  const csv = rows.map(r => r.map(v => `"${(v+'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'congressional_trades.csv';
+  a.click();
+}
+
+// #6 Cluster detection
+function smRenderClusters(data) {
+  const wrap = document.getElementById('sm-cluster-wrap');
+  if (!wrap) return;
+  const now = Date.now(), thirty = 30 * 86400000;
+  const tc = {};
+  data.forEach(t => {
+    if (!isBuyTrade(t) || !t.date || !t.ticker) return;
+    if (now - new Date(t.date).getTime() > thirty) return;
+    if (!tc[t.ticker]) tc[t.ticker] = [];
+    tc[t.ticker].push(t);
+  });
+  const clusters = Object.entries(tc).filter(([,v]) => v.length >= 3).sort((a,b) => b[1].length - a[1].length);
+  if (!clusters.length) { wrap.style.display='none'; return; }
+  wrap.style.display = '';
+  wrap.innerHTML = `<div class="sm-cluster-alert">
+    <div class="sm-cluster-alert-icon">🔥</div>
+    <div class="sm-cluster-alert-text">Pile-on signal — multiple members buying same ticker in 30 days</div>
+    <div class="sm-cluster-alert-pills">${clusters.slice(0,6).map(([tk,v]) =>
+      `<button class="sm-cluster-pill" onclick="smQuickFilter('${tk}')">${tk} <span style="opacity:.55">${v.length}×</span></button>`
+    ).join('')}</div>
+  </div>`;
+}
+
+// #3 Politician profile panel
+function smShowPoliticianPanel(name, event) {
+  if (event) event.stopPropagation();
+  const all = smAllTrades.filter(t => t.name === name);
+  if (!all.length) return;
+  const buys = all.filter(isBuyTrade), sells = all.filter(isSellTrade);
+  const tickers = [...new Set(all.map(t => t.ticker))];
+  const sample = all[0]||{};
+  const party = (sample.party||'').toUpperCase();
+  const isRep = party.includes('R') && !party.includes('D');
+  const isDem = party.includes('D') && !party.includes('R');
+  const avatarCls = isRep?'rep':isDem?'dem':'unk';
+  const initials = name.split(' ').filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?';
+  const isFollowing = smFollowing.has(name);
+  const panel = document.getElementById('sm-politician-panel');
+  panel.innerHTML = `
+    <div class="sm-panel-close" onclick="smClosePoliticianPanel()">✕</div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px">
+      <div class="sm-avatar ${avatarCls}" style="width:46px;height:46px;font-size:13px;flex-shrink:0">${initials}</div>
+      <div><div class="sm-panel-name">${name}</div>
+      <div class="sm-panel-meta">${sample.chamber||'Congress'} · ${tickers.length} ticker${tickers.length!==1?'s':''} traded</div></div>
+    </div>
+    <button class="sm-follow-btn ${isFollowing?'following':''}" onclick="smToggleFollow('${name.replace(/'/g,"\\'")}',this)">
+      ${isFollowing?'⭐ Following':'☆ Follow'}
+    </button>
+    <div class="sm-panel-stats">
+      <div class="sm-panel-stat"><div class="sm-panel-stat-val">${all.length}</div><div class="sm-panel-stat-lbl">Trades</div></div>
+      <div class="sm-panel-stat"><div class="sm-panel-stat-val" style="color:var(--green)">${buys.length}</div><div class="sm-panel-stat-lbl">Buys</div></div>
+      <div class="sm-panel-stat"><div class="sm-panel-stat-val" style="color:var(--red)">${sells.length}</div><div class="sm-panel-stat-lbl">Sells</div></div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Most traded</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px">
+      ${tickers.slice(0,10).map(tk=>`<button class="sm-ticker-pill" onclick="smClosePoliticianPanel();smQuickFilter('${tk}')">${tk}</button>`).join('')}
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Trade history</div>
+    ${all.slice(0,25).map(t => {
+      const buy=isBuyTrade(t), sell=isSellTrade(t);
+      const cls=buy?'is-buy':sell?'is-sell':'';
+      return `<div class="sm-panel-trade ${cls}" onclick="smClosePoliticianPanel();smQuickFilter('${t.ticker}')">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800">${t.ticker||'—'}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:${buy?'var(--green)':sell?'var(--red)':'var(--amber)'}">${buy?'▲ BUY':sell?'▼ SELL':'◆'}</span>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);margin-top:5px">${fmtAmount(t.amount)} · ${t.date||'—'}</div>
+      </div>`;
+    }).join('')}`;
+  document.getElementById('sm-panel-overlay').classList.add('open');
+  setTimeout(() => panel.classList.add('open'), 10);
+}
+
+function smClosePoliticianPanel() {
+  document.getElementById('sm-panel-overlay').classList.remove('open');
+  document.getElementById('sm-politician-panel').classList.remove('open');
+}
+
+// #14 Toggle follow
+function smToggleFollow(name, btn) {
+  if (smFollowing.has(name)) { smFollowing.delete(name); btn.textContent='☆ Follow'; btn.classList.remove('following'); }
+  else { smFollowing.add(name); btn.textContent='⭐ Following'; btn.classList.add('following'); }
+  try { localStorage.setItem('sm_following', JSON.stringify([...smFollowing])); } catch(e) {}
+  const fc = document.getElementById('sm-c-following');
+  if (fc) fc.style.display = smFollowing.size > 0 ? '' : 'none';
+}
+
 function smRender() {
   const q = (document.getElementById('sm-q').value||'').toLowerCase().trim();
+
+  // Date cutoff (#4)
+  let cutoff = null;
+  if (smDateRange !== 'all') { cutoff = new Date(); cutoff.setDate(cutoff.getDate() - parseInt(smDateRange)); }
 
   let data = smAllTrades.filter(t => {
     if (q && !t.ticker?.toLowerCase().includes(q) && !t.name?.toLowerCase().includes(q)) return false;
     if (smFilter === 'buy'  && !isBuyTrade(t))  return false;
     if (smFilter === 'sell' && !isSellTrade(t)) return false;
     if (smChamber !== 'all' && t.chamber !== smChamber) return false;
+    if (cutoff && t.date && new Date(t.date) < cutoff) return false;
+    if (smAmountMin > 0 && parseAmountStr(t.amount||'') < smAmountMin) return false;  // #5
+    if (smFollowingFilter && !smFollowing.has(t.name)) return false;  // #14
     return true;
   });
 
-  // Featured card — top trade (most recent buy with largest named amount)
+  // Sort (#1)
+  if (smSort === 'recent')  data.sort((a,b) => new Date(b.date)-new Date(a.date));
+  else if (smSort === 'largest') data.sort((a,b) => parseAmountStr(b.amount||'')-parseAmountStr(a.amount||''));
+  else if (smSort === 'buys')  data.sort((a,b) => (isBuyTrade(a)?0:1)-(isBuyTrade(b)?0:1)||new Date(b.date)-new Date(a.date));
+  else if (smSort === 'sells') data.sort((a,b) => (isSellTrade(a)?0:1)-(isSellTrade(b)?0:1)||new Date(b.date)-new Date(a.date));
+
+  // #6 Cluster detection
+  smRenderClusters(data);
+
+  // Featured card — top trade
   const featured = data.find(t => isBuyTrade(t) && t.amount) || data[0];
   renderFeatured(featured);
 
@@ -3732,7 +4074,7 @@ function smRender() {
         <div class="sm-avatar ${avatarCls}" title="${name}">${initials}</div>
       </div>
       <div class="sm-tc-amount">${fmtAmount(t.amount)} <div class="sm-size-dots">${sizeDotsHtml}</div></div>
-      <div class="sm-tc-name">${name}</div>
+      <div class="sm-tc-name" onclick="smShowPoliticianPanel('${name}',event)" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="View ${name}'s full trade history">${name}</div>
       <div class="sm-tc-chamber">${chmb} ${partyBadge}</div>
       <div class="sm-tc-date">${t.date||'—'}${t.disclosed?' · disclosed '+t.disclosed:''}</div>
       ${glowCls ? `<div class="sm-tc-glow ${glowCls}"></div>` : ''}
@@ -3821,6 +4163,7 @@ async function loadInsiders() {
     const sent = sentRes.ok ? ((await sentRes.json()).data||[]) : [];
     insRenderMSPR(sent, ticker);
     insRender();
+    fetchInsiderLivePrice(ticker).then(() => insRender()); // #12 fetch price then re-render with delta
   } catch(e) {
     document.getElementById('ins-grid').innerHTML =
       `<div class="sm-empty-state">
@@ -3836,13 +4179,15 @@ function loadInsiderData() { loadInsiders(); }
 
 function insRenderMSPR(data, ticker) {
   if (!data.length) return;
-  const mspr = data.at(-1)?.mspr ?? 0;
-  const col  = mspr > 20 ? 'var(--green)' : mspr < -20 ? 'var(--red)' : 'var(--amber)';
-  const lbl  = mspr > 60 ? 'Insiders are buying aggressively'
-             : mspr > 20 ? 'Mild insider buy bias'
-             : mspr < -60 ? 'Heavy insider selling'
-             : mspr < -20 ? 'Mild insider sell bias' : 'Neutral — mixed signals';
-  const pct  = Math.round(((mspr + 100) / 200) * 100);
+  const sorted = [...data].sort((a,b) => (a.year*100+a.month)-(b.year*100+b.month));
+  const last   = sorted.at(-1);
+  const mspr   = last?.mspr ?? 0;
+  const col    = mspr > 20 ? 'var(--green)' : mspr < -20 ? 'var(--red)' : 'var(--amber)';
+  const lbl    = mspr > 60 ? 'Insiders buying aggressively'
+               : mspr > 20 ? 'Mild insider buy bias'
+               : mspr < -60 ? 'Heavy insider selling'
+               : mspr < -20 ? 'Mild insider sell bias' : 'Neutral — mixed signals';
+  const pct    = Math.round(((mspr + 100) / 200) * 100);
   document.getElementById('mspr-num').textContent   = mspr.toFixed(1);
   document.getElementById('mspr-num').style.color   = col;
   document.getElementById('mspr-label').textContent = lbl;
@@ -3850,6 +4195,28 @@ function insRenderMSPR(data, ticker) {
   document.getElementById('mspr-bar').style.width      = pct + '%';
   document.getElementById('mspr-bar').style.background = col;
   document.getElementById('ins-mspr-card').style.display = '';
+  // #9 Sparkline — last 12 months of MSPR
+  const spark = document.getElementById('mspr-sparkline');
+  if (spark && sorted.length >= 2) {
+    const pts = sorted.slice(-12);
+    const W=300, H=40, pad=4;
+    const vals = pts.map(p => p.mspr ?? 0);
+    const mn = Math.min(...vals,-20), mx = Math.max(...vals,20);
+    const sx = i => pad + (i/(pts.length-1)) * (W-pad*2);
+    const sy = v => H - pad - ((v-mn)/(mx-mn||1)) * (H-pad*2);
+    const path = pts.map((p,i) => `${i===0?'M':'L'}${sx(i).toFixed(1)},${sy(vals[i]).toFixed(1)}`).join(' ');
+    const area = pts.map((p,i) => `${i===0?'M':'L'}${sx(i).toFixed(1)},${sy(vals[i]).toFixed(1)}`).join(' ')
+      + ` L${sx(pts.length-1).toFixed(1)},${H} L${sx(0).toFixed(1)},${H} Z`;
+    const lineCol = mspr>0?'#00e676':mspr<0?'#ff4d6d':'#fbbf24';
+    const fillCol = mspr>0?'rgba(0,230,118,.12)':mspr<0?'rgba(255,77,109,.12)':'rgba(251,191,36,.1)';
+    const zeroY  = sy(0).toFixed(1);
+    spark.innerHTML = `<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${lineCol}" stop-opacity=".3"/><stop offset="100%" stop-color="${lineCol}" stop-opacity="0"/></linearGradient></defs>
+      <line x1="${pad}" y1="${zeroY}" x2="${W-pad}" y2="${zeroY}" stroke="rgba(255,255,255,.08)" stroke-width="1" stroke-dasharray="3,3"/>
+      <path d="${area}" fill="url(#sg)"/>
+      <path d="${path}" fill="none" stroke="${lineCol}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${sx(pts.length-1).toFixed(1)}" cy="${sy(vals[vals.length-1]).toFixed(1)}" r="3" fill="${lineCol}"/>`;
+    spark.style.display = '';
+  }
 }
 
 function insSetFilter(type, btn) {
@@ -3865,10 +4232,34 @@ function insSetFilter(type, btn) {
 
 function insRender() {
   const amap = { P:'Purchase', S:'Sale', A:'Award', M:'Option Exercise', D:'Disposition', G:'Gift', F:'Tax Withhold' };
-  let buys  = insAllData.filter(t => t.transactionCode === 'P');
-  let sells = insAllData.filter(t => t.transactionCode === 'S');
-  let other = insAllData.filter(t => t.transactionCode !== 'P' && t.transactionCode !== 'S');
-  let data  = insFilter === 'buy' ? buys : insFilter === 'sell' ? sells : insAllData;
+  const buys    = insAllData.filter(t => t.transactionCode === 'P');
+  const sells   = insAllData.filter(t => t.transactionCode === 'S');
+  const options = insAllData.filter(t => t.transactionCode === 'M');  // #11 separated
+  const other   = insAllData.filter(t => !['P','S','M'].includes(t.transactionCode));
+  let   data    = insFilter === 'buy' ? buys : insFilter === 'sell' ? sells
+                : insAllData.filter(t => t.transactionCode !== 'M'); // #11 exclude exercises from default
+
+  if (!data.length && insFilter === 'all') data = insAllData; // fallback if all are exercises
+
+  // #10 Conviction: 3+ open-market buys within 90 days = cluster
+  const recentBuys = buys.filter(t => t.transactionDate && (Date.now()-new Date(t.transactionDate).getTime()) < 90*86400000);
+  const isConviction = recentBuys.length >= 3;
+  const convictionEl = document.getElementById('ins-conviction-wrap');
+  if (convictionEl) {
+    if (isConviction) {
+      convictionEl.style.display='';
+      convictionEl.innerHTML=`<div class="ins-conviction-banner">
+        <span style="font-size:18px">🔥</span>
+        <div style="flex:1">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700">Cluster buy signal</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">${recentBuys.length} open-market purchases by different insiders in the last 90 days</div>
+        </div>
+        <span class="ins-conviction-badge">🔥 HIGH CONVICTION</span>
+      </div>`;
+    } else {
+      convictionEl.style.display='none';
+    }
+  }
 
   if (!data.length) {
     document.getElementById('ins-grid').innerHTML =
@@ -3880,62 +4271,124 @@ function insRender() {
     return;
   }
 
-  const renderGroup = (items, title) => {
-    if (!items.length) return '';
-    return `<div class="ins-section-title">${title} <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:400;color:rgba(255,255,255,.25)">${items.length}</span></div>
-    <div class="ins-grid">
-      ${items.slice(0,30).map(t => {
-        const code  = t.transactionCode || '';
-        const buy   = code === 'P', sell = code === 'S';
-        const cardCls = buy ? 'is-buy' : sell ? 'is-sell' : 'is-other';
-        const typCls  = buy ? 'buy'   : sell ? 'sell'   : 'other';
-        const typLbl  = buy ? '▲ PURCHASE' : sell ? '▼ SALE' : `◆ ${amap[code]||code}`;
-        const value   = (t.share && t.price)
-          ? '$' + (t.share * t.price).toLocaleString(undefined, { maximumFractionDigits: 0 }) : null;
-        const shares  = t.share ? Number(t.share).toLocaleString() + ' shares' : null;
-        const valCol  = buy ? 'var(--green)' : sell ? 'var(--red)' : 'var(--amber)';
-
-        // ── Insider avatar & role badge ──
-        const rawTitle = (t.officerTitle || t.reportingRelationship || '').toUpperCase();
-        const isCEO = /CEO|CHIEF EXEC|PRESIDENT/.test(rawTitle);
-        const isCFO = /CFO|CHIEF FIN|TREASURER/.test(rawTitle);
-        const isDir = /DIRECTOR|CHAIR/.test(rawTitle);
-        const isOwn = /10%|MAJOR|OWNER/.test(rawTitle);
-        const roleKey = isCEO ? 'ceo' : isCFO ? 'cfo' : isDir ? 'dir' : isOwn ? 'own' : 'def';
-        const roleLabel = isCEO ? 'CEO' : isCFO ? 'CFO' : isDir ? 'DIR' : isOwn ? '10%+' : null;
-        const name = t.name || '—';
-        const initials = name.split(' ').filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,2) || '?';
-        const roleBadgeHtml = roleLabel ? `<span class="ins-role-badge ${roleKey}">${roleLabel}</span>` : '';
-
-        return `<div class="ins-card-new ${cardCls}">
-          <div class="ins-avatar ${roleKey}" title="${rawTitle||'Insider'}">${initials}</div>
-          <div>
-            <div class="ins-card-name">${name}</div>
-            <div class="ins-card-title-row">
-              <span class="ins-card-title">${t.officerTitle||t.reportingRelationship||'—'}</span>
-              ${roleBadgeHtml}
-            </div>
-          </div>
-          <div style="text-align:right">
-            <div class="ins-card-type ${typCls}">${typLbl}</div>
-            <div class="ins-card-value" style="color:${valCol}">${value||shares||'—'}</div>
-            <div class="ins-card-shares">${shares&&value?shares+' @ $'+Number(t.price).toFixed(2):''}</div>
-          </div>
-          <div class="ins-card-date" style="grid-column:1/-1">${t.transactionDate||t.filingDate||'—'}</div>
-        </div>`;
-      }).join('')}
+  const renderCard = t => {
+    const code  = t.transactionCode || '';
+    const buy   = code === 'P', sell = code === 'S';
+    const cardCls = buy ? 'is-buy' : sell ? 'is-sell' : 'is-other';
+    const typCls  = buy ? 'buy'   : sell ? 'sell'   : 'other';
+    const typLbl  = buy ? '▲ PURCHASE' : sell ? '▼ SALE' : `◆ ${amap[code]||code}`;
+    const value   = (t.share && t.price) ? '$' + (t.share * t.price).toLocaleString(undefined, { maximumFractionDigits: 0 }) : null;
+    const shares  = t.share ? Number(t.share).toLocaleString() + ' shares' : null;
+    const valCol  = buy ? 'var(--green)' : sell ? 'var(--red)' : 'var(--amber)';
+    // #12 Price delta
+    let deltaHtml = '';
+    const sym = t.symbol || (document.getElementById('ins-q')||{}).value || '';
+    if (buy && t.price && sym && insLivePrices[sym]) {
+      const now = insLivePrices[sym], then = Number(t.price);
+      const pct = ((now-then)/then*100).toFixed(1);
+      const pos = now >= then;
+      deltaHtml = ` <span class="ins-price-delta ${pos?'pos':'neg'}">${pos?'+':''}${pct}% since trade</span>`;
+    }
+    // Role
+    const rawTitle = (t.officerTitle || t.reportingRelationship || '').toUpperCase();
+    const isCEO = /CEO|CHIEF EXEC|PRESIDENT/.test(rawTitle);
+    const isCFO = /CFO|CHIEF FIN|TREASURER/.test(rawTitle);
+    const isDir = /DIRECTOR|CHAIR/.test(rawTitle);
+    const isOwn = /10%|MAJOR|OWNER/.test(rawTitle);
+    const roleKey = isCEO?'ceo':isCFO?'cfo':isDir?'dir':isOwn?'own':'def';
+    const roleLabel = isCEO?'CEO':isCFO?'CFO':isDir?'DIR':isOwn?'10%+':null;
+    const name = t.name||'—';
+    const initials = name.split(' ').filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?';
+    const roleBadgeHtml = roleLabel?`<span class="ins-role-badge ${roleKey}">${roleLabel}</span>`:'';
+    return `<div class="ins-card-new ${cardCls}">
+      <div class="ins-avatar ${roleKey}" title="${rawTitle||'Insider'}">${initials}</div>
+      <div>
+        <div class="ins-card-name">${name}</div>
+        <div class="ins-card-title-row">
+          <span class="ins-card-title">${t.officerTitle||t.reportingRelationship||'—'}</span>
+          ${roleBadgeHtml}
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div class="ins-card-type ${typCls}">${typLbl}</div>
+        <div class="ins-card-value" style="color:${valCol}">${value||shares||'—'}</div>
+        <div class="ins-card-shares">${shares&&value?shares+' @ $'+Number(t.price).toFixed(2):''}${deltaHtml}</div>
+      </div>
+      <div class="ins-card-date" style="grid-column:1/-1">${t.transactionDate||t.filingDate||'—'}</div>
     </div>`;
   };
 
+  const renderGroup = (items, title) => {
+    if (!items.length) return '';
+    return `<div class="ins-section-title">${title} <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:400;color:rgba(255,255,255,.25)">${items.length}</span></div>
+    <div class="ins-grid">${items.slice(0,30).map(renderCard).join('')}</div>`;
+  };
+
+  // #11 Render with option exercises clearly separated
   if (insFilter === 'all') {
-    document.getElementById('ins-grid').innerHTML =
-      renderGroup(buys, 'Purchases') +
-      renderGroup(sells, 'Sales') +
-      renderGroup(other, 'Other');
+    let html = renderGroup(buys, 'Open-Market Purchases') + renderGroup(sells, 'Sales') + renderGroup(other, 'Other');
+    if (options.length) html += `<div class="ins-section-divider">Option Exercises <span style="opacity:.5">${options.length}</span> <span style="opacity:.4;font-size:8px">— lower signal, excluded from default</span></div>
+      <div class="ins-grid">${options.slice(0,10).map(renderCard).join('')}</div>`;
+    document.getElementById('ins-grid').innerHTML = html;
   } else {
-    document.getElementById('ins-grid').innerHTML = renderGroup(data,
-      insFilter === 'buy' ? 'Purchases' : 'Sales');
+    document.getElementById('ins-grid').innerHTML = renderGroup(data, insFilter==='buy'?'Open-Market Purchases':'Sales');
   }
+}
+
+// ── #8 Auto-feed: recent insider purchases across key tickers ──
+const INSIDER_WATCH = ['AAPL','MSFT','NVDA','AMZN','META','GOOGL','TSLA','AMD','JPM','BAC',
+  'XOM','CVX','UNH','JNJ','PFE','ABBV','LMT','BA','PLTR','COIN','V','MA','AVGO','INTC','GS'];
+
+async function loadInsiderFeed() {
+  const wrap = document.getElementById('ins-feed-wrap');
+  if (!wrap) return;
+  if (insAutoData.length) { renderInsiderFeed(); return; } // cached
+  try {
+    const BATCH = 5;
+    const results = [];
+    for (let i=0; i<INSIDER_WATCH.length; i+=BATCH) {
+      const batch = INSIDER_WATCH.slice(i, i+BATCH);
+      const batchRes = await Promise.all(batch.map(async sym => {
+        try {
+          const r = await fetch(`${PROXY}/insider?symbol=${sym}`, { signal: AbortSignal.timeout(8000) });
+          if (!r.ok) return [];
+          const d = await r.json();
+          return (d.data||[]).filter(t => t.transactionCode==='P').slice(0,4).map(t=>({...t,symbol:sym}));
+        } catch(e) { return []; }
+      }));
+      batchRes.flat().forEach(t => results.push(t));
+    }
+    insAutoData = results.filter(t=>t.transactionDate).sort((a,b)=>new Date(b.transactionDate)-new Date(a.transactionDate)).slice(0,30);
+    renderInsiderFeed();
+  } catch(e) {
+    if (wrap) wrap.innerHTML='<div style="font-size:10px;color:rgba(255,255,255,.2);padding:8px">Unable to load</div>';
+  }
+}
+
+function renderInsiderFeed() {
+  const wrap = document.getElementById('ins-feed-wrap');
+  if (!wrap || !insAutoData.length) return;
+  wrap.innerHTML = insAutoData.slice(0,20).map(t => {
+    const buy = t.transactionCode==='P';
+    const val = (t.share&&t.price)?'$'+(t.share*t.price).toLocaleString(undefined,{maximumFractionDigits:0}):null;
+    const role = (t.officerTitle||'').replace(/chief executive officer/i,'CEO').replace(/chief financial officer/i,'CFO').split(/\s+/).slice(0,3).join(' ');
+    return `<div class="ins-feed-card ${buy?'is-buy':'is-sell'}" onclick="document.getElementById('ins-q').value='${t.symbol}';loadInsiders()">
+      <div class="ins-feed-ticker">${t.symbol}</div>
+      <div class="ins-feed-type ${buy?'buy':'sell'}">${buy?'▲ PURCHASE':'▼ SALE'}</div>
+      <div class="ins-feed-val">${val||'—'}</div>
+      <div class="ins-feed-name">${t.name||'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+// Fetch current price for #12 price delta, called after insiders load
+async function fetchInsiderLivePrice(ticker) {
+  try {
+    const res = await fetch(`${PROXY}/yf/quote?symbols=${ticker}`, { signal: AbortSignal.timeout(6000) });
+    const d   = await res.json();
+    const q   = d?.quoteResponse?.result?.[0];
+    if (q?.regularMarketPrice) insLivePrices[ticker] = q.regularMarketPrice;
+  } catch(e) {}
 }
 
 // ── Modal insider + congress ───────────────────────────────
