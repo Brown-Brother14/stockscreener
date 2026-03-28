@@ -841,6 +841,88 @@ tbody tr{animation:fadeIn .25s ease both}
 #eduOverlay.open .edu-anim:nth-child(3) { transition-delay: .18s }
 #eduOverlay.open .edu-anim:nth-child(4) { transition-delay: .24s }
 #eduOverlay.open .edu-anim:nth-child(5) { transition-delay: .30s }
+
+/* ══════════════════════════════════════════
+   AI CHAT TAB
+══════════════════════════════════════════ */
+.chat-msg { display: flex; }
+.chat-msg.user { justify-content: flex-end; }
+.chat-bubble {
+  max-width: 82%;
+  padding: 12px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.75;
+}
+.ai-bubble {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.09);
+  color: rgba(255,255,255,.88);
+  border-radius: 4px 16px 16px 16px;
+}
+.user-bubble {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.14);
+  color: #fff;
+  border-radius: 16px 4px 16px 16px;
+}
+.chat-typing {
+  display: flex; align-items: center; gap: 5px;
+  padding: 14px 18px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 4px 16px 16px 16px;
+  width: fit-content;
+}
+.chat-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,.28);
+  animation: chatbounce .9s ease-in-out infinite;
+}
+.chat-dot:nth-child(2) { animation-delay: .18s; }
+.chat-dot:nth-child(3) { animation-delay: .36s; }
+@keyframes chatbounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-7px); }
+}
+#chatInputBar {
+  display: none;
+  position: fixed;
+  bottom: 100px;
+  left: 0; right: 0;
+  padding: 10px 16px;
+  background: rgba(5,5,6,.96);
+  border-top: 1px solid var(--glass-border);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  z-index: 150;
+}
+#chatInput {
+  flex: 1;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #fff;
+  outline: none;
+  transition: border-color .2s;
+  width: 100%;
+}
+#chatInput::placeholder { color: rgba(255,255,255,.3); }
+#chatInput:focus { border-color: rgba(255,255,255,.3); }
+#chatSendBtn {
+  background: #fff; color: #000; border: none;
+  border-radius: 12px;
+  padding: 12px 22px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: opacity .15s, transform .15s;
+}
+#chatSendBtn:hover { opacity: .88; transform: translateY(-1px); }
+#chatSendBtn:disabled { opacity: .4; cursor: wait; transform: none; }
 </style>
 </head>
 <body>
@@ -1438,6 +1520,31 @@ tbody tr{animation:fadeIn .25s ease both}
   </div>
 </div>
 
+<!-- ═══════════════ AI CHAT TAB ═══════════════ -->
+<div id="tab-aichat" class="tab-panel">
+  <div style="max-width:800px;margin:0 auto;padding:0 20px">
+    <div style="padding:28px 0 16px">
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.4px">AI Assistant</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">Ask anything about stocks, markets, or trading</div>
+    </div>
+    <div id="chatSuggestions" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+      <button class="preset-pill" onclick="askSuggestion(this)">What does RSI divergence mean?</button>
+      <button class="preset-pill" onclick="askSuggestion(this)">Best sectors when VIX is high?</button>
+      <button class="preset-pill" onclick="askSuggestion(this)">How do I read MACD crossovers?</button>
+      <button class="preset-pill" onclick="askSuggestion(this)">Explain support and resistance</button>
+      <button class="preset-pill" onclick="askSuggestion(this)">What is a breakout setup?</button>
+      <button class="preset-pill" onclick="askSuggestion(this)">How does ADX work?</button>
+    </div>
+    <div id="chatMessages" style="display:flex;flex-direction:column;gap:16px;padding-bottom:180px">
+      <div class="chat-msg">
+        <div class="chat-bubble ai-bubble">
+          Hey! I'm your AlgoScreen AI. Ask me anything — stocks, indicators, sectors, strategies, or what any metric on the screener means.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════ BOTTOM PILL NAV ═══════════════ --><!-- ═══════════════ BOTTOM PILL NAV ═══════════════ -->
 
 <!-- #3 Politician drill-down panel -->
@@ -1464,6 +1571,9 @@ tbody tr{animation:fadeIn .25s ease both}
   </button>
   <button class="tab-btn" id="btn-smartmoney" onclick="switchTab('smartmoney')" title="Smart Money">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+  </button>
+  <button class="tab-btn" id="btn-aichat" onclick="switchTab('aichat')" title="AI Chat">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
   </button>
 </nav>
 
@@ -1629,6 +1739,9 @@ let newsAutoLoaded = false;
 let calendarLoaded = false;
 
 function switchTab(name) {
+  const chatBar = document.getElementById('chatInputBar');
+  if (chatBar) chatBar.style.display = name === 'aichat' ? 'block' : 'none';
+  if (name === 'aichat') setTimeout(() => document.getElementById('chatInput')?.focus(), 150);
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
@@ -4961,6 +5074,110 @@ function applyFilters(filters) {
     </div>
   </div>
 </div>
+<!-- AI CHAT INPUT BAR -->
+<div id="chatInputBar">
+  <div style="display:flex;gap:10px;max-width:800px;margin:0 auto;align-items:center">
+    <input id="chatInput" type="text" placeholder="Ask about stocks, indicators, strategies..."
+      onkeydown="if(event.key==='Enter'){event.preventDefault();sendChatMessage()}">
+    <button onclick="sendChatMessage()" id="chatSendBtn">Send ↑</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  AI CHAT
+// ══════════════════════════════════════════════════════════════
+const chatHistory = [];
+
+function askSuggestion(btn) {
+  document.getElementById('chatInput').value = btn.textContent.trim();
+  document.getElementById('chatSuggestions').style.display = 'none';
+  sendChatMessage();
+}
+
+async function sendChatMessage() {
+  const input   = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('chatSendBtn');
+  const text    = input.value.trim();
+  if (!text || sendBtn.disabled) return;
+
+  document.getElementById('chatSuggestions').style.display = 'none';
+  input.value = '';
+  input.disabled  = true;
+  sendBtn.disabled = true;
+
+  chatHistory.push({ role: 'user', content: text });
+  appendChatMessage('user', text);
+
+  const typingId = 'typing-' + Date.now();
+  const typingEl = document.createElement('div');
+  typingEl.className = 'chat-msg';
+  typingEl.id = typingId;
+  typingEl.innerHTML = '<div class="chat-typing"><div class="chat-dot"></div><div class="chat-dot"></div><div class="chat-dot"></div></div>';
+  document.getElementById('chatMessages').appendChild(typingEl);
+  scrollChat();
+
+  try {
+    const res = await fetch(`${PROXY}/ai/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: chatHistory }),
+      signal: AbortSignal.timeout(30000)
+    });
+
+    if (!res.ok) throw new Error('AI request failed');
+
+    document.getElementById(typingId)?.remove();
+    const aiEl   = appendChatMessage('ai', '');
+    const bubble = aiEl.querySelector('.chat-bubble');
+
+    const reader  = res.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    let buffer   = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (raw === '[DONE]') break;
+        try {
+          const token = JSON.parse(raw)?.response || '';
+          if (token) { fullText += token; bubble.textContent = fullText; scrollChat(); }
+        } catch(e) {}
+      }
+    }
+
+    if (fullText) chatHistory.push({ role: 'assistant', content: fullText });
+
+  } catch(e) {
+    document.getElementById(typingId)?.remove();
+    appendChatMessage('ai', 'The AI is unavailable right now — please try again.');
+  }
+
+  input.disabled  = false;
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+function appendChatMessage(role, text) {
+  const el = document.createElement('div');
+  el.className = `chat-msg${role === 'user' ? ' user' : ''}`;
+  el.innerHTML = `<div class="chat-bubble ${role === 'user' ? 'user-bubble' : 'ai-bubble'}">${text}</div>`;
+  document.getElementById('chatMessages').appendChild(el);
+  scrollChat();
+  return el;
+}
+
+function scrollChat() {
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+</script>
 
 </body>
 </html>
