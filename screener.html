@@ -843,86 +843,178 @@ tbody tr{animation:fadeIn .25s ease both}
 #eduOverlay.open .edu-anim:nth-child(5) { transition-delay: .30s }
 
 /* ══════════════════════════════════════════
-   AI CHAT TAB
+   AI CHAT TAB — UPGRADED
 ══════════════════════════════════════════ */
-.chat-msg { display: flex; }
-.chat-msg.user { justify-content: flex-end; }
+
+/* Message row */
+.chat-msg { display:flex; gap:10px; align-items:flex-start; animation: msgIn .28s cubic-bezier(.22,1,.36,1) both; }
+.chat-msg.user { flex-direction:row-reverse; }
+@keyframes msgIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+/* AI avatar dot */
+.chat-avatar {
+  width:28px; height:28px; border-radius:50%; flex-shrink:0; margin-top:2px;
+  background:linear-gradient(135deg,rgba(0,230,118,.2),rgba(96,165,250,.15));
+  border:1px solid rgba(0,230,118,.25);
+  display:flex; align-items:center; justify-content:center;
+}
+.chat-avatar-dot {
+  width:7px; height:7px; border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 8px rgba(0,230,118,.6);
+  animation: dotPulse2 2.4s ease-in-out infinite;
+}
+@keyframes dotPulse2 { 0%,100%{opacity:.7;box-shadow:0 0 6px rgba(0,230,118,.4)} 50%{opacity:1;box-shadow:0 0 14px rgba(0,230,118,.8)} }
+
+/* Bubble wrapper (holds bubble + meta row) */
+.chat-bubble-wrap { display:flex; flex-direction:column; gap:5px; max-width:82%; }
+
+/* Bubbles */
 .chat-bubble {
-  max-width: 82%;
-  padding: 12px 16px;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  line-height: 1.75;
+  padding:14px 18px;
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  line-height:1.78;
+  position:relative;
+  overflow:hidden;
 }
 .ai-bubble {
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.09);
-  color: rgba(255,255,255,.88);
-  border-radius: 4px 16px 16px 16px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.09);
+  color:rgba(255,255,255,.88);
+  border-radius:4px 16px 16px 16px;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.ai-bubble::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,230,118,.2),rgba(255,255,255,.12),transparent);
 }
 .user-bubble {
-  background: rgba(255,255,255,.1);
-  border: 1px solid rgba(255,255,255,.14);
-  color: #fff;
-  border-radius: 16px 4px 16px 16px;
+  background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.14);
+  color:#fff;
+  border-radius:16px 4px 16px 16px;
 }
+
+/* Markdown rendered content */
+.chat-bubble p { margin:0 0 10px; }
+.chat-bubble p:last-child { margin-bottom:0; }
+.chat-bubble strong { color:#fff; font-weight:600; }
+.chat-bubble em { color:rgba(255,255,255,.7); font-style:italic; }
+.chat-bubble ul, .chat-bubble ol { margin:8px 0 10px 18px; display:flex; flex-direction:column; gap:4px; }
+.chat-bubble li { color:rgba(255,255,255,.78); font-size:13.5px; line-height:1.65; }
+.chat-bubble h3 { font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:700; color:#fff; margin:12px 0 6px; letter-spacing:-.2px; }
+.chat-bubble code { font-family:'JetBrains Mono',monospace; font-size:11.5px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.1); border-radius:4px; padding:1px 6px; color:var(--green); }
+.chat-bubble hr { border:none; border-top:1px solid rgba(255,255,255,.08); margin:12px 0; }
+
+/* Blinking cursor during stream */
+.chat-cursor {
+  display:inline-block; width:2px; height:14px;
+  background:var(--green); margin-left:2px; vertical-align:middle;
+  border-radius:1px; animation:cursorBlink2 .7s step-end infinite;
+}
+@keyframes cursorBlink2 { 50%{opacity:0} }
+
+/* Meta row (timestamp + copy) */
+.chat-meta {
+  display:flex; align-items:center; gap:10px;
+  padding:0 4px;
+  opacity:0; transition:opacity .2s;
+}
+.chat-msg:hover .chat-meta { opacity:1; }
+.chat-time { font-family:'JetBrains Mono',monospace; font-size:9px; color:rgba(255,255,255,.25); }
+.chat-copy {
+  font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:600;
+  color:rgba(255,255,255,.25); background:none; border:none; cursor:pointer;
+  padding:2px 6px; border-radius:4px; transition:all .15s;
+}
+.chat-copy:hover { background:rgba(255,255,255,.07); color:rgba(255,255,255,.6); }
+
+/* Typing indicator */
 .chat-typing {
-  display: flex; align-items: center; gap: 5px;
-  padding: 14px 18px;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 4px 16px 16px 16px;
-  width: fit-content;
+  display:flex; align-items:center; gap:5px;
+  padding:14px 18px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:4px 16px 16px 16px;
+  backdrop-filter:blur(12px);
 }
 .chat-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: rgba(255,255,255,.28);
-  animation: chatbounce .9s ease-in-out infinite;
+  width:6px; height:6px; border-radius:50%;
+  background:rgba(0,230,118,.4);
+  animation:chatbounce .9s ease-in-out infinite;
 }
-.chat-dot:nth-child(2) { animation-delay: .18s; }
-.chat-dot:nth-child(3) { animation-delay: .36s; }
-@keyframes chatbounce {
-  0%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-7px); }
+.chat-dot:nth-child(2){animation-delay:.18s}
+.chat-dot:nth-child(3){animation-delay:.36s}
+@keyframes chatbounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}}
+
+/* Follow-up chips */
+.chat-followups {
+  display:flex; flex-wrap:wrap; gap:7px;
+  margin-top:4px; padding-left:38px;
+  animation: msgIn .35s .1s cubic-bezier(.22,1,.36,1) both;
 }
+.chat-followup-chip {
+  font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:600;
+  padding:5px 12px; border-radius:20px;
+  background:rgba(0,230,118,.06); border:1px solid rgba(0,230,118,.18);
+  color:rgba(0,230,118,.8); cursor:pointer;
+  transition:all .15s;
+}
+.chat-followup-chip:hover { background:rgba(0,230,118,.12); color:var(--green); border-color:rgba(0,230,118,.35); }
+
+/* Input bar */
 #chatInputBar {
-  display: none;
-  position: fixed;
-  bottom: 100px;
-  left: 0; right: 0;
-  padding: 10px 16px;
-  background: rgba(5,5,6,.96);
-  border-top: 1px solid var(--glass-border);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  z-index: 150;
+  display:none; position:fixed;
+  bottom:100px; left:0; right:0;
+  padding:12px 20px;
+  background:rgba(5,5,6,.94);
+  border-top:1px solid rgba(255,255,255,.07);
+  backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
+  z-index:150;
 }
+.chat-input-inner {
+  display:flex; gap:10px; max-width:800px; margin:0 auto; align-items:center;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px; padding:6px 6px 6px 16px;
+  transition:border-color .2s;
+}
+.chat-input-inner:focus-within { border-color:rgba(255,255,255,.22); }
 #chatInput {
-  flex: 1;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  color: #fff;
-  outline: none;
-  transition: border-color .2s;
-  width: 100%;
+  flex:1; background:transparent; border:none;
+  font-family:'Inter',sans-serif; font-size:14px; color:#fff;
+  outline:none; padding:6px 0;
 }
-#chatInput::placeholder { color: rgba(255,255,255,.3); }
-#chatInput:focus { border-color: rgba(255,255,255,.3); }
+#chatInput::placeholder { color:rgba(255,255,255,.28); }
 #chatSendBtn {
-  background: #fff; color: #000; border: none;
-  border-radius: 12px;
-  padding: 12px 22px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 14px; font-weight: 700;
-  cursor: pointer; white-space: nowrap; flex-shrink: 0;
-  transition: opacity .15s, transform .15s;
+  background:#fff; color:#000; border:none;
+  border-radius:12px; padding:10px 20px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:13px; font-weight:700;
+  cursor:pointer; white-space:nowrap; flex-shrink:0;
+  transition:opacity .15s,transform .15s;
 }
-#chatSendBtn:hover { opacity: .88; transform: translateY(-1px); }
-#chatSendBtn:disabled { opacity: .4; cursor: wait; transform: none; }
+#chatSendBtn:hover { opacity:.88; transform:translateY(-1px); }
+#chatSendBtn:disabled { opacity:.35; cursor:wait; transform:none; }
+
+/* AI chat header */
+.chat-header-bar {
+  display:flex; align-items:center; gap:10px;
+  padding:20px 0 6px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  margin-bottom:24px;
+}
+.chat-header-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:var(--green); box-shadow:0 0 10px rgba(0,230,118,.5);
+  animation:dotPulse2 2.4s ease-in-out infinite;
+  flex-shrink:0;
+}
+.chat-header-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:22px; font-weight:800; letter-spacing:-.4px; }
+.chat-header-sub { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-left:auto; }
 </style>
 </head>
 <body>
@@ -1523,10 +1615,13 @@ tbody tr{animation:fadeIn .25s ease both}
 <!-- ═══════════════ AI CHAT TAB ═══════════════ -->
 <div id="tab-aichat" class="tab-panel">
   <div style="max-width:800px;margin:0 auto;padding:0 20px">
-    <div style="padding:28px 0 16px">
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.4px">AI Assistant</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:4px">Ask anything about stocks, markets, or trading</div>
+
+    <div class="chat-header-bar">
+      <div class="chat-header-dot"></div>
+      <div class="chat-header-title">AI Assistant</div>
+      <div class="chat-header-sub">AlgoScreen · Live</div>
     </div>
+
     <div id="chatSuggestions" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
       <button class="preset-pill" onclick="askSuggestion(this)">What does RSI divergence mean?</button>
       <button class="preset-pill" onclick="askSuggestion(this)">Best sectors when VIX is high?</button>
@@ -1535,13 +1630,21 @@ tbody tr{animation:fadeIn .25s ease both}
       <button class="preset-pill" onclick="askSuggestion(this)">What is a breakout setup?</button>
       <button class="preset-pill" onclick="askSuggestion(this)">How does ADX work?</button>
     </div>
-    <div id="chatMessages" style="display:flex;flex-direction:column;gap:16px;padding-bottom:180px">
+
+    <div id="chatMessages" style="display:flex;flex-direction:column;gap:20px;padding-bottom:180px">
       <div class="chat-msg">
-        <div class="chat-bubble ai-bubble">
-          Hey! I'm your AlgoScreen AI. Ask me anything — stocks, indicators, sectors, strategies, or what any metric on the screener means.
+        <div class="chat-avatar"><div class="chat-avatar-dot"></div></div>
+        <div class="chat-bubble-wrap">
+          <div class="chat-bubble ai-bubble">
+            Hey! I'm your AlgoScreen AI. Ask me anything — stocks, indicators, sectors, strategies, or what any metric on the screener means.
+          </div>
+          <div class="chat-meta">
+            <span class="chat-time">just now</span>
+          </div>
         </div>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -5076,7 +5179,7 @@ function applyFilters(filters) {
 </div>
 <!-- AI CHAT INPUT BAR -->
 <div id="chatInputBar">
-  <div style="display:flex;gap:10px;max-width:800px;margin:0 auto;align-items:center">
+  <div class="chat-input-inner">
     <input id="chatInput" type="text" placeholder="Ask about stocks, indicators, strategies..."
       onkeydown="if(event.key==='Enter'){event.preventDefault();sendChatMessage()}">
     <button onclick="sendChatMessage()" id="chatSendBtn">Send ↑</button>
@@ -5085,23 +5188,151 @@ function applyFilters(filters) {
 
 <script>
 // ══════════════════════════════════════════════════════════════
-//  AI CHAT
+//  AI CHAT — UPGRADED
+//  ✦ Markdown rendering   ✦ Blinking cursor
+//  ✦ Timestamps + copy    ✦ Follow-up chips
+//  ✦ Glass bubble design
 // ══════════════════════════════════════════════════════════════
 const chatHistory = [];
 
+// ── Simple markdown → HTML parser ────────────────────────────
+function parseMarkdown(text) {
+  return text
+    // Headers
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    // Bold
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Italic
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Inline code
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    // Horizontal rule
+    .replace(/^---$/gm, '<hr>')
+    // Bullet lists — group consecutive lines
+    .replace(/(^[\-\•] .+$\n?)+/gm, m => {
+      const items = m.trim().split('\n').map(l => `<li>${l.replace(/^[\-\•] /,'')}</li>`).join('');
+      return `<ul>${items}</ul>`;
+    })
+    // Numbered lists
+    .replace(/(^\d+\. .+$\n?)+/gm, m => {
+      const items = m.trim().split('\n').map(l => `<li>${l.replace(/^\d+\. /,'')}</li>`).join('');
+      return `<ol>${items}</ol>`;
+    })
+    // Paragraphs — wrap double-newline separated blocks
+    .split(/\n{2,}/)
+    .map(block => block.trim())
+    .filter(Boolean)
+    .map(block => {
+      if (/^<(h[1-6]|ul|ol|hr|li)/.test(block)) return block;
+      return `<p>${block.replace(/\n/g,'<br>')}</p>`;
+    })
+    .join('\n');
+}
+
+// ── Relative time ─────────────────────────────────────────────
+function relTime(ts) {
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 10) return 'just now';
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  return new Date(ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ── Suggested follow-ups based on last response ───────────────
+const FOLLOWUP_MAP = [
+  { keywords:['rsi','overbought','oversold'], chips:['What RSI level is a buy signal?','How does RSI divergence work?','Combine RSI with MACD?'] },
+  { keywords:['macd','crossover','histogram'], chips:['What is a MACD crossover signal?','MACD vs RSI — which is better?','How to avoid MACD false signals?'] },
+  { keywords:['support','resistance','level'], chips:['How do I draw support levels?','What breaks a support level?','Support vs supply zone?'] },
+  { keywords:['breakout','volume','momentum'], chips:['How to confirm a breakout?','What causes false breakouts?','Best breakout screener filters?'] },
+  { keywords:['sector','vix','market'], chips:['Which sectors are defensive?','How does VIX affect stocks?','Best sectors in a bear market?'] },
+  { keywords:['ema','moving average','trend'], chips:['EMA 20 vs EMA 50?','How to use EMAs for entries?','Death cross vs golden cross?'] },
+  { keywords:['adx','trend strength','momentum'], chips:['ADX above 25 — what does it mean?','ADX vs RSI?','How to use ADX for exits?'] },
+];
+
+function getFollowUps(text) {
+  const lower = text.toLowerCase();
+  for (const entry of FOLLOWUP_MAP) {
+    if (entry.keywords.some(k => lower.includes(k))) return entry.chips;
+  }
+  return ['Tell me more','Give me an example','How does this apply to tech stocks?'];
+}
+
+// ── Append a message bubble ───────────────────────────────────
+function appendChatMessage(role, text, ts) {
+  const timestamp = ts || Date.now();
+  const isUser = role === 'user';
+  const el = document.createElement('div');
+  el.className = `chat-msg${isUser ? ' user' : ''}`;
+  el.dataset.ts = timestamp;
+
+  if (isUser) {
+    el.innerHTML = `
+      <div class="chat-bubble-wrap">
+        <div class="chat-bubble user-bubble">${text}</div>
+        <div class="chat-meta">
+          <span class="chat-time">${relTime(timestamp)}</span>
+        </div>
+      </div>`;
+  } else {
+    el.innerHTML = `
+      <div class="chat-avatar"><div class="chat-avatar-dot"></div></div>
+      <div class="chat-bubble-wrap">
+        <div class="chat-bubble ai-bubble"></div>
+        <div class="chat-meta">
+          <span class="chat-time">${relTime(timestamp)}</span>
+          <button class="chat-copy" onclick="copyBubble(this)">copy</button>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('chatMessages').appendChild(el);
+  scrollChat();
+  return el;
+}
+
+function copyBubble(btn) {
+  const bubble = btn.closest('.chat-bubble-wrap').querySelector('.chat-bubble');
+  navigator.clipboard.writeText(bubble.innerText).then(() => {
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = 'copy', 2000);
+  });
+}
+
+// ── Append follow-up chips ────────────────────────────────────
+function appendFollowUps(chips) {
+  const el = document.createElement('div');
+  el.className = 'chat-followups';
+  el.innerHTML = chips.map(c =>
+    `<button class="chat-followup-chip" onclick="askFollowUp(this)">${c}</button>`
+  ).join('');
+  document.getElementById('chatMessages').appendChild(el);
+  scrollChat();
+}
+
+function askFollowUp(btn) {
+  document.getElementById('chatInput').value = btn.textContent;
+  btn.closest('.chat-followups').remove();
+  sendChatMessage();
+}
+
+// ── Suggestion pills ──────────────────────────────────────────
 function askSuggestion(btn) {
   document.getElementById('chatInput').value = btn.textContent.trim();
   document.getElementById('chatSuggestions').style.display = 'none';
   sendChatMessage();
 }
 
+// ── Main send function ────────────────────────────────────────
 async function sendChatMessage() {
   const input   = document.getElementById('chatInput');
   const sendBtn = document.getElementById('chatSendBtn');
   const text    = input.value.trim();
   if (!text || sendBtn.disabled) return;
 
+  // Remove any existing follow-up chips
+  document.querySelectorAll('.chat-followups').forEach(el => el.remove());
   document.getElementById('chatSuggestions').style.display = 'none';
+
   input.value = '';
   input.disabled  = true;
   sendBtn.disabled = true;
@@ -5109,11 +5340,18 @@ async function sendChatMessage() {
   chatHistory.push({ role: 'user', content: text });
   appendChatMessage('user', text);
 
+  // Typing indicator
   const typingId = 'typing-' + Date.now();
   const typingEl = document.createElement('div');
   typingEl.className = 'chat-msg';
   typingEl.id = typingId;
-  typingEl.innerHTML = '<div class="chat-typing"><div class="chat-dot"></div><div class="chat-dot"></div><div class="chat-dot"></div></div>';
+  typingEl.innerHTML = `
+    <div class="chat-avatar"><div class="chat-avatar-dot"></div></div>
+    <div class="chat-typing">
+      <div class="chat-dot"></div>
+      <div class="chat-dot"></div>
+      <div class="chat-dot"></div>
+    </div>`;
   document.getElementById('chatMessages').appendChild(typingEl);
   scrollChat();
 
@@ -5128,8 +5366,14 @@ async function sendChatMessage() {
     if (!res.ok) throw new Error('AI request failed');
 
     document.getElementById(typingId)?.remove();
-    const aiEl   = appendChatMessage('ai', '');
-    const bubble = aiEl.querySelector('.chat-bubble');
+
+    const msgEl  = appendChatMessage('ai', '', Date.now());
+    const bubble = msgEl.querySelector('.chat-bubble');
+
+    // Add blinking cursor
+    const cursor = document.createElement('span');
+    cursor.className = 'chat-cursor';
+    bubble.appendChild(cursor);
 
     const reader  = res.body.getReader();
     const decoder = new TextDecoder();
@@ -5148,12 +5392,26 @@ async function sendChatMessage() {
         if (raw === '[DONE]') break;
         try {
           const token = JSON.parse(raw)?.response || '';
-          if (token) { fullText += token; bubble.textContent = fullText; scrollChat(); }
+          if (token) {
+            fullText += token;
+            // Render markdown live — remove cursor, set innerHTML, re-add cursor
+            bubble.innerHTML = parseMarkdown(fullText);
+            bubble.appendChild(cursor);
+            scrollChat();
+          }
         } catch(e) {}
       }
     }
 
-    if (fullText) chatHistory.push({ role: 'assistant', content: fullText });
+    // Finalise — remove cursor, render final markdown
+    cursor.remove();
+    bubble.innerHTML = parseMarkdown(fullText);
+
+    if (fullText) {
+      chatHistory.push({ role: 'assistant', content: fullText });
+      // Add follow-up chips after a short delay
+      setTimeout(() => appendFollowUps(getFollowUps(fullText)), 400);
+    }
 
   } catch(e) {
     document.getElementById(typingId)?.remove();
@@ -5163,15 +5421,6 @@ async function sendChatMessage() {
   input.disabled  = false;
   sendBtn.disabled = false;
   input.focus();
-}
-
-function appendChatMessage(role, text) {
-  const el = document.createElement('div');
-  el.className = `chat-msg${role === 'user' ? ' user' : ''}`;
-  el.innerHTML = `<div class="chat-bubble ${role === 'user' ? 'user-bubble' : 'ai-bubble'}">${text}</div>`;
-  document.getElementById('chatMessages').appendChild(el);
-  scrollChat();
-  return el;
 }
 
 function scrollChat() {
