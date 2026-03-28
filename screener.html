@@ -698,6 +698,149 @@ tbody tr{animation:fadeIn .25s ease both}
 .modal-smart-card.is-buy{border-left:2px solid rgba(0,230,118,.55)}
 .modal-smart-card.is-sell{border-left:2px solid rgba(255,77,109,.5)}
 .modal-smart-card.is-congress{border-left:2px solid rgba(251,191,36,.5)}
+
+/* ══════════════════════════════════════════════════════
+   ⓘ  EDU TRIGGER BUTTON
+   ══════════════════════════════════════════════════════ */
+.edu-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.3);
+  font-family: 'Georgia', serif;
+  font-size: 10px;
+  font-style: italic;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  transition: background .2s, border-color .2s, color .2s, transform .2s;
+  line-height: 1;
+  letter-spacing: 0;
+}
+.edu-btn:hover {
+  background: rgba(255,255,255,.1);
+  border-color: rgba(255,255,255,.3);
+  color: rgba(255,255,255,.9);
+  transform: scale(1.15);
+}
+.sector-tile .edu-btn {
+  width: 14px; height: 14px;
+  font-size: 8px;
+  top: 4px; right: 4px;
+}
+
+/* ══════════════════════════════════════════════════════
+   EDU MODAL SYSTEM
+   ══════════════════════════════════════════════════════ */
+#eduOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s cubic-bezier(.4,0,.2,1);
+}
+#eduOverlay.open { opacity: 1; pointer-events: all; }
+#eduOverlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(2,2,4,.82);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+}
+.edu-panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 580px;
+  max-height: 86vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: rgba(9,10,13,.97);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.03) inset, 0 40px 100px rgba(0,0,0,.8), 0 0 80px rgba(0,0,0,.5);
+  transform: translateY(20px) scale(.975);
+  opacity: 0;
+  transition: transform .38s cubic-bezier(.22,1,.36,1), opacity .28s cubic-bezier(.4,0,.2,1);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.07) transparent;
+}
+#eduOverlay.open .edu-panel { transform: translateY(0) scale(1); opacity: 1; }
+.edu-panel::-webkit-scrollbar { width: 3px }
+.edu-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,.07); border-radius: 2px }
+.edu-panel-shimmer {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.18) 30%, rgba(255,255,255,.32) 50%, rgba(255,255,255,.18) 70%, transparent 100%);
+  flex-shrink: 0;
+}
+.edu-head { padding: 28px 28px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.edu-head-left { flex: 1; min-width: 0 }
+.edu-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 600; letter-spacing: 1.8px; text-transform: uppercase;
+  color: rgba(255,255,255,.28); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.edu-eyebrow::before { content: ''; width: 16px; height: 1px; background: rgba(255,255,255,.2); }
+.edu-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -.6px; color: #fff; line-height: 1.05; margin-bottom: 8px; }
+.edu-subtitle { font-family: 'Inter', sans-serif; font-size: 13.5px; color: rgba(255,255,255,.42); line-height: 1.55; font-weight: 400; }
+.edu-live { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; padding-top: 4px; }
+.edu-live-price { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; color: #fff; letter-spacing: -.3px; line-height: 1; }
+.edu-live-chg { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; }
+.edu-close {
+  position: absolute; top: 14px; right: 14px; width: 28px; height: 28px;
+  border-radius: 50%; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.3); font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all .15s; line-height: 1;
+}
+.edu-close:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.16); color: rgba(255,255,255,.8); }
+.edu-hr { margin: 24px 28px 0; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%); }
+.edu-body { padding: 24px 28px 32px; display: flex; flex-direction: column; gap: 0; }
+.edu-sec-lbl { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: rgba(255,255,255,.2); margin-bottom: 10px; }
+.edu-definition { font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.7; color: rgba(255,255,255,.65); margin-bottom: 24px; }
+.edu-bullets { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
+.edu-bullet { display: flex; gap: 14px; align-items: flex-start; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
+.edu-bullet:last-child { border-bottom: none }
+.edu-bullet-num { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; color: rgba(255,255,255,.18); min-width: 14px; padding-top: 3px; letter-spacing: .5px; }
+.edu-bullet-text { font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.65; color: rgba(255,255,255,.58); }
+.edu-chain-wrap { background: rgba(255,255,255,.025); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
+.edu-chain-text { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: rgba(255,255,255,.35); line-height: 1.75; letter-spacing: .15px; }
+.edu-chain-arrow { color: rgba(255,255,255,.55); font-weight: 700; margin: 0 2px; }
+.edu-ai-wrap { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,.07); background: rgba(255,255,255,.025); }
+.edu-ai-shimmer-bar { height: 1px; width: 200%; background: linear-gradient(90deg, transparent 0%, rgba(96,165,250,.5) 25%, rgba(255,255,255,.6) 50%, rgba(96,165,250,.5) 75%, transparent 100%); animation: shimBarMove 2.8s linear infinite; transform-origin: left; }
+@keyframes shimBarMove { 0% { transform: translateX(-50%) } 100% { transform: translateX(0%) } }
+.edu-ai-inner { padding: 16px 18px 18px; }
+.edu-ai-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.edu-ai-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(96,165,250,.7); box-shadow: 0 0 8px rgba(96,165,250,.5); flex-shrink: 0; animation: dotPulse 2.4s ease-in-out infinite; }
+@keyframes dotPulse { 0%,100% { opacity: .7; box-shadow: 0 0 6px rgba(96,165,250,.4) } 50% { opacity: 1; box-shadow: 0 0 14px rgba(96,165,250,.8) } }
+.edu-ai-lbl { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: rgba(255,255,255,.2); }
+.edu-ai-text { font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.72; color: rgba(255,255,255,.72); min-height: 44px; transition: color .3s; }
+.edu-ai-text.loading { color: rgba(255,255,255,.22); font-style: italic; animation: txtShimmer 1.6s ease-in-out infinite; }
+.edu-cursor { display: inline-block; width: 1.5px; height: 13px; background: rgba(255,255,255,.5); margin-left: 2px; vertical-align: middle; border-radius: 1px; animation: cursorBlink .75s step-end infinite; }
+@keyframes cursorBlink { 50% { opacity: 0 } }
+@keyframes txtShimmer { 0%,100% { opacity: .35 } 50% { opacity: .7 } }
+.edu-anim { opacity: 0; transform: translateY(8px); transition: opacity .4s cubic-bezier(.4,0,.2,1), transform .4s cubic-bezier(.4,0,.2,1); }
+#eduOverlay.open .edu-anim { opacity: 1; transform: translateY(0) }
+#eduOverlay.open .edu-anim:nth-child(1) { transition-delay: .06s }
+#eduOverlay.open .edu-anim:nth-child(2) { transition-delay: .12s }
+#eduOverlay.open .edu-anim:nth-child(3) { transition-delay: .18s }
+#eduOverlay.open .edu-anim:nth-child(4) { transition-delay: .24s }
+#eduOverlay.open .edu-anim:nth-child(5) { transition-delay: .30s }
 </style>
 </head>
 <body>
@@ -3027,12 +3170,14 @@ function drawFngGauge(score,color){
 
 function renderIndexCard(ticker,q){
   const el=document.getElementById(`macro-${ticker}`);if(!el)return;
-  if(q.c==null||q.dp==null){el.innerHTML=`<div class="mi-label">${ticker}</div><div class="mi-name" style="color:var(--muted)">Unavailable</div>`;return;}
+  if(q?.c==null){el.innerHTML=`<div class="mi-label">${ticker}</div><div class="mi-name" style="color:var(--muted)">Unavailable</div>`;return;}
   const invert=ticker==='VIX';
   const up=invert?q.dp<=0:q.dp>=0;
   const cc=up?'chg-up':'chg-dn';
   const names={VIX:'Volatility Index',SPY:'S&P 500 ETF',QQQ:'Nasdaq 100 ETF',IWM:'Russell 2000 ETF'};
-  el.innerHTML=`<div class="mi-label">${ticker}</div><div class="mi-name">${names[ticker]||''}</div><div class="mi-price">$${(+q.c).toFixed(2)}</div><span class="mi-change ${cc}">${q.dp>=0?'+':''}${(+q.dp).toFixed(2)}%</span>${ticker==='VIX'?'<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:var(--muted);margin-top:4px">↑ rising = more fear</div>':''}`;
+  const price=`$${(+q.c).toFixed(2)}`;
+  const chg=`${q.dp>=0?'+':''}${(+q.dp).toFixed(2)}%`;
+  el.innerHTML=`<div class="mi-label">${ticker}</div><div class="mi-name">${names[ticker]||''}</div><div class="mi-price">${price}</div><span class="mi-change ${cc}">${chg}</span>${ticker==='VIX'?'<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;color:var(--muted);margin-top:4px">↑ rising = more fear</div>':''}<button class="edu-btn" onclick="event.stopPropagation();openEduModal('${ticker}',{price:'${price}',change:'${chg}'})">i</button>`;
 }
 
 function renderSectorTile(ticker,q){
@@ -3043,16 +3188,27 @@ function renderSectorTile(ticker,q){
   const bg=pct>=0?green+intensity+')':red+intensity+')';
   const textColor=pct>=0?'var(--green)':'var(--red)';
   const meta=SECTOR_META[ticker]||{name:ticker};
+  const chg=`${pct>=0?'+':''}${pct.toFixed(2)}%`;
   el.style.background=bg;
-  el.innerHTML=`<div class="sector-ticker">${ticker}</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);margin-top:1px;text-align:center">${meta.name}</div><div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:${textColor};margin-top:3px">${pct>=0?'+':''}${pct.toFixed(2)}%</div>`;
+  el.innerHTML=`<div class="sector-ticker">${ticker}</div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);margin-top:1px;text-align:center">${meta.name}</div><div style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:${textColor};margin-top:3px">${chg}</div><button class="edu-btn" onclick="event.stopPropagation();openEduModal('${ticker}',{price:'${ticker}',change:'${chg}'})">i</button>`;
 }
 
 function renderExtraCard(id,q){
   const labels={DXY:'DXY (US Dollar)',GLD:'Gold (GLD)',USO:'Oil (USO)',TLT:'Bonds (TLT)'};
   const valEl=document.getElementById(`macro-${id}-val`);
   const chgEl=document.getElementById(`macro-${id}-chg`);
-  if(valEl)valEl.textContent='$'+q.c.toFixed(2);
-  if(chgEl){chgEl.textContent=(q.dp>=0?'+':'')+q.dp.toFixed(2)+'%';chgEl.style.color=q.dp>=0?'var(--green)':'var(--red)';}
+  if(!valEl||q?.c==null)return;
+  const price='$'+q.c.toFixed(2);
+  const chg=(q.dp>=0?'+':'')+q.dp.toFixed(2)+'%';
+  valEl.textContent=price;
+  if(chgEl){chgEl.textContent=chg;chgEl.style.color=q.dp>=0?'var(--green)':'var(--red)';}
+  const card=valEl.closest('.macro-extra-card');
+  if(card&&!card.querySelector('.edu-btn')){
+    const btn=document.createElement('button');
+    btn.className='edu-btn';btn.textContent='i';
+    btn.onclick=e=>{e.stopPropagation();openEduModal(id,{price,change:chg});};
+    card.appendChild(btn);
+  }
 }
 
 let macroLoaded=false;
@@ -3084,6 +3240,193 @@ async function loadMacroDashboard(){
   Object.entries(extraMap).forEach(([ticker,id])=>{if(quotes[ticker]?.c!=null)renderExtraCard(id,quotes[ticker]);});
   document.getElementById('macroLastUpdated').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
   macroLoaded=true;
+}
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   EDU MODAL — data + engine
+   ══════════════════════════════════════════════════════ */
+const EDU = {
+  VIX: {
+    badge: 'Risk Gauge', name: 'Volatility Index',
+    sub: 'The market\'s real-time fear thermometer',
+    def: 'The VIX measures the S&P 500\'s implied 30-day volatility, derived from live options pricing. When traders are buying puts to hedge, VIX rises. When they\'re complacent, it falls.',
+    bullets: [
+      'Readings above 20 signal unease. Above 30 is elevated fear. Above 40 is full panic — historically a contrarian buy zone.',
+      'VIX moves inversely to equities on most sessions. A sudden spike almost always coincides with a SPY sell-off.',
+      'The shape of the VIX futures curve (contango vs backwardation) signals whether fear is expected to persist or resolve.',
+    ],
+    chain: 'Macro shock → options demand spikes → VIX 30+ → hedging costs surge → risk assets sold → SPY declines',
+  },
+  SPY: {
+    badge: 'US Benchmark', name: 'S&P 500 ETF',
+    sub: 'The single most watched number in global finance',
+    def: 'SPY tracks the S&P 500 — 500 of the largest US-listed companies, weighted by market cap. It represents roughly 80% of US equity market value and is the global benchmark against which all performance is measured.',
+    bullets: [
+      'Apple, Microsoft, Nvidia, Amazon, and Alphabet alone represent over 25% of its weight — mega-cap earnings move the index.',
+      'Fed rate decisions, CPI prints, and non-farm payrolls are the three primary macro catalysts for SPY.',
+      'Most institutional funds are benchmarked to SPY. Underperforming it is career risk for active managers.',
+    ],
+    chain: 'Fed cuts rates → borrowing costs fall → corporate margins improve → multiples expand → SPY rallies',
+  },
+  QQQ: {
+    badge: 'Tech Proxy', name: 'Nasdaq 100 ETF',
+    sub: 'Growth-concentrated — and the most interest-rate sensitive major index',
+    def: 'QQQ tracks the 100 largest non-financial Nasdaq companies. It\'s a concentrated bet on technology, semiconductors, and high-growth platforms — Apple, Nvidia, Microsoft, Meta, and Alphabet lead the weighting.',
+    bullets: [
+      'Growth stocks are long-duration assets — their value rests on distant future earnings, making them hypersensitive to discount rate changes.',
+      'QQQ vs SPY divergence is a rotation signal. QQQ lagging SPY means capital is rotating from growth into value.',
+      'Nvidia alone carries roughly 9% of QQQ\'s weight. AI capex cycles now drive the index more than macro.',
+    ],
+    chain: 'Rates rise → future earnings discounted harder → growth multiples compress → QQQ falls faster than SPY',
+  },
+  IWM: {
+    badge: 'Small Cap', name: 'Russell 2000 ETF',
+    sub: 'The domestic economy distilled — rate-sensitive, credit-driven',
+    def: 'IWM tracks 2,000 smaller US companies. Unlike S&P multinationals, these firms are mostly domestic, carry more variable-rate debt, and are far more exposed to credit conditions — making IWM a leading indicator of economic health.',
+    bullets: [
+      'Small caps tend to lead at cycle turns. IWM breaking out while SPY lags is a historically bullish rotation signal.',
+      'Higher variable-rate debt means rate cuts benefit IWM disproportionately — and rate hikes hurt it more than large caps.',
+      'A strong dollar doesn\'t hurt IWM the same way it does SPY, but tight credit conditions absolutely do.',
+    ],
+    chain: 'Rates fall + credit loosens → small cap debt refinanced cheaply → margins improve → IWM outperforms SPY',
+  },
+  DXY: {
+    badge: 'FX Gauge', name: 'US Dollar Index',
+    sub: 'The dollar\'s strength ripples through every asset class globally',
+    def: 'The DXY measures the US dollar against a basket of six major currencies — euro, yen, sterling, Canadian dollar, Swedish krona, Swiss franc. It reflects global demand for dollar assets, rate differentials, and risk appetite.',
+    bullets: [
+      'A rising DXY compresses earnings for US multinationals — foreign revenues translate back to fewer dollars.',
+      'Commodities are globally priced in USD. DXY up means oil, gold, and copper get more expensive for foreign buyers — suppressing demand.',
+      'Emerging market economies with USD-denominated debt see repayment costs rise directly with DXY.',
+    ],
+    chain: 'Fed hawkish → rate differentials favour USD → capital flows in → DXY rises → commodities fall + EM stress rises',
+  },
+  GLD: {
+    badge: 'Safe Haven', name: 'Gold ETF',
+    sub: 'The oldest store of value — and a hedge against systemic risk',
+    def: 'GLD tracks physical gold bullion. It thrives when real yields are negative, when central bank credibility is questioned, or when geopolitical risk spikes and investors flee paper assets for hard ones.',
+    bullets: [
+      'Real yields (TIPS yields) are the single most reliable driver. When real rates fall, gold rises — the relationship is near-mechanical.',
+      'Central banks globally have been structural buyers since 2022, diversifying reserves away from USD.',
+      'In severe equity sell-offs, gold typically holds or gains — acting as portfolio insurance against tail risk.',
+    ],
+    chain: 'Inflation fears + real rates fall → bond returns eroded → gold as store of value → GLD bid up',
+  },
+  USO: {
+    badge: 'Inflation Input', name: 'Oil ETF',
+    sub: 'Crude oil is embedded in the price of nearly everything',
+    def: 'USO tracks crude oil prices via futures. Oil costs flow into transportation, manufacturing, food production, and heating — making it one of the most direct real-economy inputs to headline inflation.',
+    bullets: [
+      'Every $10/barrel increase in crude adds roughly 0.2–0.3% to US CPI through energy and transportation pass-through.',
+      'OPEC+ supply decisions often dominate demand shifts in the short run — geopolitics can gap oil prices overnight.',
+      'High oil benefits energy stocks (XLE) while hurting consumer discretionary, airlines, and logistics companies.',
+    ],
+    chain: 'OPEC cuts output → crude rises → fuel + shipping costs up → CPI prints hot → Fed stays hawkish → rates hold high',
+  },
+  TLT: {
+    badge: 'Bond Market', name: '20-Year Treasury ETF',
+    sub: 'What the bond market thinks about rates and fiscal sustainability',
+    def: 'TLT tracks 20-year US Treasury bonds. It is the most direct read on long-term interest rate expectations — when the bond market fears persistent inflation or fiscal deterioration, TLT falls as yields rise.',
+    bullets: [
+      'TLT price moves inversely to long-term yields. TLT down means yields up, meaning the rate environment is tightening.',
+      'Historically, TLT rallied during equity sell-offs. That correlation broke in 2022 when inflation drove both bonds and stocks down simultaneously.',
+      'The Fed controls short rates. The bond market controls long rates — TLT is where market forces override central bank policy.',
+    ],
+    chain: 'Inflation persists → bond sellers demand higher yields → TLT price falls → mortgage rates rise → economy slows',
+  },
+  XLK:  { badge: 'Technology',         name: 'XLK — Tech Sector',          sub: 'The heaviest S&P weight — and the most rate-sensitive', def: 'XLK holds the dominant technology companies: Apple, Microsoft, Nvidia, Broadcom, and Salesforce among them. As the largest S&P sector by weight, XLK\'s performance largely dictates broader market direction.', bullets: ['Tech is long-duration — small changes in discount rates have outsized valuation impacts on high-multiple stocks.', 'AI infrastructure buildout has made semiconductors the current growth engine, with Nvidia leading the cycle.', 'Earnings quality matters: cash-rich companies like Apple and Microsoft weather downturns better than unprofitable tech.'], chain: 'Rates fall → growth valuations re-rate → tech multiples expand → XLK leads S&P 500 rally' },
+  XLF:  { badge: 'Financials',          name: 'XLF — Financial Sector',     sub: 'Banks profit from the gap between short and long rates', def: 'XLF covers banks, insurers, and asset managers. Financial companies earn their margin primarily from the spread between what they pay depositors and what they charge borrowers — the yield curve is their fundamental profit driver.', bullets: ['A steeper yield curve (long rates above short rates) directly expands bank net interest margins.', 'Credit quality is the tail risk — when recession hits, loan loss provisions erode bank earnings rapidly.', 'JPMorgan and Berkshire Hathaway together represent over 20% of XLF\'s total weighting.'], chain: 'Yield curve steepens → bank NIM expands → earnings beat expectations → XLF re-rates higher' },
+  XLE:  { badge: 'Energy',              name: 'XLE — Energy Sector',        sub: 'Crude oil price is XLE\'s primary driver', def: 'XLE holds energy majors like ExxonMobil and Chevron, plus exploration, production, and pipeline companies. Their revenues are directly indexed to the price of crude — making XLE a leveraged expression of oil.', bullets: ['Energy companies carry high fixed costs — a 10% rise in oil can translate to a 30–50% rise in earnings.', 'XLE pays elevated dividends, acting defensively when inflation is elevated and other sectors reprice lower.', 'Geopolitical events, OPEC+ decisions, and US rig counts are the three primary supply-side variables to watch.'], chain: 'OPEC cuts output → crude rises → producer margins expand sharply → XLE outperforms the broader market' },
+  XLV:  { badge: 'Health Care',         name: 'XLV — Health Care Sector',   sub: 'Non-discretionary demand makes this a classic defensive hold', def: 'XLV includes pharmaceutical giants, biotechnology, medical devices, and managed care companies. Demand for healthcare is structurally non-discretionary — people need treatment regardless of economic conditions.', bullets: ['Drug pricing policy and FDA approvals introduce idiosyncratic risk that general macroeconomics cannot predict.', 'The biotech sub-sector adds significant volatility — clinical trial binary events can move individual holdings dramatically.', 'UnitedHealth Group alone represents roughly 12% of XLV, making managed care a key driver.'], chain: 'Recession feared → investors rotate from cyclicals into defensives → XLV holds value while growth sectors sell off' },
+  XLI:  { badge: 'Industrials',         name: 'XLI — Industrial Sector',    sub: 'Capex cycles and infrastructure spending drive this sector', def: 'XLI covers aerospace, defense, industrial machinery, transportation, and construction. These companies profit when businesses are investing and the economy is expanding — a textbook cyclical sector.', bullets: ['Defense spending (Boeing, Raytheon, L3Harris) provides a government-floor in economic downturns.', 'Transportation sub-sector (FedEx, UPS, Union Pacific) functions as a real-time economic barometer.', 'US reshoring and infrastructure legislation represent structural multi-year tailwinds.'], chain: 'GDP expands + capex cycle accelerates → industrial orders rise → XLI earnings beat → outperforms in expansion' },
+  XLY:  { badge: 'Consumer Discret.',   name: 'XLY — Discretionary Sector', sub: 'Spending on wants — first cut when consumers feel squeezed', def: 'XLY tracks retail, automotive, restaurants, and leisure. These are things consumers purchase when they feel financially comfortable — and cut immediately when income or confidence is pressured.', bullets: ['Amazon and Tesla together represent 35–40% of XLY, giving it growth-stock characteristics beyond pure consumer exposure.', 'Consumer confidence, credit card delinquency rates, and personal savings rates are the leading indicators for this sector.', 'Rising mortgage rates combined with high energy prices is the most damaging macro combination for XLY.'], chain: 'Rates rise + inflation persists → consumer budgets squeezed → discretionary spending cut → XLY underperforms XLP' },
+  XLP:  { badge: 'Consumer Staples',    name: 'XLP — Staples Sector',       sub: 'Toothpaste and food — revenues that hold through any cycle', def: 'XLP holds companies selling essential goods — Procter & Gamble, Coca-Cola, Costco, Walmart. People buy food and household products whether the economy is booming or contracting, giving these companies exceptional earnings predictability.', bullets: ['Pricing power is the key variable — can staples companies pass inflation on to consumers without losing volume?', 'Acts as a bond-proxy when rates fall — high, reliable dividend yields attract income-focused capital.', 'Defensive rotation into XLP often precedes and signals broader market deterioration ahead.'], chain: 'Recession risk rises → investors rotate from cyclicals to defensives → XLP and XLU hold while cyclicals sell off' },
+  XLU:  { badge: 'Utilities',           name: 'XLU — Utilities Sector',     sub: 'The most bond-like equity sector — with a new AI tailwind', def: 'XLU covers electric, gas, and water utilities. They have predictable regulated revenues, pay high dividends, and are capital-intensive — making them extremely sensitive to the level of interest rates.', bullets: ['Interest rates are the primary driver — when rates fall, XLU re-rates higher as its dividend yield becomes relatively attractive.', 'Explosive data centre and AI infrastructure electricity demand is a new structural demand driver that benefits utilities directly.', 'Heavily leveraged balance sheets make credit spreads and refinancing costs highly significant for XLU valuations.'], chain: 'Rates fall → XLU dividend yield attractive relative to bonds → capital rotates in → AI electricity demand adds structural floor' },
+  XLRE: { badge: 'Real Estate',         name: 'XLRE — Real Estate Sector',  sub: 'REITs with mandatory payout requirements — deeply rate-sensitive', def: 'XLRE holds REITs — Real Estate Investment Trusts — companies that own income-producing property. By law, they must distribute at least 90% of taxable income as dividends, making them a hybrid between equity and fixed income.', bullets: ['Rising rates compress REIT valuations through two channels: higher cap rates reduce property values, and higher debt costs squeeze margins.', 'Data centre and industrial REITs have dramatically outperformed traditional office over the last five years.', 'REIT dividends are taxed as ordinary income, not the preferential dividend rate — a meaningful after-tax consideration.'], chain: 'Rates rise → cap rates rise → property valuations fall + refinancing costs increase → XLRE underperforms significantly' },
+  XLB:  { badge: 'Materials',           name: 'XLB — Materials Sector',     sub: 'Mining and chemicals — highly cyclical and China-sensitive', def: 'XLB includes mining companies, chemical producers, packaging, and construction materials. These businesses supply the raw inputs for all industrial activity — making them deeply cyclical and sensitive to global demand.', bullets: ['China is the world\'s largest consumer of metals and industrial materials. Chinese stimulus announcements reliably move XLB.', 'Materials act as an inflation hedge — when input prices rise broadly, hard asset producers benefit from pricing power.', 'XLB typically leads early-cycle recoveries as inventory rebuilds following recessions.'], chain: 'China stimulus + weak USD → commodity demand surge → materials pricing power returns → XLB outperforms' },
+  XLC:  { badge: 'Comm. Services',      name: 'XLC — Comm. Services Sector',sub: 'Digital advertising, streaming, and telecom under one roof', def: 'XLC bundles Alphabet, Meta, Netflix, Disney, and telecoms. Despite the name, it\'s effectively a digital media and platforms sector — Alphabet and Meta together make up over 40% of the weighting.', bullets: ['Digital advertising revenue is procyclical — it\'s among the first marketing budgets cut when companies face economic pressure.', 'Streaming subscriber growth (or loss) drives Disney and Netflix sentiment significantly within the sector.', 'Large Alphabet and Meta weights introduce rate sensitivity similar to technology stocks.'], chain: 'Ad market strengthens + user growth accelerates → XLC earnings surprise to upside → outperforms in expansion' },
+};
+
+let _eduActiveKey = null;
+const _eduAiCache = {};
+
+function openEduModal(key, liveData) {
+  const d = EDU[key];
+  if (!d) return;
+  _eduActiveKey = key;
+  document.getElementById('eduEyebrow').textContent = d.badge;
+  document.getElementById('eduTitle').textContent   = d.name;
+  document.getElementById('eduSubtitle').textContent = d.sub;
+  const liveEl = document.getElementById('eduLive');
+  if (liveData?.price) {
+    const up = liveData.change && !liveData.change.startsWith('-');
+    liveEl.innerHTML = `<div class="edu-live-price">${liveData.price}</div><div class="edu-live-chg" style="color:${up?'#00e676':'#ff4d6d'}">${liveData.change}</div>`;
+  } else { liveEl.innerHTML = ''; }
+  document.getElementById('eduDef').textContent = d.def;
+  document.getElementById('eduBullets').innerHTML = d.bullets.map((b,i) => `<div class="edu-bullet"><span class="edu-bullet-num">0${i+1}</span><span class="edu-bullet-text">${b}</span></div>`).join('');
+  document.getElementById('eduChain').innerHTML = d.chain.replace(/→/g, `<span class="edu-chain-arrow"> → </span>`);
+  const aiEl = document.getElementById('eduAiText');
+  if (_eduAiCache[key]) {
+    aiEl.classList.remove('loading'); aiEl.style.animation = 'none'; aiEl.textContent = _eduAiCache[key];
+  } else {
+    aiEl.classList.add('loading'); aiEl.style.animation = '';
+    aiEl.textContent = 'Generating insight based on today\'s reading…';
+    _eduFetchAI(key, liveData, aiEl);
+  }
+  document.getElementById('eduOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.querySelectorAll('.edu-anim').forEach(el => { el.style.opacity='0'; el.style.transform='translateY(8px)'; });
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.querySelectorAll('.edu-anim').forEach((el,i) => {
+      el.style.transition=`opacity .38s cubic-bezier(.4,0,.2,1) ${.06+i*.07}s, transform .38s cubic-bezier(.4,0,.2,1) ${.06+i*.07}s`;
+      el.style.opacity='1'; el.style.transform='translateY(0)';
+    });
+  }));
+}
+
+function closeEduModal() {
+  document.getElementById('eduOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  _eduActiveKey = null;
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEduModal(); });
+
+async function _eduFetchAI(key, liveData, aiEl) {
+  const d = EDU[key];
+  const ctx = liveData?.price ? `Current value: ${liveData.price}, Day change: ${liveData.change ?? 'N/A'}` : 'Live data not available.';
+  const prompt = `You are a sharp, concise financial educator for retail stock market investors.\n\nIndicator: ${d.name} (${key})\n${ctx}\n\nIn exactly 2 sentences, explain what today's specific reading signals for the broader stock market right now, and what investors should be paying attention to. Be direct and specific. No preamble or labels. Maximum 55 words total.`;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] }),
+    });
+    const data = await res.json();
+    const text = data.content?.find(b => b.type === 'text')?.text?.trim();
+    if (text && _eduActiveKey === key) {
+      _eduAiCache[key] = text;
+      aiEl.classList.remove('loading'); aiEl.style.animation = 'none';
+      _eduTypewrite(aiEl, text);
+    }
+  } catch {
+    if (_eduActiveKey === key) {
+      aiEl.classList.remove('loading'); aiEl.style.animation = 'none';
+      aiEl.style.color = 'rgba(255,255,255,.22)';
+      aiEl.textContent = 'AI insight unavailable — check API connection.';
+    }
+  }
+}
+
+function _eduTypewrite(el, text) {
+  el.textContent = ''; el.style.color = '';
+  const cursor = document.createElement('span');
+  cursor.className = 'edu-cursor'; el.appendChild(cursor);
+  let i = 0;
+  const tick = () => { if (i < text.length) { el.insertBefore(document.createTextNode(text[i++]), cursor); setTimeout(tick, 16); } else { cursor.remove(); } };
+  setTimeout(tick, 60);
 }
 </script>
 
@@ -4572,5 +4915,52 @@ function applyFilters(filters) {
   });
 }
 </script>
+<!-- ══════════════════════════════════════════════════════
+     EDU MODAL OVERLAY
+     ══════════════════════════════════════════════════════ -->
+<div id="eduOverlay" onclick="if(event.target===this)closeEduModal()">
+  <div class="edu-panel" id="eduPanel" role="dialog" aria-modal="true" aria-labelledby="eduTitle">
+    <div class="edu-panel-shimmer"></div>
+    <div class="edu-head">
+      <div class="edu-head-left">
+        <div class="edu-eyebrow" id="eduEyebrow"></div>
+        <div class="edu-title" id="eduTitle"></div>
+        <div class="edu-subtitle" id="eduSubtitle"></div>
+      </div>
+      <div class="edu-live" id="eduLive"></div>
+    </div>
+    <button class="edu-close" onclick="closeEduModal()" aria-label="Close">×</button>
+    <div class="edu-hr"></div>
+    <div class="edu-body" id="eduBody">
+      <div class="edu-anim">
+        <div class="edu-sec-lbl">Definition</div>
+        <div class="edu-definition" id="eduDef"></div>
+      </div>
+      <div class="edu-anim">
+        <div class="edu-sec-lbl">Why it matters</div>
+        <div class="edu-bullets" id="eduBullets"></div>
+      </div>
+      <div class="edu-anim">
+        <div class="edu-sec-lbl">Market chain reaction</div>
+        <div class="edu-chain-wrap">
+          <div class="edu-chain-text" id="eduChain"></div>
+        </div>
+      </div>
+      <div class="edu-anim">
+        <div class="edu-ai-wrap">
+          <div class="edu-ai-shimmer-bar" id="eduAiBar"></div>
+          <div class="edu-ai-inner">
+            <div class="edu-ai-hdr">
+              <div class="edu-ai-dot" id="eduAiDot"></div>
+              <div class="edu-ai-lbl">AI Insight · Today's Context</div>
+            </div>
+            <div class="edu-ai-text loading" id="eduAiText"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
