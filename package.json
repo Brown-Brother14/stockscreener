@@ -1,0 +1,13 @@
+{
+  "name": "algoscreen-pro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Real-time stock screener and portfolio analyser",
+  "scripts": {
+    "lint": "eslint *.html --ext .html || eslint supabase-client.js",
+    "lint:js": "eslint supabase-client.js"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  }
+}

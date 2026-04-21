@@ -1051,6 +1051,7 @@ footer{border-top:1px solid var(--glass-border);padding:36px 60px;display:flex;a
 
 <script src="supabase-client.js"></script>
 <script>
+window.addEventListener('unhandledrejection', e => { console.error('[AlgoScreen] Unhandled rejection:', e.reason); });
 // ── Auth-aware nav, hero, screener section, CTA, footer ──────
 window.addEventListener('AlgoAuthReady', async () => {
   const loggedIn = await AlgoAuth.isLoggedIn();

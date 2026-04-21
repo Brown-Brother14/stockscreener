@@ -264,6 +264,34 @@ footer{border-top:1px solid var(--glass-border);padding:30px 40px;display:flex;a
 <script src="supabase-client.js"></script>
 <script>
 const WORKER='https://algoscreen-worker.brown-brother14.workers.dev';
+
+// ── Global error handler ────────────────────────────────────
+window.addEventListener('unhandledrejection', e => {
+  console.error('[AlgoScreen] Unhandled promise rejection:', e.reason);
+});
+
+// ── HTML escape helper ──────────────────────────────────────
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Toast helper ────────────────────────────────────────────
+let _toastTimer;
+function showToast(msg, type = 'success') {
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_toast';
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(18,20,24,.96);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:12px 20px;font-size:14px;color:rgba(255,255,255,.88);display:flex;align-items:center;gap:10px;box-shadow:0 16px 48px rgba(0,0,0,.5);transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .35s;opacity:0;z-index:9000;pointer-events:none;white-space:nowrap;';
+    document.body.appendChild(t);
+  }
+  const dot = type === 'error' ? 'background:#ff4d6d;box-shadow:0 0 8px rgba(255,77,109,.5)' : 'background:#00e676;box-shadow:0 0 8px rgba(0,230,118,.5)';
+  t.innerHTML = `<div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;${dot}"></div><span>${esc(msg)}</span>`;
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  t.style.opacity = '1';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { t.style.transform = 'translateX(-50%) translateY(80px)'; t.style.opacity = '0'; }, 3500);
+}
 const SPY_WEIGHTS={'Technology':28.5,'Healthcare':12.8,'Financials':13.2,'Consumer Discretionary':10.1,'Communication Services':8.6,'Industrials':8.4,'Consumer Staples':6.1,'Energy':3.9,'Utilities':2.5,'Real Estate':2.3,'Materials':2.6};
 const SCOL={'Technology':'#60a5fa','Healthcare':'#34d399','Financials':'#fbbf24','Consumer Discretionary':'#f472b6','Communication Services':'#a78bfa','Industrials':'#fb923c','Consumer Staples':'#6ee7b7','Energy':'#fde68a','Utilities':'#93c5fd','Real Estate':'#f9a8d4','Materials':'#86efac','Other':'rgba(255,255,255,.22)'};
 let holdings=[];
@@ -296,12 +324,14 @@ async function loadSaved(){
   holdings=saved.map(r=>({symbol:r.symbol,shares:parseFloat(r.shares),avgCost:parseFloat(r.avg_cost),livePrice:null,name:null,sector:null,beta:null,chgPct:null,pe:null}));
   updateCount();await fetchLive();
 }
+function sanitizeTicker(t) { return t.replace(/[^A-Z0-9.\^]/g,'').slice(0,10); }
+
 async function addHolding(){
   const eEl=document.getElementById('entryError');eEl.style.display='none';
-  const ticker=document.getElementById('inTicker').value.trim().toUpperCase();
+  const ticker=sanitizeTicker(document.getElementById('inTicker').value.trim().toUpperCase());
   const shares=parseFloat(document.getElementById('inShares').value);
   const cost=parseFloat(document.getElementById('inCost').value);
-  if(!ticker){showErr('Enter a ticker symbol.');return;}
+  if(!ticker){showErr('Enter a valid ticker symbol.');return;}
   if(!shares||shares<=0){showErr('Enter a valid share count.');return;}
   if(!cost||cost<=0){showErr('Enter a valid average cost.');return;}
   const btn=document.getElementById('btnAdd');btn.disabled=true;btn.textContent='Adding...';
@@ -326,12 +356,13 @@ async function fetchLive(){
   document.getElementById('holdingsTbody').innerHTML=`<tr class="loader-row"><td colspan="10"><span class="spin"></span>Loading live prices...</td></tr>`;
   try{
     const res=await fetch(`${WORKER}/yf/quote?symbols=${encodeURIComponent(syms)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data=await res.json();
     for(const q of(data?.quoteResponse?.result||[])){
       const h=holdings.find(x=>x.symbol===q.symbol);
       if(h){h.livePrice=q.regularMarketPrice;h.name=q.shortName||q.longName||q.symbol;h.sector=q.sector||'Other';h.beta=q.beta||null;h.chgPct=q.regularMarketChangePercent||0;h.pe=q.trailingPE||q.forwardPE||null;}
     }
-  }catch(e){console.warn('fetch err',e);}
+  }catch(e){console.warn('fetch err',e);showToast('Could not load live prices — showing cost basis values.','error');}
   document.getElementById('lastRefresh').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
   renderTable();renderStats();renderCharts();updateBtn();
 }
@@ -341,7 +372,7 @@ function renderTable(){
   const tot=holdings.reduce((s,h)=>s+(h.livePrice||h.avgCost)*h.shares,0);
   tbody.innerHTML=holdings.map(h=>{
     const p=h.livePrice||h.avgCost,val=p*h.shares,c=h.avgCost*h.shares,gain=val-c,gp=c>0?(gain/c*100):0,wt=tot>0?(val/tot*100):0,chg=h.chgPct||0;
-    return `<tr><td><div class="t-ticker">${h.symbol}</div><div class="t-name">${h.name||'&mdash;'}</div></td><td style="font-family:'JetBrains Mono',monospace;font-size:12px">${h.shares.toLocaleString()}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px">$${h.avgCost.toFixed(2)}</td><td class="t-price">${h.livePrice?'$'+h.livePrice.toFixed(2):'...'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#fff">$${Math.round(val).toLocaleString()}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:${gain>=0?'var(--green)':'var(--red)'}">${gain>=0?'+':''}$${Math.abs(Math.round(gain)).toLocaleString()}</td><td><span class="t-chgp ${gp>=0?'up':'dn'}">${gp>=0?'+':''}${gp.toFixed(1)}%</span></td><td><span class="t-chgp ${chg>=0?'up':'dn'}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></td><td><div class="wb-wrap"><div class="wb-track"><div class="wb-fill" style="width:${Math.min(wt,100)}%"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2)">${wt.toFixed(1)}%</span></div></td><td><button class="btn-remove" onclick="removeHolding('${h.symbol}')" title="Remove">&#10005;</button></td></tr>`;
+    return `<tr><td><div class="t-ticker">${esc(h.symbol)}</div><div class="t-name">${h.name?esc(h.name):'&mdash;'}</div></td><td style="font-family:'JetBrains Mono',monospace;font-size:12px">${h.shares.toLocaleString()}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px">$${h.avgCost.toFixed(2)}</td><td class="t-price">${h.livePrice?'$'+h.livePrice.toFixed(2):'...'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#fff">$${Math.round(val).toLocaleString()}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:${gain>=0?'var(--green)':'var(--red)'}">${gain>=0?'+':''}$${Math.abs(Math.round(gain)).toLocaleString()}</td><td><span class="t-chgp ${gp>=0?'up':'dn'}">${gp>=0?'+':''}${gp.toFixed(1)}%</span></td><td><span class="t-chgp ${chg>=0?'up':'dn'}">${chg>=0?'+':''}${chg.toFixed(2)}%</span></td><td><div class="wb-wrap"><div class="wb-track"><div class="wb-fill" style="width:${Math.min(wt,100)}%"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2)">${wt.toFixed(1)}%</span></div></td><td><button class="btn-remove" onclick="removeHolding('${esc(h.symbol)}')" title="Remove">&#10005;</button></td></tr>`;
   }).join('');
 }
 function renderStats(){
@@ -418,7 +449,14 @@ function buildCtx(){
   const positions=sorted.map(h=>{const p=h.livePrice||h.avgCost,v=p*h.shares,co=h.avgCost*h.shares;return{ticker:h.symbol,name:h.name||h.symbol,sector:h.sector||'Unknown',shares:h.shares,avgCost:h.avgCost.toFixed(2),livePrice:p.toFixed(2),marketValue:Math.round(v),returnPct:((v-co)/co*100).toFixed(1),portfolioWeight:(v/tot*100).toFixed(1),beta:h.beta||'N/A',pe:h.pe||'N/A',dayChangePct:h.chgPct?h.chgPct.toFixed(2):'N/A'};});
   return{summary:{totalValue:Math.round(tot),costBasis:Math.round(c),totalReturnPct:((tot-c)/c*100).toFixed(1),portfolioBeta:beta?beta.toFixed(2):'N/A',positions:holdings.length,top3Concentration:(t3v/tot*100).toFixed(1)+'%',top3Tickers:sorted.slice(0,3).map(h=>h.symbol).join(', ')},positions,sectorVsSpyBreakdown:sectors};
 }
+let _analysisAbort = null;
+
 async function runAnalysis(){
+  // Cancel any in-flight analysis
+  if (_analysisAbort) { _analysisAbort.abort(); }
+  _analysisAbort = new AbortController();
+  const signal = _analysisAbort.signal;
+
   const ctx=buildCtx();
   document.getElementById('apPlaceholder').style.display='none';document.getElementById('apOutput').style.display='';
   ['bVerdict','bFlags','bSectors','bReco'].forEach(id=>{document.getElementById(id).innerHTML='<span class="cursor"></span>';});
@@ -444,30 +482,45 @@ ${ctx.sectorVsSpyBreakdown.map(s=>`${s.sector}: client ${s.yourWeight}% vs SPY $
 
 Deliver a frank institutional assessment. Name specific tickers, cite dollar amounts, give concrete recommendations with named alternatives.`;
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYS,messages:[{role:'user',content:USR}]})});
+    // Route through worker — worker adds the Claude API key server-side
+    const resp=await fetch(`${WORKER}/ai/analyse`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYS,messages:[{role:'user',content:USR}]}),
+      signal,
+    });
+    if (!resp.ok) throw new Error(`AI service returned ${resp.status}`);
     const data=await resp.json();
     const raw=data.content?.map(b=>b.text||'').join('')||'';
     let parsed;try{parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());}catch(e){parsed={grade:'?',verdict:raw,flags:'',sectors:'',recommendations:''};}
     const g=(parsed.grade||'?').charAt(0).toUpperCase();
     document.getElementById('gradeLetter').textContent=g;
     document.getElementById('gradeBadge').className='grade-badge '+({'A':'gA','B':'gB','C':'gC','D':'gD','F':'gF'}[g]||'gC');
-    await stream('bVerdict',fmt(parsed.verdict||''));
-    await stream('bFlags',fmt(parsed.flags||''));
-    await stream('bSectors',fmt(parsed.sectors||''));
-    await stream('bReco',fmt(parsed.recommendations||''));
+    await stream('bVerdict',fmt(parsed.verdict||''),signal);
+    await stream('bFlags',fmt(parsed.flags||''),signal);
+    await stream('bSectors',fmt(parsed.sectors||''),signal);
+    await stream('bReco',fmt(parsed.recommendations||''),signal);
     document.getElementById('analysisTime').textContent='Analysed '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-  }catch(err){console.error(err);document.getElementById('bVerdict').innerHTML='<p style="color:var(--red)">Analysis failed. Check your connection and try again.</p>';['bFlags','bSectors','bReco'].forEach(id=>{document.getElementById(id).innerHTML='';});}
+  }catch(err){
+    if (err.name === 'AbortError') return; // user triggered a new analysis — silently exit
+    console.error('[AlgoScreen] analysis error:', err);
+    document.getElementById('bVerdict').innerHTML='<p style="color:var(--red)">Analysis failed — could not reach the AI service. Check your connection and try again.</p>';
+    ['bFlags','bSectors','bReco'].forEach(id=>{document.getElementById(id).innerHTML='';});
+    showToast('Analysis failed. Check your connection.', 'error');
+  }
   [document.getElementById('btnAnalyse'),document.getElementById('btnRerun')].forEach(b=>{if(b)b.disabled=false;});
 }
 function fmt(t){if(!t)return '';return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').split('\n\n').filter(p=>p.trim()).map(p=>`<p>${p.trim()}</p>`).join('');}
-async function stream(id,html){
+async function stream(id,html,signal){
   const el=document.getElementById(id);el.innerHTML='';
   const tmp=document.createElement('div');tmp.innerHTML=html;
   const paras=Array.from(tmp.querySelectorAll('p'));
   if(!paras.length){el.innerHTML=html;return;}
   for(const para of paras){
+    if(signal?.aborted) return;
     const p=document.createElement('p');el.appendChild(p);
     for(const node of Array.from(para.childNodes)){
+      if(signal?.aborted) return;
       if(node.nodeType===3){for(const w of node.textContent.split(' ')){if(!w)continue;p.appendChild(document.createTextNode(w+' '));await wait(16);}}
       else if(node.nodeName==='STRONG'){const s=document.createElement('strong');s.textContent=node.textContent;p.appendChild(s);await wait(10);}
     }
