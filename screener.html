@@ -2807,6 +2807,20 @@ function macroSensitivityScore(beta, sector) {
   return 0.30;
 }
 
+// ── Insider MSPR → score (0-1) ────────────────────────────────────────────────
+// MSPR (Monthly Share Purchase Ratio): -100 = all selling, +100 = all buying
+// null = no data → neutral 0.4 (slightly below average, penalises missing info lightly)
+function insiderMsprScore(mspr) {
+  if (mspr == null) return 0.4;
+  if (mspr >=  60) return 1.00;  // Heavy cluster buying — very bullish
+  if (mspr >=  30) return 0.82;  // Strong buy bias
+  if (mspr >=  10) return 0.65;  // Mild buy bias
+  if (mspr >=  -10) return 0.50; // Neutral / mixed
+  if (mspr >= -30) return 0.32;  // Mild sell bias
+  if (mspr >= -60) return 0.18;  // Strong selling
+  return 0.05;                   // Heavy insider selling — very bearish
+}
+
 // ── MAIN SCORE FUNCTION ───────────────────────────────────────────────────────
 function calculateScore({
   // Technical
@@ -2821,6 +2835,8 @@ function calculateScore({
   divYield, buybackYield,
   // Macro
   beta,
+  // Smart Money
+  insiderMspr,
   // Meta
   sector, presetKey,
 }) {
@@ -2841,7 +2857,7 @@ function calculateScore({
     revenue_growth:    revenueGrowthScore(revenueGrowth),
     div_buyback_yield: divBuybackScore(divYield, buybackYield),
     earnings_quality:  earningsQualityScore(null, epsGrowth),
-    insider_buying:    0.4, // placeholder — Form 4 data not yet fetched
+    insider_buying:    insiderMsprScore(insiderMspr),
     analyst_upside:    analystUpsideScore(price, analystTarget),
     macro_sensitivity: macroSensitivityScore(beta, sector),
   };
@@ -2909,6 +2925,27 @@ async function runScan(){
   document.getElementById('dashTop5').innerHTML=`<div style="padding:24px 18px;display:flex;flex-direction:column;gap:10px">${[1,2,3,4,5].map(n=>`<div style="display:grid;grid-template-columns:24px 1fr auto;gap:12px;align-items:center"><div style="width:16px;height:10px;background:rgba(255,255,255,.06);border-radius:3px"></div><div><div style="width:${50+n*10}px;height:11px;background:rgba(255,255,255,.06);border-radius:3px;margin-bottom:4px"></div><div style="width:80px;height:9px;background:rgba(255,255,255,.04);border-radius:3px"></div></div><div style="width:28px;height:14px;background:rgba(255,255,255,.06);border-radius:3px"></div></div>`).join('')}</div>`;
   let breakouts=0,bullishMACD=0,totalScore=0;
 
+  // ── Pre-fetch insider sentiment for all tickers in one batch call ──
+  // This replaces the 0.4 placeholder with real MSPR data from Finnhub Form 4 filings.
+  const insiderScoreMap = {};
+  try {
+    updateLoadingText(`Fetching insider sentiment data…`);
+    const insRes = await fetch(`${PROXY}/insider-batch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ symbols: tickers }),
+      signal: AbortSignal.timeout(30000),
+    });
+    if (insRes.ok) {
+      const insData = await insRes.json();
+      for (const [sym, d] of Object.entries(insData)) {
+        insiderScoreMap[sym] = d?.mspr ?? null;
+      }
+    }
+  } catch(e) {
+    console.warn('[AlgoScreen] Insider batch fetch failed, using neutral scores:', e.message);
+  }
+
   for(let i=0;i<tickers.length;i++){
     const ticker=tickers[i];
     document.getElementById('progressFill').style.width=Math.round((i/tickers.length)*100)+'%';
@@ -2945,7 +2982,9 @@ async function runScan(){
         pe,peg,pb,analystTarget,price:quote.price,
         roe,debtToEquity,epsGrowth:financials?.epsGrowth||null,
         revenueGrowth,divYield,buybackYield:null,
-        beta:financials?.beta||null,sector,presetKey:activePresetKey,
+        beta:financials?.beta||null,
+        insiderMspr: insiderScoreMap[ticker] ?? null,
+        sector,presetKey:activePresetKey,
       });
       const signal=getSignal(score);
       if(signal.cls==='breakout')breakouts++;
@@ -3960,7 +3999,7 @@ async function runBackgroundTopScan() {
         pe, peg, pb, analystTarget:q.targetMeanPrice||null, price,
         roe, debtToEquity, epsGrowth:q.earningsGrowth??null,
         revenueGrowth, divYield:q.dividendYield??null, buybackYield:null,
-        beta:q.beta??null, sector:q.sector||'', presetKey:'top20',
+        beta:q.beta??null, insiderMspr:null, sector:q.sector||'', presetKey:'top20',
       });
       const signal = getSignal(score);
       results.push({
@@ -4306,7 +4345,9 @@ const isSellTrade = t => /sale|sell/i.test(t.type||t.transactionType||'');
 const fmtAmount   = v => v || '—';
 
 // Parse amount string like "$15,001 - $50,000" → lower bound number
-function parseAmountStr(s) {
+function parseAmountStr(s, amountNum) {
+  // Prefer pre-parsed midpoint from worker (more accurate)
+  if (typeof amountNum === 'number' && amountNum > 0) return amountNum;
   if (!s) return 0;
   const m = s.match(/\$?([\d,]+)/);
   if (!m) return 0;
@@ -4330,9 +4371,9 @@ function smSetView(name, btn) {
 // ── Load congressional trades — #13 localStorage 4-hour cache ──
 async function loadCongressTrades() {
   smLoaded = true;
-  // Try cache first (4h TTL)
+  // Try cache first (4h TTL) — v2 cache key ensures old data without amountNum/party is busted
   try {
-    const cached = JSON.parse(localStorage.getItem('sm_congress_cache') || '{}');
+    const cached = JSON.parse(localStorage.getItem('sm_congress_cache_v2') || '{}');
     if (cached.trades && cached.ts && (Date.now() - cached.ts) < 4 * 3600 * 1000) {
       smAllTrades = cached.trades;
       smUpdateStats();
@@ -4350,7 +4391,7 @@ async function fetchCongressFresh() {
     const res  = await fetch(`${PROXY}/smartmoney?limit=200`, { signal: AbortSignal.timeout(20000) });
     const json = await res.json();
     smAllTrades = json.trades || [];
-    try { localStorage.setItem('sm_congress_cache', JSON.stringify({ trades: smAllTrades, ts: Date.now() })); } catch(e) {}
+    try { localStorage.setItem('sm_congress_cache_v2', JSON.stringify({ trades: smAllTrades, ts: Date.now() })); } catch(e) {}
     smUpdateStats();
     smBuildHotPills();
     smRender();
@@ -4594,7 +4635,7 @@ function smRender() {
     if (smFilter === 'sell' && !isSellTrade(t)) return false;
     if (smChamber !== 'all' && t.chamber !== smChamber) return false;
     if (cutoff && t.date && new Date(t.date) < cutoff) return false;
-    if (smAmountMin > 0 && parseAmountStr(t.amount||'') < smAmountMin) return false;  // #5
+    if (smAmountMin > 0 && parseAmountStr(t.amount||'', t.amountNum) < smAmountMin * 1000) return false;  // #5
     if (smFollowingFilter && !smFollowing.has(t.name)) return false;  // #14
     return true;
   });
