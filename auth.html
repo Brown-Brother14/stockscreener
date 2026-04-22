@@ -430,6 +430,7 @@ body{
 
 <script src="supabase-client.js"></script>
 <script>
+window.addEventListener('unhandledrejection', e => { console.error('[AlgoScreen] Unhandled rejection:', e.reason); });
 // ── Cursor ───────────────────────────────────────────────────
 const cur  = document.getElementById('cur');
 const curR = document.getElementById('cur-r');

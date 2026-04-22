@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint & validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint — supabase-client.js
+        run: npx eslint supabase-client.js --max-warnings 20
+
+      - name: Check for hardcoded secrets (basic)
+        run: |
+          echo "Scanning for common secret patterns..."
+          # Warn if API keys appear to be non-placeholder values
+          if grep -rn "x-api-key.*sk-ant-" --include="*.js" --include="*.html" .; then
+            echo "ERROR: Claude API key found in source files. Move it to your Cloudflare Worker."
+            exit 1
+          fi
+          echo "No hardcoded Claude API keys found."
+
+      - name: Validate HTML structure (basic)
+        run: |
+          echo "Checking all HTML files exist and are non-empty..."
+          for f in index.html screener.html portfolio.html auth.html settings.html about.html; do
+            if [ ! -s "$f" ]; then
+              echo "ERROR: $f is missing or empty"
+              exit 1
+            fi
+            echo "✓ $f"
+          done
+          echo "Checking supabase-client.js..."
+          if [ ! -s "supabase-client.js" ]; then
+            echo "ERROR: supabase-client.js is missing or empty"
+            exit 1
+          fi
+          echo "✓ supabase-client.js"
+
+      - name: Check README exists
+        run: |
+          if [ ! -f "README.md" ]; then
+            echo "ERROR: README.md is missing"
+            exit 1
+          fi
+          echo "✓ README.md"

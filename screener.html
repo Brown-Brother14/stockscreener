@@ -2120,9 +2120,47 @@ function toggleMorePresets(btn) {
 const PROXY = 'https://stockscreener.jai-mistry14.workers.dev';
 
 // ── Finnhub WebSocket key (free tier, real-time trades) ─────
+// Note: rotate this key periodically at finnhub.io — it is visible in client-side source.
+// For production, proxy WebSocket through your Cloudflare Worker.
 const FINNHUB_WS_KEY = 'd6m8fvhr01qi0ajlajn0d6m8fvhr01qi0ajlajng';
 
 const delay = ms => new Promise(r => setTimeout(r, ms));
+
+// ── Global error handler ─────────────────────────────────────
+window.addEventListener('unhandledrejection', e => {
+  console.error('[AlgoScreen] Unhandled promise rejection:', e.reason);
+});
+
+// ── HTML escape helper ───────────────────────────────────────
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Safe URL helper (blocks javascript: and data: URLs) ──────
+function safeUrl(url) {
+  try {
+    const u = new URL(url);
+    return (u.protocol === 'https:' || u.protocol === 'http:') ? url : '#';
+  } catch { return '#'; }
+}
+
+// ── Toast notification ───────────────────────────────────────
+let _toastTimer;
+function showToast(msg, type = 'success') {
+  let t = document.getElementById('_screenToast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_screenToast';
+    t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(18,20,24,.96);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:12px 20px;font-size:14px;color:rgba(255,255,255,.88);display:flex;align-items:center;gap:10px;box-shadow:0 16px 48px rgba(0,0,0,.5);transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .35s;opacity:0;z-index:9000;pointer-events:none;white-space:nowrap;';
+    document.body.appendChild(t);
+  }
+  const dot = type === 'error' ? 'background:#ff4d6d;box-shadow:0 0 8px rgba(255,77,109,.5)' : 'background:#00e676;box-shadow:0 0 8px rgba(0,230,118,.5)';
+  t.innerHTML = `<div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;${dot}"></div><span>${esc(msg)}</span>`;
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  t.style.opacity = '1';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { t.style.transform = 'translateX(-50%) translateY(80px)'; t.style.opacity = '0'; }, 3500);
+}
 
 async function finnhubFetch(endpoint, params={}) {
   const qs = new URLSearchParams(params).toString();
@@ -2851,10 +2889,14 @@ let allResults=[], dashboardResults=[], currentFilter='all', sortField='score', 
 let fhWS=null, fhReconnectTimer=null, fhSubscribed=new Set(), _fallbackInterval=null;
 let _pendingPatches={}, _patchRaf=null;
 
-function showError(msg){const b=document.getElementById('errorBox');b.style.display='block';b.textContent=msg;}
+function showError(msg){const b=document.getElementById('errorBox');if(b){b.style.display='block';b.textContent=msg;}showToast(msg,'error');}
+
+// Validate ticker: only A-Z, 0-9, dot, caret — max 10 chars
+function sanitizeTicker(t) { return t.replace(/[^A-Z0-9.\^]/g,'').slice(0,10); }
 
 async function runScan(){
-  const tickers=document.getElementById('tickerInput').value.split(',').map(t=>t.trim().toUpperCase()).filter(Boolean);
+  const raw=document.getElementById('tickerInput').value.split(',').map(t=>t.trim().toUpperCase()).filter(Boolean);
+  const tickers=raw.map(sanitizeTicker).filter(Boolean);
   if(!tickers.length){showError('Enter at least one ticker.');return;}
   const btn=document.getElementById('scanBtn');
   btn.disabled=true;btn.textContent='⏳ Scanning...';
@@ -3615,11 +3657,13 @@ async function _eduFetchAI(key, liveData, aiEl) {
   const ctx = liveData?.price ? `Current value: ${liveData.price}, Day change: ${liveData.change ?? 'N/A'}` : 'Live data not available.';
   const prompt = `You are a sharp, concise financial educator for retail stock market investors.\n\nIndicator: ${d.name} (${key})\n${ctx}\n\nIn exactly 2 sentences, explain what today's specific reading signals for the broader stock market right now, and what investors should be paying attention to. Be direct and specific. No preamble or labels. Maximum 55 words total.`;
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    // Route through worker — worker adds the Claude API key server-side
+    const res = await fetch(`${PROXY}/ai/insight`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 200, messages: [{ role: 'user', content: prompt }] }),
     });
+    if (!res.ok) throw new Error(`AI service returned ${res.status}`);
     const data = await res.json();
     const text = data.content?.find(b => b.type === 'text')?.text?.trim();
     if (text && _eduActiveKey === key) {
@@ -3627,12 +3671,13 @@ async function _eduFetchAI(key, liveData, aiEl) {
       aiEl.classList.remove('loading'); aiEl.style.animation = 'none';
       _eduTypewrite(aiEl, text);
     }
-  } catch {
+  } catch(err) {
     if (_eduActiveKey === key) {
       aiEl.classList.remove('loading'); aiEl.style.animation = 'none';
       aiEl.style.color = 'rgba(255,255,255,.22)';
       aiEl.textContent = 'AI insight unavailable — check API connection.';
     }
+    console.error('[AlgoScreen] edu AI fetch error:', err);
   }
 }
 
@@ -3676,7 +3721,7 @@ function applyLimits(items){const catBuckets={};const catCounts={market:0,econom
 function renderNews(items){
   const container=document.getElementById('marketNewsContainer');
   if(!items.length){container.innerHTML='<div style="padding:32px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--muted)">No headlines for this category right now.</div>';return;}
-  container.innerHTML=items.map(item=>`<a href="${item.link}" target="_blank" rel="noopener" class="news-item-row"><div class="news-meta-row">${getCategoryBadge(item._cat)}<span class="news-src-name">${item._source}</span>${item._ago?`<span class="news-ago">· ${item._ago}</span>`:''}</div><div class="news-headline">${item.title}</div>${item.description?`<div class="news-desc">${item.description}</div>`:''}</a>`).join('');
+  container.innerHTML=items.map(item=>`<a href="${safeUrl(item.link)}" target="_blank" rel="noopener noreferrer" class="news-item-row"><div class="news-meta-row">${getCategoryBadge(item._cat)}<span class="news-src-name">${esc(item._source)}</span>${item._ago?`<span class="news-ago">· ${esc(item._ago)}</span>`:''}</div><div class="news-headline">${esc(item.title)}</div>${item.description?`<div class="news-desc">${esc(item.description)}</div>`:''}</a>`).join('');
 }
 
 function filterNews(cat,btn){
@@ -4066,8 +4111,9 @@ function connectFinnhubStream() {
   fhWS.onerror = () => {};
   fhWS.onclose = (e) => {
     fhWS = null;
+    // Clear any pending reconnect before scheduling a new one to avoid duplicates
+    if (fhReconnectTimer) { clearTimeout(fhReconnectTimer); fhReconnectTimer = null; }
     if (e.code !== 1000) {
-      // Reconnect after 5s on unexpected close
       fhReconnectTimer = setTimeout(connectFinnhubStream, 5000);
     }
   };
